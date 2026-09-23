@@ -231,7 +231,7 @@ a { color: var(--color-navy); }
 .nav-cta {
   color: var(--color-white) !important;
   background: var(--color-navy);
-  padding: 8px 18px;
+  padding: 14px 18px;
   border-radius: 999px;
   font-weight: 600 !important;
   transition: transform 150ms ease, background-color 150ms ease !important;
