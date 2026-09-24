@@ -161,7 +161,7 @@
   function client() {
     if (!clientP) clientP = new Promise(function (res, rej) {
       var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      s.src = 'assets/js/vendor/supabase.min.js';
       s.onload = function () { res(window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY)); };
       s.onerror = function () { rej(new Error('Verbindung zum Speicherdienst fehlgeschlagen. Bist du online?')); };
       document.head.appendChild(s);
