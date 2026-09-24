@@ -172,3 +172,4 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .gen-ablage.drueber { border-color: var(--color-navy); background: var(--color-lilac); }
 .gen-ablage:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .gen-ablage { transition: none; } }
+.push-note { margin: -12px 0 28px; font-size: 0.92rem; color: var(--color-text-soft); }

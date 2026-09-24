@@ -146,6 +146,12 @@
     BSN.signOut = function () { sessionStorage.removeItem(KS); return Promise.resolve(); };
     BSN.getUser = function () { var e = sessionStorage.getItem(KS); return Promise.resolve(e ? { email: e } : null); };
     BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); seed(); };
+    /* Mitteilungen (Demo: nichts wird gespeichert oder verschickt) */
+    BSN.pushPublicKey = function () { return Promise.resolve(null); };
+    BSN.pushSubscribe = function () { return Promise.resolve(); };
+    BSN.pushUnsubscribe = function () { return Promise.resolve(); };
+    BSN.pushCount = function () { return Promise.resolve(0); };
+    BSN.pushSend = function () { return Promise.resolve({ sent: 0, gone: 0, failed: 0 }); };
     window.BSN = BSN;
     return;
   }
@@ -233,5 +239,32 @@
       return r.data && r.data.session ? r.data.session.user : null;
     });
   };
+  /* Mitteilungen bei neuen Beiträgen */
+  BSN.pushPublicKey = function () {
+    return client().then(function (c) { return c.rpc('push_public_key'); }).then(ok);
+  };
+  BSN.pushSubscribe = function (sub) {
+    var j = sub.toJSON();
+    return client().then(function (c) { return c.rpc('push_anmelden', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth }); }).then(ok);
+  };
+  BSN.pushUnsubscribe = function (endpoint) {
+    return client().then(function (c) { return c.rpc('push_abmelden', { p_endpoint: endpoint }); }).then(ok);
+  };
+  BSN.pushCount = function () {
+    return client().then(function (c) { return c.from('push_subscriptions').select('endpoint', { count: 'exact', head: true }); })
+      .then(function (r) { if (r.error) throw new Error(r.error.message); return r.count || 0; });
+  };
+  function pushCall(body) {
+    return client().then(function (c) { return c.functions.invoke('push', { body: body }); }).then(function (r) {
+      if (r.error) {
+        var ctx = r.error.context;
+        if (ctx && ctx.json) return ctx.json().then(function (j) { throw Object.assign(new Error(j.error || 'Versand fehlgeschlagen.'), j); });
+        throw new Error('Versand fehlgeschlagen.');
+      }
+      return r.data;
+    });
+  }
+  BSN.pushInit = function () { return pushCall({ action: 'init' }); };
+  BSN.pushSend = function (id, again) { return pushCall({ action: 'send', article_id: id, again: !!again }); };
   window.BSN = BSN;
 })();

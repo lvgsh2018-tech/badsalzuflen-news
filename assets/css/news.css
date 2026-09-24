@@ -192,3 +192,29 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 .event a.more { font-weight: 600; font-size: 0.92rem; }
 .event.today { outline: 2px solid var(--color-gold); }
 @media (max-width: 480px) { .event { grid-template-columns: 60px 1fr; gap: 14px; padding: 16px; } .event-date strong { font-size: 1.5rem; } }
+
+/* ---------- Mitteilungen („Keinen Beitrag verpassen“) ---------- */
+.push-card {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px;
+  margin-top: 48px; padding: 24px 28px; border-radius: var(--radius-l);
+  background: var(--color-lilac-soft); border: 1px solid rgba(30, 58, 102, 0.12);
+}
+:root[data-theme="dark"] .push-card { border-color: rgba(255, 255, 255, 0.1); }
+.push-icon {
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--color-navy); color: #fff;
+}
+.push-card.is-on .push-icon { background: var(--color-gold); color: #142845; }
+.push-icon svg { width: 24px; height: 24px; }
+.push-text h2 { font-size: 1.35rem; margin: 0 0 4px; }
+.push-text p { margin: 0; font-size: 0.95rem; color: var(--color-text-soft); }
+.push-text b { color: var(--color-text); }
+.push-text .push-msg { margin-top: 8px; font-weight: 600; color: var(--color-text); }
+.push-action .btn { white-space: nowrap; }
+.ico-inline { width: 1.05em; height: 1.05em; vertical-align: -0.15em; color: var(--color-navy); }
+:root[data-theme="dark"] .ico-inline { color: var(--color-gold); }
+@media (max-width: 680px) {
+  .push-card { grid-template-columns: auto 1fr; align-items: start; padding: 20px; gap: 14px 16px; }
+  .push-action { grid-column: 1 / -1; }
+  .push-action .btn { width: 100%; justify-content: center; }
+}

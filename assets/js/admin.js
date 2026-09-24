@@ -1,7 +1,7 @@
 /* Redaktionsbereich: Übersicht, Beitragsliste, Editor. */
 (function () {
   var R = window.BSNR, esc = R.esc, view = document.getElementById('view');
-  var articles = [], views = [], dirty = false;
+  var articles = [], views = [], pushN = null, dirty = false;
 
   /* ---------- Hilfen ---------- */
   function toast(msg, bad) {
@@ -21,6 +21,24 @@
       d.showModal(); if (o.input) i.focus();
     });
   }
+  /* Mitteilung an alle, die sie eingeschaltet haben – nur nach Rückfrage. */
+  function notify(a) {
+    return BSN.pushCount().catch(function () { return 0; }).then(function (n) {
+      if (!n) return null;
+      return ask({
+        title: 'Leser benachrichtigen?',
+        text: n + (n === 1 ? ' Person bekommt' : ' Personen bekommen') + ' eine Mitteilung mit der Überschrift „' + title(a) + '“. Das geht pro Beitrag nur einmal.',
+        yes: 'Mitteilung senden'
+      }).then(function (ok) {
+        if (!ok) return null;
+        toast('Mitteilung wird verschickt …');
+        return BSN.pushSend(a.id).then(function (r) {
+          toast('Mitteilung ist raus an ' + r.sent + (r.sent === 1 ? ' Person.' : ' Personen.'));
+          return r;
+        }).catch(function (x) { toast(x.message, true); return null; });
+      });
+    });
+  }
   function views7(id) {
     var lim = Date.now() - 7 * 864e5;
     return views.filter(function (v) { return (!id || v.article_id === id) && new Date(v.created_at).getTime() >= lim; }).length;
@@ -28,7 +46,8 @@
   function viewsOf(id) { return views.filter(function (v) { return v.article_id === id; }).length; }
   function title(a) { return a.title || 'Ohne Titel'; }
   function load() {
-    return Promise.all([BSN.listAll(), BSN.getViews().catch(function () { return []; })]).then(function (r) { articles = r[0]; views = r[1]; });
+    return Promise.all([BSN.listAll(), BSN.getViews().catch(function () { return []; }), BSN.pushCount().catch(function () { return null; })])
+      .then(function (r) { articles = r[0]; views = r[1]; pushN = r[2]; });
   }
 
   /* ---------- Übersicht ---------- */
@@ -48,6 +67,7 @@
       '<div class="stat"><strong>' + views7() + '</strong><span>Aufrufe letzte 7 Tage</span></div>' +
       '<div class="stat"><strong>' + pub.length + '</strong><span>Veröffentlichte Beiträge</span></div>' +
       '<div class="stat"><strong>' + dr + '</strong><span>Entwürfe</span></div></div>' +
+      (pushN !== null && BSN.live ? '<p class="push-note">' + pushN + (pushN === 1 ? ' Person hat' : ' Personen haben') + ' Mitteilungen bei neuen Beiträgen eingeschaltet.</p>' : '') +
       '<div class="panel-cols"><section class="panel"><h2>Aufrufe pro Tag (14 Tage)</h2>' +
       '<div class="bars" role="img" aria-label="Balkendiagramm der Aufrufe pro Tag, insgesamt ' + days.reduce(function (s, x) { return s + x.n; }, 0) + ' in 14 Tagen">' +
       days.map(function (x) {
@@ -123,6 +143,7 @@
         (live
           ? '<button class="btn btn-primary" id="bSave" type="button">Änderungen speichern</button><button class="btn btn-secondary" id="bDraft" type="button">Zurück zum Entwurf</button>'
           : '<button class="btn btn-primary" id="bPub" type="button">Veröffentlichen</button><button class="btn btn-secondary" id="bSave" type="button">Als Entwurf speichern</button>') +
+        (live && !a.notified_at && BSN.live ? '<button class="btn-ghost" type="button" id="bNotify">Leser per Mitteilung informieren</button>' : '') +
         '<button class="btn-ghost" type="button" id="bPrev"' + (isNew ? ' disabled' : '') + '>Vorschau in neuem Tab</button></div></aside></div>';
 
       var st = { id: a.id, image_url: a.image_url, status: a.status, published_at: a.published_at };
@@ -180,9 +201,13 @@
         if (missing.length) { toast('Es fehlt noch ' + missing.join(' und ') + '.', true); return; }
         var btns = view.querySelectorAll('.editor-side .btn'); btns.forEach(function (b) { b.disabled = true; });
         BSN.saveArticle(rec).then(function (saved) {
-          dirty = false; toast(msg); return load().then(function () { location.hash = '#beitraege'; });
+          dirty = false; toast(msg);
+          var first = status === 'published' && !live && !saved.notified_at;
+          return (first ? notify(saved) : Promise.resolve()).then(load).then(function () { location.hash = '#beitraege'; });
         }).catch(function (x) { toast(x.message, true); btns.forEach(function (b) { b.disabled = false; }); });
       }
+      var nb = document.getElementById('bNotify');
+      if (nb) nb.addEventListener('click', function () { notify(a).then(function (r) { if (r) nb.hidden = true; }); });
       var pub = document.getElementById('bPub'), sv = document.getElementById('bSave'), dr = document.getElementById('bDraft');
       if (pub) pub.addEventListener('click', function () {
         ask({ title: 'Jetzt veröffentlichen?', text: 'Der Beitrag ist danach für alle Besucher der Webseite sichtbar.', yes: 'Veröffentlichen' }).then(function (ok) { if (ok) save('published', 'Beitrag veröffentlicht.'); });
@@ -278,5 +303,7 @@
   BSN.getUser().then(function (u) {
     if (!u) { location.replace('login.html'); return; }
     document.body.hidden = false; R.demoBadge(); route();
+    // Absender-Schlüssel für Mitteilungen einmalig anlegen lassen (falls der Versand eingerichtet ist).
+    if (BSN.live) BSN.pushPublicKey().then(function (k) { if (!k) return BSN.pushInit(); }).catch(function () {});
   }).catch(function () { location.replace('login.html'); });
 })();

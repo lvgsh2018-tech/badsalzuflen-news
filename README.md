@@ -88,3 +88,11 @@ der Browser.
 
 Neue Canva-Vorlage: als `assets/generator/montagsupdate-vorlage.png`
 (1080 × 1920) ersetzen und in `admin.html` die Zahl hinter `?v=` erhöhen.
+
+## Mitteilungen bei neuen Beiträgen (seit 2026-09-24; Supabase eingerichtet, Seite noch nicht online)
+
+- `assets/js/push.js` — Karte „Keinen Beitrag verpassen“ auf Startseite und Artikelseite
+- `sw.js`, `manifest.webmanifest` — Hintergrund-Helfer und App-Angaben (nötig fürs iPhone)
+- `supabase/push.sql`, `supabase/functions/push/index.ts` — Speicher und Versand
+- Redaktionsbereich: beim ersten Veröffentlichen Rückfrage „Leser benachrichtigen?“,
+  Übersicht zeigt, wie viele Leser Mitteilungen eingeschaltet haben.

@@ -10,6 +10,11 @@
 <meta property="og:image" content="assets/img/logo-social.webp">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/img/logo.webp">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#1E3A66">
+<meta name="apple-mobile-web-app-title" content="BS News">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -58,6 +63,7 @@
       <div class="post-grid" id="postGrid"></div>
       <p class="posts-note" id="postNote" hidden></p>
       <div class="posts-more"><button class="btn btn-secondary" id="moreBtn" type="button" hidden>Mehr laden</button></div>
+      <aside data-push hidden aria-label="Mitteilungen"></aside>
     </div>
   </section>
 
@@ -89,6 +95,7 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/render.js"></script>
 <script src="assets/js/home.js"></script>
+<script src="assets/js/push.js"></script>
 <script>
   document.getElementById('jahr').textContent = new Date().getFullYear();
   const toggle = document.getElementById('navToggle');
