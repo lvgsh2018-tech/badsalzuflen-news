@@ -72,3 +72,19 @@ eigene Domain) steht im Chat mit Claude Code.
 - `assets/js/config.js` — Verbindung zum Speicher; leer = Demo-Modus
 - `supabase/` — Einrichtung des echten Speichers (`ANLEITUNG.md`, `setup.sql`);
   liegt nur lokal und wird nicht veröffentlicht
+
+## Generator im Redaktionsbereich (seit 2026-09-24)
+
+`admin.html#generator` — der Bad Salzuflen News Update-Generator vom Mac, hier
+als Reiter „Generator“ mit drei Vorlagen: Montagsupdate, Story, Beitrag. Läuft
+komplett im Browser: Termine reinkopieren → erkennen → Bilder herunterladen.
+Nichts wird hochgeladen; Einstellungen und die letzte Terminliste merkt sich
+der Browser.
+
+- `assets/js/generator/termine.js` — Termine aus Rohtext lesen (wie `termine.py`)
+- `assets/js/generator/zeichnen.js` — Bilder zeichnen (wie `bildbearbeitung.py` und `story.py`)
+- `assets/js/generator/generator.js` — die Bedienung
+- `assets/generator/` — Canva-Vorlage, Logo, Montserrat und Playfair Display
+
+Neue Canva-Vorlage: als `assets/generator/montagsupdate-vorlage.png`
+(1080 × 1920) ersetzen und in `admin.html` die Zahl hinter `?v=` erhöhen.

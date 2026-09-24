@@ -261,6 +261,7 @@
     if (p[0] === 'editor') return pageEditor(p[1] || 'neu');
     if (p[0] === 'termine') return pageEvents();
     if (p[0] === 'termin') return pageEvent(p[1] || 'neu');
+    if (p[0] === 'generator') return window.BSNGenerator.zeigen(view, p[1], toast);
     load().then(function () { p[0] === 'beitraege' ? pageList() : pageOverview(); })
       .catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
   }
