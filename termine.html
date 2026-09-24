@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bad Salzuflen News — Neuigkeiten & Termine aus deiner Stadt</title>
-<meta name="description" content="Bad Salzuflen News zeigt dir, was in Bad Salzuflen passiert: Neuigkeiten, Termine und die Menschen, die die Stadt bewegen. Unabhängig und privat betrieben.">
-<meta property="og:title" content="Bad Salzuflen News">
+<title>Termine — Bad Salzuflen News</title>
+<meta name="description" content="Alle Termine und Veranstaltungen in Bad Salzuflen auf einen Blick.">
+<meta property="og:title" content="Unser Angebot — Bad Salzuflen News">
 <meta property="og:description" content="Neuigkeiten & Termine aus Bad Salzuflen — kompakt und verständlich an einem Ort.">
 <meta property="og:image" content="assets/img/logo-social.webp">
 <meta property="og:type" content="website">
@@ -29,8 +29,8 @@
     </button>
     <nav class="main-nav" id="mainNav">
       <div class="nav-glass">
-        <a href="index.html" aria-current="page">Nachrichten</a>
-        <a href="termine.html">Termine</a>
+        <a href="index.html">Nachrichten</a>
+        <a href="termine.html" aria-current="page">Termine</a>
         <a href="angebot.html">Unser Angebot</a>
         <a href="team.html">Team</a>
         <a href="kontakt.html">Kontakt</a>
@@ -41,30 +41,16 @@
 </header>
 
 <main id="top">
-
-  <section class="newsboard-wrap" id="nachrichten" aria-labelledby="boardTitle">
-    <div class="newsboard">
-      <h1 class="sr-only" id="boardTitle">Bad Salzuflen News — Neuigkeiten und Termine aus deiner Stadt</h1>
-      <div class="board-grid" id="boardGrid" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section class="section" id="alle">
+  <section class="section">
     <div class="container">
-      <div class="posts-head">
-        <h2>Alle Nachrichten</h2>
-        <div class="chips" id="chips" role="group" aria-label="Nach Thema filtern"></div>
+      <div class="section-head">
+        <span class="eyebrow">Termine</span>
+        <h1 style="font-size:clamp(1.9rem,3.6vw,2.7rem)">Das ist los in Bad Salzuflen</h1>
+        <p>Veranstaltungen und Termine, die vor uns liegen.</p>
       </div>
-      <div class="post-grid" id="postGrid"></div>
-      <p class="posts-note" id="postNote" hidden></p>
-      <div class="posts-more"><button class="btn btn-secondary" id="moreBtn" type="button" hidden>Mehr laden</button></div>
+      <div id="events" class="events" aria-live="polite"><p class="posts-note">Termine werden geladen …</p></div>
     </div>
   </section>
-
-
-
-
-
 </main>
 
 <footer class="site-footer">
@@ -88,7 +74,7 @@
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script src="assets/js/render.js"></script>
-<script src="assets/js/home.js"></script>
+<script src="assets/js/termine.js"></script>
 <script>
   document.getElementById('jahr').textContent = new Date().getFullYear();
   const toggle = document.getElementById('navToggle');

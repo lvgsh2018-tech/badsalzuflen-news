@@ -3,12 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bad Salzuflen News — Neuigkeiten & Termine aus deiner Stadt</title>
-<meta name="description" content="Bad Salzuflen News zeigt dir, was in Bad Salzuflen passiert: Neuigkeiten, Termine und die Menschen, die die Stadt bewegen. Unabhängig und privat betrieben.">
-<meta property="og:title" content="Bad Salzuflen News">
-<meta property="og:description" content="Neuigkeiten & Termine aus Bad Salzuflen — kompakt und verständlich an einem Ort.">
-<meta property="og:image" content="assets/img/logo-social.webp">
-<meta property="og:type" content="website">
+<title>Beitrag — Bad Salzuflen News</title>
+<meta name="robots" content="index,follow">
 <link rel="icon" href="assets/img/logo.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +14,6 @@
 <script src="assets/js/theme.js"></script>
 </head>
 <body>
-
 <header class="site-header">
   <div class="container">
     <a href="index.html" class="logo-link" aria-label="Bad Salzuflen News — Start">
@@ -29,7 +24,7 @@
     </button>
     <nav class="main-nav" id="mainNav">
       <div class="nav-glass">
-        <a href="index.html" aria-current="page">Nachrichten</a>
+        <a href="index.html">Nachrichten</a>
         <a href="termine.html">Termine</a>
         <a href="angebot.html">Unser Angebot</a>
         <a href="team.html">Team</a>
@@ -39,34 +34,13 @@
     </nav>
   </div>
 </header>
-
-<main id="top">
-
-  <section class="newsboard-wrap" id="nachrichten" aria-labelledby="boardTitle">
-    <div class="newsboard">
-      <h1 class="sr-only" id="boardTitle">Bad Salzuflen News — Neuigkeiten und Termine aus deiner Stadt</h1>
-      <div class="board-grid" id="boardGrid" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section class="section" id="alle">
-    <div class="container">
-      <div class="posts-head">
-        <h2>Alle Nachrichten</h2>
-        <div class="chips" id="chips" role="group" aria-label="Nach Thema filtern"></div>
-      </div>
-      <div class="post-grid" id="postGrid"></div>
-      <p class="posts-note" id="postNote" hidden></p>
-      <div class="posts-more"><button class="btn btn-secondary" id="moreBtn" type="button" hidden>Mehr laden</button></div>
-    </div>
-  </section>
-
-
-
-
-
+<div id="previewFlag" class="preview-flag" hidden>Vorschau — dieser Beitrag ist noch nicht veröffentlicht.</div>
+<main class="article-wrap">
+  <div class="article-top">
+    <a class="back-link" href="index.html">← Alle Nachrichten</a>
+  </div>
+  <article class="article" id="article" aria-live="polite"><p>Beitrag wird geladen …</p></article>
 </main>
-
 <footer class="site-footer">
   <div class="container">
     <div class="footer-links">
@@ -84,20 +58,34 @@
     </p>
   </div>
 </footer>
-
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
 <script src="assets/js/render.js"></script>
-<script src="assets/js/home.js"></script>
 <script>
-  document.getElementById('jahr').textContent = new Date().getFullYear();
-  const toggle = document.getElementById('navToggle');
-  const nav = document.getElementById('mainNav');
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open);
-  });
+(function () {
+  var R = window.BSNR, q = new URLSearchParams(location.search), slug = q.get('s'), box = document.getElementById('article');
+  function missing() {
+    document.title = 'Beitrag nicht gefunden — Bad Salzuflen News';
+    box.innerHTML = '<h1>Diesen Beitrag gibt es nicht</h1><p>Vielleicht wurde er entfernt oder der Link ist unvollständig.</p><a class="btn btn-primary" href="index.html">Zu allen Nachrichten</a>';
+  }
+  if (!slug) { missing(); return; }
+  BSN.getUser().catch(function () { return null; }).then(function (u) {
+    return BSN.getArticle(slug, { preview: !!u }).then(function (a) { return [a, u]; });
+  }).then(function (r) {
+    var a = r[0]; if (!a) { missing(); return; }
+    var draft = a.status !== 'published';
+    document.getElementById('previewFlag').hidden = !draft;
+    document.title = a.title + ' — Bad Salzuflen News';
+    var meta = document.querySelector('meta[name=robots]'); if (draft) meta.content = 'noindex';
+    box.innerHTML = '<span class="tag tag-dark">' + R.esc(a.category) + '</span><h1>' + R.esc(a.title) + '</h1>' +
+      '<p class="article-meta">' + (a.published_at ? R.date(a.published_at) + ' · ' : '') + R.readMinutes(a.body) + ' Min. Lesezeit</p>' +
+      (a.image_url ? '<figure><img src="' + R.esc(a.image_url) + '" alt="">' + (a.image_credit ? '<figcaption>' + R.esc(a.image_credit) + '</figcaption>' : '') + '</figure>' : '') +
+      (a.teaser ? '<p class="article-lede">' + R.esc(a.teaser) + '</p>' : '') +
+      '<div class="article-body">' + R.sanitize(a.body) + '</div>';
+    if (!draft) BSN.addView(a.id);
+  }).catch(function () { box.innerHTML = '<h1>Der Beitrag lässt sich gerade nicht laden</h1><p>Bitte versuche es gleich noch einmal.</p>'; });
+  R.demoBadge();
+})();
 </script>
-
 </body>
 </html>

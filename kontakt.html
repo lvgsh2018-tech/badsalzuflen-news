@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bad Salzuflen News — Neuigkeiten & Termine aus deiner Stadt</title>
-<meta name="description" content="Bad Salzuflen News zeigt dir, was in Bad Salzuflen passiert: Neuigkeiten, Termine und die Menschen, die die Stadt bewegen. Unabhängig und privat betrieben.">
-<meta property="og:title" content="Bad Salzuflen News">
+<title>Kontakt — Bad Salzuflen News</title>
+<meta name="description" content="Hinweis, Foto oder Veranstaltung für Bad Salzuflen News? Schreib uns.">
+<meta property="og:title" content="Kontakt — Bad Salzuflen News">
 <meta property="og:description" content="Neuigkeiten & Termine aus Bad Salzuflen — kompakt und verständlich an einem Ort.">
 <meta property="og:image" content="assets/img/logo-social.webp">
 <meta property="og:type" content="website">
@@ -29,11 +29,11 @@
     </button>
     <nav class="main-nav" id="mainNav">
       <div class="nav-glass">
-        <a href="index.html" aria-current="page">Nachrichten</a>
+        <a href="index.html">Nachrichten</a>
         <a href="termine.html">Termine</a>
         <a href="angebot.html">Unser Angebot</a>
         <a href="team.html">Team</a>
-        <a href="kontakt.html">Kontakt</a>
+        <a href="kontakt.html" aria-current="page">Kontakt</a>
       </div>
       <a class="nav-cta" href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">Instagram ↗</a>
     </nav>
@@ -42,28 +42,27 @@
 
 <main id="top">
 
-  <section class="newsboard-wrap" id="nachrichten" aria-labelledby="boardTitle">
-    <div class="newsboard">
-      <h1 class="sr-only" id="boardTitle">Bad Salzuflen News — Neuigkeiten und Termine aus deiner Stadt</h1>
-      <div class="board-grid" id="boardGrid" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section class="section" id="alle">
+  <section class="section" id="kontakt">
     <div class="container">
-      <div class="posts-head">
-        <h2>Alle Nachrichten</h2>
-        <div class="chips" id="chips" role="group" aria-label="Nach Thema filtern"></div>
+      <div class="contact">
+        <div>
+          <h2>Du hast einen Hinweis?</h2>
+          <p>Ein Foto, eine Veranstaltung oder eine Neuigkeit aus Bad Salzuflen?
+            Schreib uns — wir freuen uns über jede Nachricht.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="contact-link" href="mailto:redaktion@badsalzuflennews.de">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+            redaktion@badsalzuflennews.de
+          </a>
+          <a class="contact-link" href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+            @badsalzuflennews.de
+          </a>
+        </div>
       </div>
-      <div class="post-grid" id="postGrid"></div>
-      <p class="posts-note" id="postNote" hidden></p>
-      <div class="posts-more"><button class="btn btn-secondary" id="moreBtn" type="button" hidden>Mehr laden</button></div>
     </div>
   </section>
-
-
-
-
 
 </main>
 
@@ -85,10 +84,6 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/render.js"></script>
-<script src="assets/js/home.js"></script>
 <script>
   document.getElementById('jahr').textContent = new Date().getFullYear();
   const toggle = document.getElementById('navToggle');

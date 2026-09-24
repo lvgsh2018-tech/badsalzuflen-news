@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anmelden — Bad Salzuflen News</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="assets/img/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/news.css">
+<script src="assets/js/theme.js"></script>
+</head>
+<body>
+<main class="auth-page">
+  <div class="auth-card">
+    <img src="assets/img/logo.webp" alt="Bad Salzuflen News">
+    <h1>Redaktion</h1>
+    <p>Melde dich an, um Beiträge zu schreiben und zu veröffentlichen.</p>
+    <form id="loginForm" novalidate>
+      <label class="field"><span>E-Mail</span><input type="email" id="email" autocomplete="username" required></label>
+      <label class="field"><span>Passwort</span><input type="password" id="pw" autocomplete="current-password" required></label>
+      <div class="form-error" id="err" role="alert" hidden></div>
+      <div class="demo-note" id="demoNote" hidden><strong>Demo-Modus:</strong> Noch nicht mit dem echten Speicher verbunden. Jede Eingabe funktioniert, und alles bleibt nur in deinem Browser.</div>
+      <button class="btn btn-primary" id="go" type="submit">Anmelden</button>
+    </form>
+    <a class="auth-back" href="index.html">← Zurück zur Webseite</a>
+  </div>
+</main>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/render.js"></script>
+<script>
+(function () {
+  var f = document.getElementById('loginForm'), err = document.getElementById('err'), go = document.getElementById('go');
+  document.getElementById('demoNote').hidden = !BSN.demo;
+  BSN.getUser().then(function (u) { if (u) location.replace('admin.html'); }).catch(function () {});
+  f.addEventListener('submit', function (e) {
+    e.preventDefault(); err.hidden = true; go.disabled = true; go.textContent = 'Einen Moment …';
+    BSN.signIn(document.getElementById('email').value.trim(), document.getElementById('pw').value)
+      .then(function () { location.href = 'admin.html'; })
+      .catch(function (x) { err.textContent = x.message; err.hidden = false; go.disabled = false; go.textContent = 'Anmelden'; });
+  });
+})();
+</script>
+</body>
+</html>

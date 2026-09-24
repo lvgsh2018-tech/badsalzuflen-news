@@ -1,7 +1,8 @@
 # Bad Salzuflen News — Webseite
 
-Reine Info-Seite zu Bad Salzuflen News: was wir machen, Impressionen, Team,
-Kontakt. Kein Nachrichten-Upload — das bleibt bei Instagram.
+Nachrichtenseite zu Bad Salzuflen News: Kachel-Startseite mit Beiträgen,
+Artikelseiten, Anmeldung und Redaktionsbereich (Übersicht, Editor), dazu
+Angebot, Team, Kontakt.
 
 ## Aufbau
 
@@ -61,3 +62,13 @@ nötig.
 Diese Seite ist eine reine HTML/CSS-Seite ohne Build-Schritt — sie kann direkt
 so hochgeladen werden, wie sie ist. Der nächste Schritt (GitHub Pages +
 eigene Domain) steht im Chat mit Claude Code.
+
+## Nachrichten und Redaktion (seit 2026-09-24)
+
+- `index.html` — Startseite mit Kachel-Tafel und Beitragsliste
+- `artikel.html?s=...` — ein einzelner Beitrag
+- `login.html` → `admin.html` — Anmeldung und Redaktionsbereich (Übersicht mit
+  Aufrufen, Beitragsliste, Editor)
+- `assets/js/config.js` — Verbindung zum Speicher; leer = Demo-Modus
+- `supabase/` — Einrichtung des echten Speichers (`ANLEITUNG.md`, `setup.sql`);
+  liegt nur lokal und wird nicht veröffentlicht
