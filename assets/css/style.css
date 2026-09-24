@@ -184,6 +184,8 @@ a { color: var(--color-navy); }
 
 .logo-link { display: flex; align-items: center; }
 .logo-link img { height: 48px; width: auto; }
+/* Nachtmodus: Logo komplett weiß, damit die Navy-Schrift auf dunklem Grund lesbar bleibt. */
+:root[data-theme="dark"] .logo-link img { filter: brightness(0) invert(1); }
 
 .main-nav { display: flex; align-items: center; gap: 14px; }
 
@@ -255,6 +257,7 @@ a { color: var(--color-navy); }
   min-height: 44px;
 }
 .nav-toggle svg { width: 26px; height: 26px; }
+:root[data-theme="dark"] .nav-toggle { color: #FFFFFF; }
 
 @media (max-width: 760px) {
   .main-nav {
