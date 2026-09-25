@@ -608,3 +608,9 @@ a { color: var(--color-navy); }
   html { scroll-behavior: auto; }
   .btn, .contact-link { transition: none; }
 }
+
+/* Lavendel-Verlauf oben wie auf Nachrichten- und Blaulicht-Seite, für alle übrigen Seiten (<body class="verlauf">) */
+body.verlauf { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(--color-cream) 100%) top / 100% 900px no-repeat, var(--color-cream); }
+:root[data-theme="dark"] body.verlauf { background: linear-gradient(180deg, #3A2D57 0%, #2A2340 45%, var(--color-cream) 100%) top / 100% 900px no-repeat, var(--color-cream); }
+body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(220, 203, 243, 0.85) 0%, rgba(220, 203, 243, 0.7) 55%, rgba(220, 203, 243, 0) 100%); }
+:root[data-theme="dark"] body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(58, 45, 87, 0.85) 0%, rgba(58, 45, 87, 0.7) 55%, rgba(58, 45, 87, 0) 100%); }
