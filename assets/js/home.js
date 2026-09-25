@@ -4,7 +4,23 @@
   var grid = document.getElementById('boardGrid'), pg = document.getElementById('postGrid');
   var chips = document.getElementById('chips'), more = document.getElementById('moreBtn'), note = document.getElementById('postNote');
 
-  function board(list) {
+  /* Neueste Blaulicht-Meldung als feste Kachel (gleich neben der Titelkachel) */
+  var BL_BILD = 'assets/img/blaulicht-kachel.jpg';
+  function blaulichtTile() {
+    if (!BSN.listBlaulicht) return Promise.resolve(null);
+    return BSN.listBlaulicht().then(function (l) {
+      var m = l.filter(function (x) { return !x.hidden; })[0];
+      if (!m) return null;
+      return { title: m.title, category: 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
+        href: 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true };
+    }).catch(function () { return null; });
+  }
+
+  function board(list, bl) {
+    if (bl) {
+      if (!list.length) list = [bl];
+      else { var f = list.filter(function (a) { return a.featured; })[0] || list[0]; list = [f, bl].concat(list.filter(function (a) { return a !== f; })); }
+    }
     if (!list.length) {
       grid.innerHTML = '<div class="board-empty"><h2>Bald gibt es hier Neuigkeiten</h2><p>Sobald der erste Beitrag erscheint, siehst du ihn an dieser Stelle.</p></div>';
       return;
@@ -55,8 +71,8 @@
   });
   more.addEventListener('click', function () { renderList(false); });
 
-  BSN.listPublished().then(function (list) {
-    all = list; board(list); renderChips(); renderList(true);
+  Promise.all([BSN.listPublished(), blaulichtTile()]).then(function (r) {
+    var list = r[0]; all = list; board(list, r[1]); renderChips(); renderList(true);
   }).catch(function (err) {
     grid.innerHTML = '<div class="board-empty"><h2>Die Beiträge lassen sich gerade nicht laden</h2><p>Bitte versuche es in ein paar Minuten noch einmal.</p></div>';
     if (window.console) console.error(err);

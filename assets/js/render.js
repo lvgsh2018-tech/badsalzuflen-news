@@ -41,7 +41,7 @@
     var words = (html || '').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.round(words / 200));
   };
-  R.url = function (a) { return 'artikel.html?s=' + encodeURIComponent(a.slug); };
+  R.url = function (a) { return a.href || 'artikel.html?s=' + encodeURIComponent(a.slug); };
 
   /* Ohne Foto: ruhiger Farbverlauf aus den Markenfarben, je Kategorie anders. */
   var PH = [
