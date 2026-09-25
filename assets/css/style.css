@@ -544,6 +544,8 @@ a { color: var(--color-navy); }
   overflow: hidden;
 }
 .team-photo img { width: 100%; height: 100%; object-fit: cover; }
+.team-mail { display: inline-block; margin-top: 14px; font-weight: 600; font-size: 0.95rem; text-decoration: none; overflow-wrap: anywhere; }
+.team-mail:hover { text-decoration: underline; }
 .team-role { color: var(--color-gold-ink); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 
 /* Contact */
