@@ -232,3 +232,6 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 .bl-source { margin-top: 36px; padding: 16px 18px; border-radius: var(--radius-s); background: var(--color-lilac-soft); font-size: 0.9rem; color: var(--color-text); overflow-wrap: anywhere; }
 .bl-source a { text-decoration-color: var(--color-gold); text-underline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .bl-item { transition: none; } .bl-item:hover { transform: none; } }
+/* Blaulicht: gleicher Lavendel-Verlauf wie die Nachrichtenseite, aber nur oben (die Liste ist lang). */
+.bl-wrap { padding-bottom: 0; background-color: var(--color-cream); background-repeat: no-repeat; background-size: 100% 900px; }
+.bl-wrap > .section { padding-top: clamp(24px, 4vw, 48px); }

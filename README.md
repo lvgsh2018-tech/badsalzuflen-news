@@ -97,7 +97,7 @@ Neue Canva-Vorlage: als `assets/generator/montagsupdate-vorlage.png`
 - Redaktionsbereich: beim ersten Veröffentlichen Rückfrage „Leser benachrichtigen?“,
   Übersicht zeigt, wie viele Leser Mitteilungen eingeschaltet haben.
 
-## Blaulicht (seit 2026-09-25; Supabase eingeschaltet, Seite noch nicht online)
+## Blaulicht (seit 2026-09-25 online)
 
 `blaulicht.html` — Polizeimeldungen der Polizei Lippe, nur Bad Salzuflen, automatisch
 von presseportal.de/blaulicht/nr/12727. Einzelne Meldung: `blaulicht.html?m=<Nummer>`,
