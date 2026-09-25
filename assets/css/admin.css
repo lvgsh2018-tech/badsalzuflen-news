@@ -173,3 +173,10 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .gen-ablage:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .gen-ablage { transition: none; } }
 .push-note { margin: -12px 0 28px; font-size: 0.92rem; color: var(--color-text-soft); }
+
+/* Termine einfügen */
+.ev-import textarea { min-height: 150px; font-family: inherit; }
+.ev-import input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--color-navy); cursor: pointer; }
+.ev-import td:first-child { width: 44px; }
+.ev-import tr.ev-aus td { opacity: 0.5; }
+.ev-hinweis { display: inline-block; margin-left: 6px; font-size: 0.75rem; font-weight: 500; color: var(--color-text-soft); }

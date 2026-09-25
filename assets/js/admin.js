@@ -236,7 +236,13 @@
       function table(a, empty) {
         return a.length ? '<table class="posts"><thead><tr><th>Termin</th><th>Wann</th><th>Wo</th><th><span class="sr-only">Aktionen</span></th></tr></thead><tbody>' + rows(a) + '</tbody></table>' : '<p class="empty">' + empty + '</p>';
       }
-      view.innerHTML = '<h1>Termine</h1><p><a class="btn btn-primary" href="#termin/neu">+ Neuer Termin</a></p>' +
+      view.innerHTML = '<h1>Termine</h1>' +
+        '<div class="panel ev-import"><h2>Termine einfügen</h2>' +
+        '<label class="field" style="margin-top:0"><span>Termine hineinkopieren, so wie beim Montagsupdate</span>' +
+        '<textarea id="evRoh" rows="7" placeholder="Freitag, 2. Oktober&#10;19:30 Konzert im Kurpark&#10;20 Uhr Filmabend | Kino Salzuflen"></textarea></label>' +
+        '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" id="evLesen">Termine erkennen</button>' +
+        '<a class="btn btn-secondary btn-sm" href="#termin/neu">+ Einzeln eintragen</a></div>' +
+        '<div id="evVorschau"></div></div>' +
         '<div class="panel"><h2>Kommende Termine</h2><div class="table-wrap">' + table(up, 'Keine kommenden Termine eingetragen.') + '</div></div>' +
         (past.length ? '<div class="panel"><h2>Vergangene Termine</h2><div class="table-wrap">' + table(past, '') + '</div></div>' : '');
       view.querySelectorAll('[data-delev]').forEach(function (b) {
@@ -247,7 +253,44 @@
           });
         });
       });
+      eventImport(list);
     }).catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
+  }
+  /* Eingefügter Text → dieselbe Erkennung wie beim Montagsupdate → Vorschau → Übernehmen */
+  var KEV = 'bsn_termine_roh';
+  function eventImport(list) {
+    var roh = document.getElementById('evRoh'), box = document.getElementById('evVorschau'), found = [];
+    try { roh.value = localStorage.getItem(KEV) || ''; } catch (x) {}
+    roh.addEventListener('input', function () { try { localStorage.setItem(KEV, roh.value); } catch (x) {} });
+    function key(t, d) { return String(t || '').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '') + '|' + d; }
+    var da = {}; list.forEach(function (e) { da[key(e.title, e.starts_on)] = true; });
+    function zeit(z) { var m = String(z || '').match(/(\d{1,2}):(\d{2})/); return m ? m[1].padStart(2, '0') + ':' + m[2] : ''; }
+    function zeigen() {
+      var neu = found.filter(function (t) { return t.an; }).length;
+      box.innerHTML = '<div class="table-wrap" style="margin-top:18px"><table class="posts"><thead><tr><th><span class="sr-only">Übernehmen</span></th><th>Termin</th><th>Wann</th><th>Wo</th></tr></thead><tbody>' +
+        found.map(function (t, i) {
+          return '<tr' + (t.an ? '' : ' class="ev-aus"') + '><td><input type="checkbox" data-evi="' + i + '"' + (t.an ? ' checked' : '') + ' aria-label="' + esc(t.title) + ' übernehmen"></td>' +
+            '<td class="t">' + esc(t.title) + (t.schon ? ' <span class="ev-hinweis">schon eingetragen</span>' : '') + '</td><td>' + R.date(t.starts_on) + (t.starts_at ? ', ' + esc(t.starts_at) + ' Uhr' : '') + '</td><td>' + esc(t.location) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="side-row" style="margin-top:14px"><button class="btn btn-primary" type="button" id="evGo"' + (neu ? '' : ' disabled') + '>' + (neu === 1 ? '1 Termin' : neu + ' Termine') + ' übernehmen</button></div>';
+      box.querySelectorAll('[data-evi]').forEach(function (c) { c.addEventListener('change', function () { found[+c.dataset.evi].an = c.checked; zeigen(); }); });
+      document.getElementById('evGo').addEventListener('click', function () {
+        var weg = found.filter(function (t) { return t.an; }), b = this; b.disabled = true; b.textContent = 'Wird gespeichert …';
+        weg.reduce(function (p, t) { return p.then(function () { return BSN.saveEvent(t); }); }, Promise.resolve()).then(function () {
+          roh.value = ''; try { localStorage.removeItem(KEV); } catch (x) {}
+          toast(weg.length === 1 ? 'Termin ist auf der Webseite.' : weg.length + ' Termine sind auf der Webseite.'); pageEvents();
+        }).catch(function (x) { toast(x.message, true); pageEvents(); });
+      });
+    }
+    document.getElementById('evLesen').addEventListener('click', function () {
+      var heute = R.todayIso();
+      found = window.BSNTermine.lesen(roh.value).filter(function (t) { return t.datum && t.datum >= heute && t.titel; }).map(function (t) {
+        var schon = !!da[key(t.titel, t.datum)];
+        return { title: t.titel, starts_on: t.datum, starts_at: zeit(t.zeit), location: t.ort || '', description: t.preis ? 'Eintritt: ' + t.preis : '', link: '', schon: schon, an: !schon };
+      });
+      if (!found.length) { box.innerHTML = '<p class="empty" style="padding:20px 0 0">Ich habe keinen kommenden Termin mit Datum gefunden.</p>'; return; }
+      zeigen();
+    });
   }
   function pageEvent(id) {
     (id === 'neu' ? Promise.resolve({ title: '', starts_on: '', starts_at: '', location: '', description: '', link: '' }) : BSN.getEvent(id)).then(function (e) {
