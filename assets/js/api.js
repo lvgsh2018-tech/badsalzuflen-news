@@ -139,13 +139,25 @@
     };
     BSN.deleteEvent = function (id) { write(KE, read(KE, []).filter(function (x) { return x.id !== id; })); return Promise.resolve(); };
 
+    /* Blaulicht (Demo) */
+    var KB = 'bsn_demo_blaulicht';
+    if (!read(KB, null)) write(KB, [
+      { id: 'bl-1', source_id: '1', source_url: 'https://www.presseportal.de/blaulicht/nr/12727', source_name: 'Polizei Lippe', title: 'Beispiel: Einbruch in Wohnung', place: 'Schötmar', teaser: 'Das ist eine Beispielmeldung, damit du siehst, wie Blaulicht-Meldungen aussehen.', body: '<p>Das ist eine Beispielmeldung, damit du siehst, wie Blaulicht-Meldungen aussehen.</p><p>Hinweise nimmt die Polizei unter (05231) 6090 entgegen.</p>', published_at: daysAgo(0), hidden: false },
+      { id: 'bl-2', source_id: '2', source_url: 'https://www.presseportal.de/blaulicht/nr/12727', source_name: 'Polizei Lippe', title: 'Beispiel: Radfahrer bei Unfall leicht verletzt', place: 'Bad Salzuflen', teaser: 'Noch eine Beispielmeldung.', body: '<p>Noch eine Beispielmeldung.</p>', published_at: daysAgo(2), hidden: false }
+    ]);
+    BSN.listBlaulicht = function (all) { return Promise.resolve(read(KB, []).filter(function (m) { return all || !m.hidden; }).sort(function (a, b) { return String(b.published_at).localeCompare(String(a.published_at)); })); };
+    BSN.getBlaulicht = function (sid) { return Promise.resolve(read(KB, []).filter(function (m) { return m.source_id === sid && !m.hidden; })[0] || null); };
+    BSN.setBlaulichtHidden = function (id, hidden) {
+      var list = read(KB, []); list.forEach(function (m) { if (m.id === id) m.hidden = !!hidden; }); write(KB, list); return Promise.resolve();
+    };
+
     BSN.signIn = function (email, pw) {
       if (!email || !pw) return Promise.reject(new Error('Bitte E-Mail und Passwort eingeben.'));
       sessionStorage.setItem(KS, email); return Promise.resolve({ email: email });
     };
     BSN.signOut = function () { sessionStorage.removeItem(KS); return Promise.resolve(); };
     BSN.getUser = function () { var e = sessionStorage.getItem(KS); return Promise.resolve(e ? { email: e } : null); };
-    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); seed(); };
+    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); seed(); };
     /* Mitteilungen (Demo: nichts wird gespeichert oder verschickt) */
     BSN.pushPublicKey = function () { return Promise.resolve(null); };
     BSN.pushSubscribe = function () { return Promise.resolve(); };
@@ -227,6 +239,17 @@
     }).then(ok);
   };
   BSN.deleteEvent = function (id) { return client().then(function (c) { return c.from('events').delete().eq('id', id); }).then(ok); };
+
+  /* Blaulicht: kommt automatisch von presseportal.de (Edge Function blaulicht-sync) */
+  BSN.listBlaulicht = function () {
+    return client().then(function (c) { return c.from('blaulicht').select('*').order('published_at', { ascending: false }).limit(200); }).then(ok);
+  };
+  BSN.getBlaulicht = function (sid) {
+    return client().then(function (c) { return c.from('blaulicht').select('*').eq('source_id', sid).maybeSingle(); }).then(ok);
+  };
+  BSN.setBlaulichtHidden = function (id, hidden) {
+    return client().then(function (c) { return c.from('blaulicht').update({ hidden: !!hidden }).eq('id', id); }).then(ok);
+  };
   BSN.signIn = function (email, pw) {
     return client().then(function (c) { return c.auth.signInWithPassword({ email: email, password: pw }); }).then(function (r) {
       if (r.error) throw new Error('E-Mail oder Passwort stimmt nicht.');

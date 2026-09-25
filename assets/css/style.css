@@ -221,6 +221,12 @@ a { color: var(--color-navy); }
   padding: 8px 16px;
   border-radius: 999px;
 }
+.main-nav a { white-space: nowrap; }
+/* Sechs Reiter: auf mittleren Breiten etwas enger, damit nichts umbricht. */
+@media (min-width: 761px) and (max-width: 980px) {
+  .nav-glass a { padding: 8px 10px; }
+  .nav-cta { padding: 12px 14px; }
+}
 .nav-glass a:hover {
   color: var(--color-navy);
   background: rgba(255, 255, 255, 0.7);

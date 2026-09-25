@@ -96,3 +96,12 @@ Neue Canva-Vorlage: als `assets/generator/montagsupdate-vorlage.png`
 - `supabase/push.sql`, `supabase/functions/push/index.ts` — Speicher und Versand
 - Redaktionsbereich: beim ersten Veröffentlichen Rückfrage „Leser benachrichtigen?“,
   Übersicht zeigt, wie viele Leser Mitteilungen eingeschaltet haben.
+
+## Blaulicht (seit 2026-09-25; Supabase eingeschaltet, Seite noch nicht online)
+
+`blaulicht.html` — Polizeimeldungen der Polizei Lippe, nur Bad Salzuflen, automatisch
+von presseportal.de/blaulicht/nr/12727. Einzelne Meldung: `blaulicht.html?m=<Nummer>`,
+darunter immer der Link zur Meldung bei presseportal.de als Quelle.
+
+- `assets/js/blaulicht.js` — Liste und Einzelansicht
+- `supabase/functions/blaulicht-sync/index.ts`, `supabase/blaulicht.sql` — Abruf alle 30 Minuten
