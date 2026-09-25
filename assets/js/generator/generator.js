@@ -9,6 +9,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var KE = 'bsn_gen_einstellungen', KT = 'bsn_gen_termine', KR = 'bsn_gen_rohtext', KN = 'bsn_gen_nachweis';
+  var NACHWEISE = ['Stadt Bad Salzuflen', 'Lennart Schleef'];
   function lesen(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (x) { return d; } }
   function merken(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (x) { /* egal */ } }
 
@@ -320,6 +321,7 @@
       '<label class="field" style="margin-top:0"><span>Kleine Zeile darüber (freiwillig)</span><input type="text" id="s_zusatz" placeholder="' + (beitrag ? 'z. B. bis zum Jahresende' : 'z. B. 152.889 km') + '"></label>' +
       '<label class="field"><span>Überschrift</span><textarea id="s_titel" placeholder="' + (beitrag ? 'z. B. Weg „An den Gleisen“ wird saniert' : 'z. B. Stadtradeln 2026') + '"></textarea></label>' +
       '<label class="field"><span>Bildnachweis (freiwillig)</span><input type="text" id="s_nachweis" placeholder="z. B. Stadt Bad Salzuflen"></label>' +
+      '<div class="credit-vorschlaege" role="group" aria-label="Bildnachweis-Vorschläge">' + NACHWEISE.map(function (n) { return '<button type="button" class="chip" data-nachweis="' + n + '">' + n + '</button>'; }).join('') + '</div>' +
       (beitrag ? '' : '<label class="check"><input type="checkbox" id="s_link_zeigen"><span>Hinweis für den Link-Sticker zeigen</span></label>' +
         '<label class="field"><span>Text des Hinweises</span><input type="text" id="s_link_text"></label>') +
       '<details class="gen-klein"><summary>Größe und Lage</summary><p class="gen-hilfe">Den Text kannst du auch direkt in der Vorschau verschieben.</p>' +
@@ -349,6 +351,12 @@
     TEXTE.forEach(function (k) { var el = $('s_' + k); if (!el) return; el.value = S[k] || ''; el.addEventListener('input', function () { S[k] = this.value; spaeter(); }); });
     SCHALTER.forEach(function (k) { var el = $('s_' + k); if (!el) return; el.checked = !!S[k]; el.addEventListener('change', function () { S[k] = this.checked; spaeter(); }); });
     $('s_nachweis').addEventListener('change', function () { merken(KN, this.value); });
+    // Bildnachweis-Vorschläge: ein Tipp füllt das Feld, Knopf zeigt, welcher gerade drinsteht.
+    var nachweisBtns = document.querySelectorAll('[data-nachweis]');
+    function nachweisMarken() { nachweisBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.nachweis === $('s_nachweis').value.trim() ? 'true' : 'false'); }); }
+    nachweisBtns.forEach(function (b) { b.addEventListener('click', function () { var el = $('s_nachweis'); el.value = S.nachweis = b.dataset.nachweis; merken(KN, el.value); nachweisMarken(); spaeter(); }); });
+    $('s_nachweis').addEventListener('input', nachweisMarken);
+    nachweisMarken();
     werte();
 
     function spaeter() { clearTimeout(uhr); uhr = setTimeout(vorschau, 90); }

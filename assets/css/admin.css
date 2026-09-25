@@ -1,12 +1,15 @@
 /* Redaktionsbereich */
-body.admin { background: var(--color-cream); }
+/* Lavendel-Verlauf oben wie auf der Nachrichtenseite */
+body.admin { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(--color-cream) 100%) top / 100% 900px no-repeat, var(--color-cream); }
+:root[data-theme="dark"] body.admin { background: linear-gradient(180deg, #3A2D57 0%, #2A2340 45%, var(--color-cream) 100%) top / 100% 900px no-repeat, var(--color-cream); }
 .admin-bar {
   position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   padding: 10px clamp(14px, 3vw, 32px);
-  background: color-mix(in srgb, var(--color-cream) 82%, transparent);
+  background: rgba(220, 203, 243, 0.8);
   backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px);
   border-bottom: 1px solid rgba(30, 58, 102, 0.1);
 }
+:root[data-theme="dark"] .admin-bar { background: rgba(58, 45, 87, 0.8); border-bottom-color: rgba(255, 255, 255, 0.08); }
 .admin-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 1.1rem var(--font-head); color: var(--color-navy); }
 :root[data-theme="dark"] .admin-brand { color: #F1EEF9; }
 .admin-brand img { height: 40px; width: auto; }
