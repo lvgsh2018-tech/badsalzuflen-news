@@ -2,6 +2,7 @@
 (function () {
   var R = window.BSNR, esc = R.esc, view = document.getElementById('view');
   var articles = [], views = [], pushN = null, dirty = false;
+  var CREDITS = ['Foto: Stadt Bad Salzuflen', 'Foto: Lennart Schleef'];
 
   /* ---------- Hilfen ---------- */
   function toast(msg, bad) {
@@ -136,7 +137,8 @@
         '<div class="panel"><div class="cover-preview" id="cover">' + (a.image_url ? '<img src="' + esc(a.image_url) + '" alt="Titelbild">' : 'Noch kein Titelbild') + '</div>' +
         '<div class="side-row"><label class="btn btn-secondary btn-sm" for="fFile" style="cursor:pointer">Bild wählen</label><button class="btn-ghost" type="button" id="rmImg"' + (a.image_url ? '' : ' hidden') + '>Entfernen</button></div>' +
         '<input type="file" id="fFile" accept="image/*" class="sr-only">' +
-        '<label class="field"><span>Bildnachweis (z. B. „Foto: Name“)</span><input id="fCredit" value="' + esc(a.image_credit) + '"></label></div>' +
+        '<label class="field"><span>Bildnachweis (z. B. „Foto: Name“)</span><input id="fCredit" value="' + esc(a.image_credit) + '"></label>' +
+        '<div class="credit-vorschlaege" role="group" aria-label="Bildnachweis-Vorschläge">' + CREDITS.map(function (c) { return '<button type="button" class="chip" data-credit="' + esc(c) + '"' + (c === a.image_credit ? ' aria-pressed="true"' : '') + '>' + esc(c.replace(/^Foto: /, '')) + '</button>'; }).join('') + '</div></div>' +
         '<div class="panel"><label class="field" style="margin-top:0"><span>Thema</span><select id="fCat">' + cats.map(function (c) { return '<option' + (c === a.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></label>' +
         '<label class="check"><input type="checkbox" id="fFeat"' + (a.featured ? ' checked' : '') + '><span>Als große Kachel oben auf der Startseite zeigen</span></label></div>' +
         '<div class="panel stack"><div class="save-state" id="state">' + (live ? 'Veröffentlicht am ' + R.date(a.published_at) : 'Entwurf — noch nicht sichtbar') + '</div>' +
@@ -184,6 +186,12 @@
         e.target.value = '';
       });
       document.getElementById('rmImg').addEventListener('click', function () { setCover(''); });
+
+      // Bildnachweis-Vorschläge: ein Tipp füllt das Feld, Knopf zeigt, welcher gerade drinsteht.
+      var fCredit = document.getElementById('fCredit'), creditBtns = view.querySelectorAll('[data-credit]');
+      function markCredit() { creditBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.credit === fCredit.value.trim() ? 'true' : 'false'); }); }
+      creditBtns.forEach(function (b) { b.addEventListener('click', function () { fCredit.value = b.dataset.credit; markCredit(); dirty = true; }); });
+      fCredit.addEventListener('input', markCredit);
 
       function collect(status) {
         return {

@@ -250,7 +250,8 @@ a { color: var(--color-navy); }
 :root[data-theme="dark"] .nav-cta:hover { background: var(--color-gold); opacity: 0.9; }
 
 @media (max-width: 760px) {
-  .nav-cta { align-self: flex-start; margin-top: 10px; }
+  /* Im Handy-Menü eigener Innenabstand, sonst greift die Menüzeilen-Regel (ohne Seitenabstand, volle Breite) und die Schrift klebt am Rand. */
+  .main-nav .nav-cta { align-self: flex-start; width: auto; margin-top: 10px; padding: 12px 20px; }
 }
 
 .nav-toggle {

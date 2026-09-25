@@ -10,6 +10,8 @@ body.admin { background: var(--color-cream); }
 .admin-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 1.1rem var(--font-head); color: var(--color-navy); }
 :root[data-theme="dark"] .admin-brand { color: #F1EEF9; }
 .admin-brand img { height: 40px; width: auto; }
+/* Nachtmodus: Logo komplett weiß wie auf der öffentlichen Seite. */
+:root[data-theme="dark"] .admin-brand img { filter: brightness(0) invert(1); }
 .admin-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.7); }
 :root[data-theme="dark"] .admin-tabs { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); }
 .admin-tabs a { padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 0.9rem; text-decoration: none; color: var(--color-text-soft); min-height: 40px; display: inline-flex; align-items: center; }
@@ -92,6 +94,8 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .cover-preview { position: relative; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; background: var(--color-lilac-soft); display: grid; place-items: center; text-align: center; color: var(--color-text-soft); font-size: 0.88rem; padding: 12px; }
 .cover-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .side-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.credit-vorschlaege { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.credit-vorschlaege .chip { font-size: 0.85rem; }
 .check { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 0.92rem; cursor: pointer; min-height: 44px; }
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--color-navy); }
 .stack { display: flex; flex-direction: column; gap: 10px; }
