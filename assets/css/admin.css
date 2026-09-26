@@ -21,6 +21,13 @@ body.admin { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(--
 .admin-tabs a[aria-current="page"] { background: var(--color-navy); color: #fff; }
 :root[data-theme="dark"] .admin-tabs a[aria-current="page"] { background: var(--color-gold); color: #142845; }
 .admin-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* Handy: Reiter über die volle Breite, alle vier gleichzeitig sichtbar; Leiste scrollt mit, damit sie nicht den halben Bildschirm belegt. */
+@media (max-width: 640px) {
+  .admin-bar { position: static; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+  .admin-tabs { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
+  .admin-tabs a { justify-content: center; padding: 8px 2px; font-size: 0.8rem; min-height: 44px; }
+  .admin-actions { margin-left: 0; width: 100%; gap: 4px; }
+}
 .btn-sm { padding: 10px 20px; font-size: 0.9rem; }
 .btn-ghost { background: none; border: 0; cursor: pointer; min-height: 44px; padding: 0 12px; font: 600 0.88rem var(--font-body); color: var(--color-text-soft); text-decoration: none; display: inline-flex; align-items: center; border-radius: 999px; }
 .btn-ghost:hover { color: var(--color-navy); background: rgba(30, 58, 102, 0.07); }
@@ -187,3 +194,12 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .ev-import td:first-child { width: 44px; }
 .ev-import tr.ev-aus td { opacity: 0.5; }
 .ev-hinweis { display: inline-block; margin-left: 6px; font-size: 0.75rem; font-weight: 500; color: var(--color-text-soft); }
+
+/* Handy: Leiste oben scrollt mit, die Textwerkzeuge kleben deshalb ganz oben. */
+@media (max-width: 640px) { .toolbar { top: 0; } }
+
+/* Bilder im Beitragstext */
+.body-edit figure { margin: 1em 0; }
+.body-edit figure img { display: block; width: 100%; height: auto; border-radius: 12px; cursor: pointer; }
+.body-edit figcaption { min-height: 1.6em; margin-top: 6px; font-size: 0.85rem; color: var(--color-text-soft); outline: none; }
+.body-edit figcaption:empty::before { content: "Bildunterschrift (kann leer bleiben)"; opacity: 0.6; }

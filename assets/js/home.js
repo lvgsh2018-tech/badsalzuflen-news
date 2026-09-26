@@ -11,7 +11,7 @@
     return BSN.listBlaulicht().then(function (l) {
       var m = l.filter(function (x) { return !x.hidden; })[0];
       if (!m) return null;
-      return { title: m.title, category: 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
+      return { title: m.title, category: m.place || 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
         href: 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true };
     }).catch(function () { return null; });
   }

@@ -295,6 +295,8 @@ a { color: var(--color-navy); }
     gap: 0;
   }
   .nav-glass a { padding: 12px 4px; border-radius: 10px; }
+  /* Nachtmodus: die Glas-Pille der großen Ansicht darf im Handy-Menü nicht als Oval durchscheinen. */
+  :root[data-theme="dark"] .nav-glass { background: none; border: none; box-shadow: none; }
 }
 
 /* Hero */

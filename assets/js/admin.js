@@ -131,7 +131,9 @@
         '<button type="button" data-cmd="insertUnorderedList" aria-label="Liste" title="Liste">• Liste</button>' +
         '<button type="button" data-block="blockquote" aria-label="Zitat" title="Zitat">„ “</button><span class="sep"></span>' +
         '<button type="button" data-link aria-label="Link einfügen" title="Link einfügen">Link</button>' +
-        '<button type="button" data-cmd="unlink" aria-label="Link entfernen" title="Link entfernen">Link weg</button></div>' +
+        '<button type="button" data-cmd="unlink" aria-label="Link entfernen" title="Link entfernen">Link weg</button><span class="sep"></span>' +
+        '<button type="button" data-img aria-label="Bilder in den Text einfügen" title="Bilder in den Text einfügen (mehrere möglich)">+ Bilder</button></div>' +
+        '<input type="file" id="fBodyImgs" accept="image/*" multiple class="sr-only" tabindex="-1" aria-hidden="true">' +
         '<div class="body-edit" id="fBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Beitragstext" data-placeholder="Schreib hier deinen Beitrag …">' + R.sanitize(a.body) + '</div>' +
         '</div><aside class="editor-side">' +
         '<div class="panel"><div class="cover-preview" id="cover">' + (a.image_url ? '<img src="' + esc(a.image_url) + '" alt="Titelbild">' : 'Noch kein Titelbild') + '</div>' +
@@ -154,7 +156,9 @@
 
       view.querySelector('.toolbar').addEventListener('mousedown', function (e) { e.preventDefault(); });
       view.querySelector('.toolbar').addEventListener('click', function (e) {
-        var b = e.target.closest('button'); if (!b) return; body.focus();
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.hasAttribute('data-img')) { document.getElementById('fBodyImgs').click(); return; }
+        body.focus();
         if (b.dataset.cmd) document.execCommand(b.dataset.cmd);
         else if (b.dataset.block) document.execCommand('formatBlock', false, b.dataset.block);
         else if (b.hasAttribute('data-link')) {
@@ -172,6 +176,43 @@
         var cd = e.clipboardData, h = cd.getData('text/html');
         var clean = h ? R.sanitize(h) : esc(cd.getData('text/plain')).split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
         document.execCommand('insertHTML', false, clean);
+      });
+
+      /* Bilder im Text: an der Stelle des Cursors einfügen, mehrere auf einmal, Antippen entfernt eins. */
+      var spot = null;
+      function saveSpot() {
+        var sel = window.getSelection();
+        spot = sel.rangeCount && body.contains(sel.getRangeAt(0).commonAncestorContainer) ? sel.getRangeAt(0).cloneRange() : null;
+      }
+      document.addEventListener('selectionchange', function () { if (body.isConnected && document.activeElement === body) saveSpot(); });
+      function captions() { body.querySelectorAll('figure').forEach(function (f) { if (!f.querySelector('figcaption')) f.appendChild(document.createElement('figcaption')); }); }
+      captions();
+      function insertFigure(url) {
+        var fig = document.createElement('figure'), img = document.createElement('img');
+        img.src = url; img.alt = ''; fig.appendChild(img); fig.appendChild(document.createElement('figcaption'));
+        // Absatz finden, in dem der Cursor steht – das Bild kommt dahinter; weitere Bilder jeweils hinter das vorige.
+        var at = spot && spot.nodeType ? spot : spot ? spot.startContainer : null;
+        while (at && at.parentNode !== body) at = at.parentNode;
+        if (at) body.insertBefore(fig, at.nextSibling); else body.appendChild(fig);
+        if (!fig.nextSibling) { var p = document.createElement('p'); p.appendChild(document.createElement('br')); body.appendChild(p); }
+        spot = fig;
+      }
+      document.getElementById('fBodyImgs').addEventListener('change', function (e) {
+        var files = Array.prototype.slice.call(e.target.files); e.target.value = '';
+        if (!files.length) return;
+        var n = 0;
+        toast(files.length === 1 ? 'Bild wird verarbeitet …' : files.length + ' Bilder werden verarbeitet …');
+        files.reduce(function (p, f) {
+          return p.then(function () { return BSN.uploadImage(f).then(function (url) { insertFigure(url); n++; dirty = true; }); });
+        }, Promise.resolve()).then(function () {
+          toast(n === 1 ? 'Bild ist im Text.' : n + ' Bilder sind im Text.');
+        }).catch(function (x) { toast((n ? n + ' Bilder sind drin, dann ging es nicht weiter: ' : '') + x.message, true); });
+      });
+      body.addEventListener('click', function (e) {
+        var img = e.target.closest('figure img'); if (!img) return;
+        ask({ title: 'Bild aus dem Text entfernen?', yes: 'Entfernen', danger: true }).then(function (ok) {
+          if (ok) { img.closest('figure').remove(); dirty = true; }
+        });
       });
 
       function setCover(url) {

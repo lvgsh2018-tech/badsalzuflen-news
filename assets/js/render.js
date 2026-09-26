@@ -8,8 +8,15 @@
   };
 
   /* Nur harmlose Formatierung durchlassen. */
-  var ALLOWED = { P: 1, H2: 1, H3: 1, STRONG: 1, EM: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, A: 1, BR: 1 };
+  var ALLOWED = { P: 1, H2: 1, H3: 1, STRONG: 1, EM: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1, A: 1, BR: 1, FIGURE: 1, FIGCAPTION: 1, IMG: 1 };
   var RENAME = { B: 'STRONG', I: 'EM', H1: 'H2', H4: 'H3', H5: 'H3', H6: 'H3', DIV: 'P' };
+  /* Bilder im Text: nur aus dem eigenen Bilderspeicher (bzw. im Demo-Modus direkt eingebettet) */
+  function ownImage(src) {
+    var base = ((window.BSN_CONFIG || {}).SUPABASE_URL || '').replace(/\/$/, '');
+    if (!src) return false;
+    if (base && src.indexOf(base + '/storage/v1/object/public/bilder/') === 0) return true;
+    return /^data:image\/(jpeg|png|webp);base64,/i.test(src);
+  }
   R.sanitize = function (html) {
     var doc = new DOMParser().parseFromString('<body>' + (html || '') + '</body>', 'text/html');
     function walk(node) {
@@ -20,11 +27,16 @@
         walk(ch);
         var tag = RENAME[ch.tagName] || ch.tagName;
         if (!ALLOWED[tag]) { while (ch.firstChild) node.insertBefore(ch.firstChild, ch); ch.remove(); return; }
-        var el = ch;
+        var el = ch, src = ch.getAttribute('src'), h = ch.getAttribute('href');
         if (tag !== ch.tagName) { el = doc.createElement(tag); while (ch.firstChild) el.appendChild(ch.firstChild); node.replaceChild(el, ch); }
         Array.prototype.slice.call(el.attributes).forEach(function (a) { el.removeAttribute(a.name); });
+        if (tag === 'IMG') {
+          if (!ownImage(src)) { el.remove(); return; }
+          el.setAttribute('src', src); el.setAttribute('alt', ''); el.setAttribute('loading', 'lazy'); el.setAttribute('decoding', 'async');
+        }
+        if (tag === 'FIGCAPTION' && !el.textContent.trim()) { el.remove(); return; }
+        if (tag === 'FIGURE' && !el.querySelector('img')) { el.remove(); return; }
         if (tag === 'A') {
-          var h = ch.getAttribute && ch.getAttribute('href');
           if (h && /^(https?:|mailto:)/i.test(h)) { el.setAttribute('href', h); el.setAttribute('rel', 'noopener noreferrer'); el.setAttribute('target', '_blank'); }
         }
       });
