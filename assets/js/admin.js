@@ -407,6 +407,8 @@
       if (a.dataset.tab === (p[0] === 'termin' ? 'termine' : p[0] === 'editor' ? 'beitraege' : p[0])) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     window.scrollTo(0, 0);
+    view.onclick = view.ondragstart = view.ondragover = view.ondragend = view.ondrop = null; // Reste der Planung
+    if (p[0] === 'planung') return window.BSNPlanung.zeigen(view, toast, ask);
     if (p[0] === 'editor') return pageEditor(p[1] || 'neu');
     if (p[0] === 'termine') return pageEvents();
     if (p[0] === 'termin') return pageEvent(p[1] || 'neu');

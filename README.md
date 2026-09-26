@@ -105,3 +105,15 @@ darunter immer der Link zur Meldung bei presseportal.de als Quelle.
 
 - `assets/js/blaulicht.js` — Liste und Einzelansicht
 - `supabase/functions/blaulicht-sync/index.ts`, `supabase/blaulicht.sql` — Abruf alle 30 Minuten
+
+## Planung im Redaktionsbereich (seit 2026-09-26)
+
+`admin.html#planung` — die Contentplanung aus MeinOrbit: Kanäle (z. B. Bad Salzuflen
+News, Bad Salzuflen Bilder) mit eigener Farbe, geplante Beiträge im Monatsraster,
+„Als Nächstes“ und Ideenspeicher (Beiträge ohne Datum). Verschieben per Ziehen oder
+über das Datum im Fenster. Auf dem Handy wird das Raster zur Tagesliste.
+Nur für die Redaktion sichtbar, Besucher sehen nichts davon.
+
+- `assets/js/planung.js` — die Bedienung
+- `supabase/content.sql` — Tabellen `content_kanaele` und `content_beitraege` plus
+  einmalige Übernahme der Einträge aus MeinOrbit (Stand 2026-09-26)

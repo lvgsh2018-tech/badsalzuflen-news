@@ -151,13 +151,47 @@
       var list = read(KB, []); list.forEach(function (m) { if (m.id === id) m.hidden = !!hidden; }); write(KB, list); return Promise.resolve();
     };
 
+    /* Contentplanung (Demo) — Kanäle und geplante Beiträge, nur für die Redaktion */
+    var KK = 'bsn_demo_kanaele', KP = 'bsn_demo_planung';
+    if (!read(KK, null)) write(KK, [
+      { id: 1, name: 'Bad Salzuflen Bilder', plattform: 'instagram', farbe: 'limette', notiz: '', aktiv: true, reihung: 1 },
+      { id: 2, name: 'Bad Salzuflen News', plattform: 'instagram', farbe: 'lila', notiz: '', aktiv: true, reihung: 2 }
+    ]);
+    if (!read(KP, null)) write(KP, [
+      { id: 1, kanal_id: 2, titel: 'Beispiel: Wochenmarkt', datum: iso(1), uhrzeit: '18:00', format: 'post', status: 'fertig', text: '', notiz: '' },
+      { id: 2, kanal_id: 1, titel: 'Beispiel: Kurpark im Herbst', datum: iso(3), uhrzeit: '', format: 'post', status: 'geplant', text: '', notiz: '' },
+      { id: 3, kanal_id: 2, titel: 'Beispiel: Idee ohne Datum', datum: null, uhrzeit: '', format: 'reel', status: 'idee', text: '', notiz: '' }
+    ]);
+    function nextId(list) { return list.reduce(function (m, x) { return Math.max(m, +x.id || 0); }, 0) + 1; }
+    /* Beim Ändern nur die mitgeschickten Felder anfassen (Verschieben schickt nur id + datum). */
+    function merge(key, rec) {
+      var list = read(key, []), i;
+      if (!rec.id) { rec = Object.assign({}, rec, { id: nextId(list) }); list.push(rec); write(key, list); return rec; }
+      i = list.findIndex(function (x) { return x.id === rec.id; });
+      if (i < 0) list.push(rec); else list[i] = Object.assign({}, list[i], rec);
+      write(key, list); return list[i < 0 ? list.length - 1 : i];
+    }
+    BSN.listKanaele = function () { return Promise.resolve(read(KK, []).sort(function (a, b) { return a.reihung - b.reihung; })); };
+    BSN.saveKanal = function (k) {
+      if (!k.id) k.reihung = read(KK, []).reduce(function (m, x) { return Math.max(m, x.reihung || 0); }, 0) + 1;
+      return Promise.resolve(merge(KK, k));
+    };
+    BSN.deleteKanal = function (id) {
+      write(KP, read(KP, []).map(function (p) { if (p.kanal_id === id) p.kanal_id = null; return p; }));
+      write(KK, read(KK, []).filter(function (k) { return k.id !== id; }));
+      return Promise.resolve();
+    };
+    BSN.listPlanung = function () { return Promise.resolve(read(KP, [])); };
+    BSN.savePlan = function (p) { return Promise.resolve(merge(KP, p)); };
+    BSN.deletePlan = function (id) { write(KP, read(KP, []).filter(function (p) { return p.id !== id; })); return Promise.resolve(); };
+
     BSN.signIn = function (email, pw) {
       if (!email || !pw) return Promise.reject(new Error('Bitte E-Mail und Passwort eingeben.'));
       sessionStorage.setItem(KS, email); return Promise.resolve({ email: email });
     };
     BSN.signOut = function () { sessionStorage.removeItem(KS); return Promise.resolve(); };
     BSN.getUser = function () { var e = sessionStorage.getItem(KS); return Promise.resolve(e ? { email: e } : null); };
-    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); seed(); };
+    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); localStorage.removeItem(KK); localStorage.removeItem(KP); seed(); };
     /* Mitteilungen (Demo: nichts wird gespeichert oder verschickt) */
     BSN.pushPublicKey = function () { return Promise.resolve(null); };
     BSN.pushSubscribe = function () { return Promise.resolve(); };
@@ -262,6 +296,34 @@
       return r.data && r.data.session ? r.data.session.user : null;
     });
   };
+  /* Contentplanung — nur für die Redaktion lesbar (siehe supabase/content.sql).
+     Beim Ändern nur die mitgeschickten Felder schreiben: Verschieben schickt nur id + datum. */
+  function pick(o, keys) { var r = {}; keys.forEach(function (k) { if (k in o) r[k] = o[k]; }); return r; }
+  var KANAL = ['name', 'plattform', 'farbe', 'notiz', 'aktiv', 'reihung'];
+  var PLAN = ['kanal_id', 'titel', 'datum', 'uhrzeit', 'format', 'status', 'text', 'notiz'];
+  function upsert(table, rec, keys) {
+    var row = pick(rec, keys);
+    return client().then(function (c) {
+      return rec.id ? c.from(table).update(row).eq('id', rec.id).select().single() : c.from(table).insert(row).select().single();
+    }).then(ok);
+  }
+  BSN.listKanaele = function () {
+    return client().then(function (c) { return c.from('content_kanaele').select('*').order('reihung').order('name'); }).then(ok);
+  };
+  BSN.saveKanal = function (k) {
+    if (k.id) return upsert('content_kanaele', k, KANAL);
+    return BSN.listKanaele().then(function (l) {
+      k.reihung = l.reduce(function (m, x) { return Math.max(m, x.reihung || 0); }, 0) + 1;
+      return upsert('content_kanaele', k, KANAL);
+    });
+  };
+  BSN.deleteKanal = function (id) { return client().then(function (c) { return c.from('content_kanaele').delete().eq('id', id); }).then(ok); };
+  BSN.listPlanung = function () {
+    return client().then(function (c) { return c.from('content_beitraege').select('*').order('datum').order('uhrzeit').limit(5000); }).then(ok);
+  };
+  BSN.savePlan = function (p) { return upsert('content_beitraege', p, PLAN); };
+  BSN.deletePlan = function (id) { return client().then(function (c) { return c.from('content_beitraege').delete().eq('id', id); }).then(ok); };
+
   /* Mitteilungen bei neuen Beiträgen */
   BSN.pushPublicKey = function () {
     return client().then(function (c) { return c.rpc('push_public_key'); }).then(ok);
