@@ -103,6 +103,19 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .body-edit blockquote { margin: 1em 0; padding-left: 16px; border-left: 4px solid var(--color-gold); font-family: var(--font-head); }
 .cover-preview { position: relative; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; background: var(--color-lilac-soft); display: grid; place-items: center; text-align: center; color: var(--color-text-soft); font-size: 0.88rem; padding: 12px; }
 .cover-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.focus-pick { position: relative; border-radius: 14px; overflow: hidden; cursor: crosshair; touch-action: none; user-select: none; -webkit-user-select: none; background: var(--color-lilac-soft); }
+.focus-pick img { display: block; width: 100%; height: auto; max-height: 420px; object-fit: contain; pointer-events: none; }
+.focus-dot { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; padding: 0; border-radius: 50%; border: 3px solid #fff; background: rgba(217, 164, 65, 0.35); box-shadow: 0 0 0 2px rgba(10, 18, 36, 0.55), 0 4px 12px rgba(10, 18, 36, 0.35); cursor: grab; }
+.focus-dot::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; }
+.focus-dot:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 3px; }
+.focus-hint { margin: 10px 0 0; font-size: 0.82rem; color: var(--color-text-soft); line-height: 1.45; }
+.focus-previews { display: grid; grid-template-columns: 0.8fr 1.3fr 1fr; gap: 8px; margin-top: 10px; align-items: end; }
+.focus-previews figure { margin: 0; }
+.focus-previews div { overflow: hidden; border-radius: 8px; background: var(--color-lilac-soft); }
+.focus-previews img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fp-quadrat { aspect-ratio: 1; } .fp-breit { aspect-ratio: 5 / 2; } .fp-karte { aspect-ratio: 16 / 10; }
+.focus-previews figcaption { margin-top: 4px; font-size: 0.72rem; color: var(--color-text-soft); text-align: center; }
+.focus-reset { margin-top: 6px; }
 .side-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .credit-vorschlaege { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .credit-vorschlaege .chip { font-size: 0.85rem; }

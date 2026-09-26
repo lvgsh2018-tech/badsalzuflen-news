@@ -136,7 +136,7 @@
         '<input type="file" id="fBodyImgs" accept="image/*" multiple class="sr-only" tabindex="-1" aria-hidden="true">' +
         '<div class="body-edit" id="fBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Beitragstext" data-placeholder="Schreib hier deinen Beitrag …">' + R.sanitize(a.body) + '</div>' +
         '</div><aside class="editor-side">' +
-        '<div class="panel"><div class="cover-preview" id="cover">' + (a.image_url ? '<img src="' + esc(a.image_url) + '" alt="Titelbild">' : 'Noch kein Titelbild') + '</div>' +
+        '<div class="panel"><div id="cover"></div>' +
         '<div class="side-row"><label class="btn btn-secondary btn-sm" for="fFile" style="cursor:pointer">Bild wählen</label><button class="btn-ghost" type="button" id="rmImg"' + (a.image_url ? '' : ' hidden') + '>Entfernen</button></div>' +
         '<input type="file" id="fFile" accept="image/*" class="sr-only">' +
         '<label class="field"><span>Bildnachweis (z. B. „Foto: Name“)</span><input id="fCredit" value="' + esc(a.image_credit) + '"></label>' +
@@ -150,7 +150,7 @@
         (live && !a.notified_at && BSN.live ? '<button class="btn-ghost" type="button" id="bNotify">Leser per Mitteilung informieren</button>' : '') +
         '<button class="btn-ghost" type="button" id="bPrev"' + (isNew ? ' disabled' : '') + '>Vorschau in neuem Tab</button></div></aside></div>';
 
-      var st = { id: a.id, image_url: a.image_url, status: a.status, published_at: a.published_at };
+      var st = { id: a.id, image_url: R.withFocus(a.image_url, null), focus: R.focus(a.image_url), status: a.status, published_at: a.published_at };
       var body = document.getElementById('fBody');
       view.oninput = view.onchange = function () { dirty = true; };
 
@@ -215,11 +215,43 @@
         });
       });
 
+      /* Titelbild mit Ausschnitt-Wahl: Punkt antippen oder ziehen – diese Stelle bleibt auf allen Kacheln sichtbar. */
+      var FORMEN = [['fp-quadrat', 'Handy'], ['fp-breit', 'Kachel breit'], ['fp-karte', 'Liste']];
+      function drawCover() {
+        var c = document.getElementById('cover'), url = st.image_url;
+        document.getElementById('rmImg').hidden = !url;
+        if (!url) { c.className = 'cover-preview'; c.innerHTML = 'Noch kein Titelbild'; return; }
+        c.className = 'cover-pick';
+        c.innerHTML = '<div class="focus-pick" id="fpick"><img alt="Titelbild – tippe auf die wichtigste Stelle">' +
+          '<button type="button" class="focus-dot" id="fdot" aria-label="Wichtigste Stelle im Bild, mit den Pfeiltasten verschieben"></button></div>' +
+          '<p class="focus-hint">Tipp auf die wichtigste Stelle im Bild – sie bleibt auf der Startseite immer zu sehen.</p>' +
+          '<div class="focus-previews" aria-hidden="true">' + FORMEN.map(function (f) { return '<figure><div class="' + f[0] + '"><img alt=""></div><figcaption>' + f[1] + '</figcaption></figure>'; }).join('') + '</div>' +
+          '<button type="button" class="btn-ghost focus-reset" id="freset">Mitte nehmen</button>';
+        c.querySelectorAll('img').forEach(function (i) { i.src = url; });
+        var pick = document.getElementById('fpick'), dot = document.getElementById('fdot');
+        function show() {
+          dot.style.left = st.focus.x + '%'; dot.style.top = st.focus.y + '%';
+          c.querySelectorAll('.focus-previews img').forEach(function (i) { i.style.objectPosition = st.focus.x + '% ' + st.focus.y + '%'; });
+        }
+        function setAt(e) {
+          var r = pick.getBoundingClientRect();
+          st.focus = { x: Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)), y: Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)) };
+          show(); dirty = true;
+        }
+        pick.addEventListener('pointerdown', function (e) { e.preventDefault(); pick.setPointerCapture(e.pointerId); dot.focus({ preventScroll: true }); setAt(e); });
+        pick.addEventListener('pointermove', function (e) { if (pick.hasPointerCapture(e.pointerId)) setAt(e); });
+        dot.addEventListener('keydown', function (e) {
+          var k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!k) return;
+          e.preventDefault(); var n = e.shiftKey ? 10 : 2;
+          st.focus = { x: Math.max(0, Math.min(100, st.focus.x + k[0] * n)), y: Math.max(0, Math.min(100, st.focus.y + k[1] * n)) };
+          show(); dirty = true;
+        });
+        document.getElementById('freset').addEventListener('click', function () { st.focus = { x: 50, y: 50 }; show(); dirty = true; });
+        show();
+      }
+      drawCover();
       function setCover(url) {
-        st.image_url = url; var c = document.getElementById('cover');
-        c.innerHTML = url ? '<img alt="Titelbild">' : 'Noch kein Titelbild';
-        if (url) c.querySelector('img').src = url;
-        document.getElementById('rmImg').hidden = !url; dirty = true;
+        st.image_url = url; st.focus = { x: 50, y: 50 }; drawCover(); dirty = true;
       }
       document.getElementById('fFile').addEventListener('change', function (e) {
         var f = e.target.files[0]; if (!f) return; toast('Bild wird verarbeitet …');
@@ -237,7 +269,7 @@
       function collect(status) {
         return {
           id: st.id, title: document.getElementById('fTitle').value.trim(), teaser: document.getElementById('fTeaser').value.trim(),
-          body: R.sanitize(body.innerHTML), category: document.getElementById('fCat').value, image_url: st.image_url,
+          body: R.sanitize(body.innerHTML), category: document.getElementById('fCat').value, image_url: R.withFocus(st.image_url, st.focus),
           image_credit: document.getElementById('fCredit').value.trim(), featured: document.getElementById('fFeat').checked,
           status: status, published_at: st.published_at
         };

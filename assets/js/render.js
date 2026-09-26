@@ -65,9 +65,23 @@
     var p = PH[h % PH.length];
     return 'background:linear-gradient(140deg,' + p[0] + ',' + p[1] + ')';
   };
+  /* Bildausschnitt: der wichtigste Punkt steckt als „#fp=x,y“ (Prozent) hinten an der Bildadresse. */
+  R.focus = function (url) {
+    var m = /#fp=(\d{1,3}(?:\.\d+)?),(\d{1,3}(?:\.\d+)?)$/.exec(url || '');
+    return m ? { x: Math.min(100, +m[1]), y: Math.min(100, +m[2]) } : { x: 50, y: 50 };
+  };
+  R.withFocus = function (url, f) {
+    url = String(url || '').replace(/#fp=[^#]*$/, '');
+    if (!url || !f || (Math.round(f.x) === 50 && Math.round(f.y) === 50)) return url;
+    return url + '#fp=' + Math.round(f.x) + ',' + Math.round(f.y);
+  };
+  R.focusStyle = function (url) {
+    var f = R.focus(url);
+    return 'object-position:' + f.x + '% ' + f.y + '%;transform-origin:' + f.x + '% ' + f.y + '%';
+  };
   function media(a) {
     return a.image_url
-      ? '<img src="' + R.esc(a.image_url) + '" alt="" loading="lazy" decoding="async">'
+      ? '<img src="' + R.esc(a.image_url) + '" alt="" loading="lazy" decoding="async" style="' + R.focusStyle(a.image_url) + '">'
       : '<div class="ph" style="' + R.placeholder(a.category) + '" aria-hidden="true"></div>';
   }
   R.tile = function (a, cls) {
