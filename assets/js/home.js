@@ -5,7 +5,7 @@
   var chips = document.getElementById('chips'), more = document.getElementById('moreBtn'), note = document.getElementById('postNote');
 
   /* Neueste Blaulicht-Meldung als feste Kachel (gleich neben der Titelkachel) */
-  var BL_BILD = 'assets/img/blaulicht-kachel.jpg';
+  var BL_BILD = 'assets/img/blaulicht.jpg#fp=40,30';
   function blaulichtTile() {
     if (!BSN.listBlaulicht) return Promise.resolve(null);
     return BSN.listBlaulicht().then(function (l) {

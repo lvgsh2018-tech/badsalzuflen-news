@@ -24,11 +24,11 @@
       text = 'Auf dem iPhone geht das so: unten auf ' + SHARE + ' <b>Teilen</b> tippen, dann <b>„Zum Home-Bildschirm“</b>. ' +
         'Öffne Bad Salzuflen News danach über das neue Symbol und schalte hier die Mitteilungen ein.';
     } else if (state === 'off') {
-      text = 'Wir sagen dir mit einer kurzen Mitteilung Bescheid, sobald ein neuer Beitrag erscheint. Jederzeit wieder abschaltbar. <a href="datenschutz.html#mitteilungen">Mehr zum Datenschutz</a>';
+      text = 'Wir sagen dir mit einer kurzen Mitteilung Bescheid, sobald ein neuer Beitrag erscheint – und bei jeder neuen Blaulicht-Meldung der Polizei aus Bad Salzuflen. Jederzeit wieder abschaltbar. <a href="datenschutz.html#mitteilungen">Mehr zum Datenschutz</a>';
       action = '<button class="btn btn-primary" type="button" data-push-on>Mitteilungen einschalten</button>';
     } else if (state === 'on') {
       title = 'Mitteilungen sind an';
-      text = 'Du bekommst eine kurze Mitteilung, sobald ein neuer Beitrag erscheint.';
+      text = 'Du bekommst eine kurze Mitteilung, sobald ein neuer Beitrag oder eine neue Blaulicht-Meldung erscheint.';
       action = '<button class="btn btn-secondary" type="button" data-push-off>Ausschalten</button>';
     } else if (state === 'blocked') {
       text = 'Mitteilungen sind für diese Seite in deinem Browser blockiert. Du kannst sie in den Einstellungen des Browsers wieder erlauben.';
