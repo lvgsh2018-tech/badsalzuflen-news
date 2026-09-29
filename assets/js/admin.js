@@ -44,6 +44,12 @@
     var lim = Date.now() - 7 * 864e5;
     return views.filter(function (v) { return (!id || v.article_id === id) && new Date(v.created_at).getTime() >= lim; }).length;
   }
+  /* Durchschnitt pro Monat: alle Aufrufe geteilt durch die Monate seit dem ersten gezählten Aufruf (mindestens ein Monat). */
+  function viewsPerMonth() {
+    if (!views.length) return 0;
+    var first = views.reduce(function (m, v) { var t = new Date(v.created_at).getTime(); return t < m ? t : m; }, Date.now());
+    return Math.round(views.length / Math.max(1, (Date.now() - first) / (30.44 * 864e5)));
+  }
   function viewsOf(id) { return views.filter(function (v) { return v.article_id === id; }).length; }
   function title(a) { return a.title || 'Ohne Titel'; }
   function load() {
@@ -53,7 +59,7 @@
 
   /* ---------- Übersicht ---------- */
   function pageOverview() {
-    var pub = articles.filter(function (a) { return a.status === 'published'; }), dr = articles.length - pub.length;
+    var pub = articles.filter(function (a) { return a.status === 'published'; });
     var days = [], max = 1, i;
     for (i = 13; i >= 0; i--) { var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i); days.push({ d: d, n: 0 }); }
     views.forEach(function (v) {
@@ -67,7 +73,7 @@
       '<div class="stat"><strong>' + views.length + '</strong><span>Aufrufe insgesamt</span></div>' +
       '<div class="stat"><strong>' + views7() + '</strong><span>Aufrufe letzte 7 Tage</span></div>' +
       '<div class="stat"><strong>' + pub.length + '</strong><span>Veröffentlichte Beiträge</span></div>' +
-      '<div class="stat"><strong>' + dr + '</strong><span>Entwürfe</span></div></div>' +
+      '<div class="stat"><strong>' + viewsPerMonth().toLocaleString('de-DE') + '</strong><span>Ø Aufrufe pro Monat</span></div></div>' +
       (pushN !== null && BSN.live ? '<p class="push-note">' + pushN + (pushN === 1 ? ' Person hat' : ' Personen haben') + ' Mitteilungen bei neuen Beiträgen eingeschaltet.</p>' : '') +
       '<div class="panel-cols"><section class="panel"><h2>Aufrufe pro Tag (14 Tage)</h2>' +
       '<div class="bars" role="img" aria-label="Balkendiagramm der Aufrufe pro Tag, insgesamt ' + days.reduce(function (s, x) { return s + x.n; }, 0) + ' in 14 Tagen">' +
