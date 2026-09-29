@@ -359,3 +359,10 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .artikel-import summary::-webkit-details-marker { display: none; }
 .artikel-import summary::after { content: "+"; margin-left: auto; font: 400 1.5rem var(--font-body); line-height: 1; }
 .artikel-import[open] summary::after { content: "–"; }
+
+/* Generator: letzte Überschriften als Vorschläge */
+.gen-zuletzt { display: flex; flex-direction: column; gap: 6px; }
+.gen-zuletzt h3 { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7; margin: 10px 0 2px; }
+.gen-zuletzt button { display: flex; gap: 8px; align-items: baseline; width: 100%; min-height: 44px; text-align: left; padding: 9px 12px; border-radius: 12px; font: inherit; font-size: 0.9rem; line-height: 1.3; color: inherit; background: transparent; border: 1px solid currentColor; border-color: rgba(128, 128, 128, 0.35); cursor: pointer; }
+.gen-zuletzt button small { opacity: 0.65; white-space: nowrap; }
+.gen-zuletzt button[aria-pressed="true"] { outline: 2px solid #3D74BE; outline-offset: -2px; }

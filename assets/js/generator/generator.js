@@ -320,6 +320,7 @@
 
       '<section class="panel"><h2>2 · Text</h2>' +
       '<label class="field" style="margin-top:0"><span>Kleine Zeile darüber (freiwillig)</span><input type="text" id="s_zusatz" placeholder="' + (beitrag ? 'z. B. bis zum Jahresende' : 'z. B. 152.889 km') + '"></label>' +
+      '<details class="gen-klein" open><summary>Letzte Überschriften übernehmen</summary><div class="gen-zuletzt" id="sZuletzt"><span class="gen-hilfe">Wird geladen …</span></div></details>' +
       '<label class="field"><span>Überschrift</span><textarea id="s_titel" placeholder="' + (beitrag ? 'z. B. Weg „An den Gleisen“ wird saniert' : 'z. B. Stadtradeln 2026') + '"></textarea></label>' +
       '<label class="field"><span>Bildnachweis (freiwillig)</span><input type="text" id="s_nachweis" placeholder="z. B. Stadt Bad Salzuflen"></label>' +
       '<div class="credit-vorschlaege" role="group" aria-label="Bildnachweis-Vorschläge">' + NACHWEISE.map(function (n) { return '<button type="button" class="chip" data-nachweis="' + n + '">' + n + '</button>'; }).join('') + '</div>' +
@@ -419,6 +420,33 @@
         fotoLaden(new File([b], 'Blaulicht-Foto', { type: 'image/jpeg' }));
       }).catch(function () { $('sAblageTitel').textContent = 'Blaulicht-Foto ließ sich nicht laden.'; });
     });
+
+    /* ---------- Letzte Überschriften (Nachrichten + Blaulicht) vorschlagen ---------- */
+    function tag(d) { return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }); }
+    var basis = location.origin + '/';
+    Promise.all([BSN.listPublished(), BSN.listBlaulicht()]).then(function (r) {
+      var gruppen = [
+        ['Nachrichten', r[0].slice(0, 5).map(function (a) { return { titel: a.title, datum: a.published_at, link: basis + 'artikel.html?s=' + encodeURIComponent(a.slug) }; })],
+        ['Blaulicht', r[1].filter(function (m) { return !m.hidden; }).slice(0, 5).map(function (m) { return { titel: m.title, datum: m.published_at, link: basis + 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true }; })]
+      ];
+      var box = $('sZuletzt'), alle = [];
+      box.innerHTML = gruppen.map(function (g, gi) {
+        return '<h3>' + g[0] + '</h3>' + (g[1].length ? g[1].map(function (x, i) {
+          alle.push(x);
+          return '<button type="button" data-zuletzt="' + (alle.length - 1) + '"><span>' + esc(x.titel) + '</span><small>' + tag(x.datum) + '</small></button>';
+        }).join('') : '<span class="gen-hilfe">Nichts gefunden.</span>');
+      }).join('');
+      box.querySelectorAll('[data-zuletzt]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var x = alle[Number(b.dataset.zuletzt)];
+          $('s_titel').value = S.titel = x.titel;
+          if ($('sArtikel')) $('sArtikel').value = x.link;
+          box.querySelectorAll('[data-zuletzt]').forEach(function (k) { k.setAttribute('aria-pressed', k === b ? 'true' : 'false'); });
+          if (x.blaulicht && !foto) $('sBlaulicht').click();
+          spaeter();
+        });
+      });
+    }).catch(function () { $('sZuletzt').innerHTML = '<span class="gen-hilfe">Überschriften ließen sich nicht laden.</span>'; });
 
     if ($('sKopieren')) $('sKopieren').addEventListener('click', function () {
       var k = this, link = $('sArtikel').value.trim();
