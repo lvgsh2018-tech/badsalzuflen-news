@@ -314,6 +314,7 @@
       '<section class="panel"><h2>1 · Foto</h2>' +
       '<div class="gen-ablage" id="sAblage" tabindex="0" role="button" aria-label="Foto auswählen oder hierher ziehen"><b id="sAblageTitel">Foto hierher ziehen</b><span id="sAblageText">oder tippen zum Auswählen</span></div>' +
       '<input type="file" id="sDatei" accept="image/*" class="sr-only" tabindex="-1">' +
+      '<div class="credit-vorschlaege"><button type="button" class="chip" id="sBlaulicht">Blaulicht-Foto nehmen</button></div>' +
       regler('foto_x', 'Ausschnitt links / rechts', 0, 100, 1, ' %') + regler('foto_y', 'Ausschnitt oben / unten', 0, 100, 1, ' %') + regler('zoom', 'Vergrößern', 100, 250, 1, ' %') +
       '</section>' +
 
@@ -412,6 +413,12 @@
     ['dragenter', 'dragover'].forEach(function (t) { ablage.addEventListener(t, function (ev) { ev.preventDefault(); ablage.classList.add('drueber'); }); });
     ['dragleave', 'drop'].forEach(function (t) { ablage.addEventListener(t, function (ev) { ev.preventDefault(); ablage.classList.remove('drueber'); }); });
     ablage.addEventListener('drop', function (ev) { fotoLaden(ev.dataTransfer.files[0]); });
+    // Fest hinterlegtes Blaulicht-Foto mit einem Tipp übernehmen
+    $('sBlaulicht').addEventListener('click', function () {
+      fetch('assets/generator/blaulicht.jpg').then(function (r) { return r.blob(); }).then(function (b) {
+        fotoLaden(new File([b], 'Blaulicht-Foto', { type: 'image/jpeg' }));
+      }).catch(function () { $('sAblageTitel').textContent = 'Blaulicht-Foto ließ sich nicht laden.'; });
+    });
 
     if ($('sKopieren')) $('sKopieren').addEventListener('click', function () {
       var k = this, link = $('sArtikel').value.trim();
