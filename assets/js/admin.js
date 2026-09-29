@@ -152,12 +152,17 @@
   }
 
   /* ---------- Editor ---------- */
+  var NEU = '__neues_thema';
   function pageEditor(id) {
     var isNew = id === 'neu';
-    (isNew ? Promise.resolve({ title: '', teaser: '', body: '', category: BSN.categories[0], image_url: '', image_credit: '', status: 'draft', featured: false }) : BSN.getById(id)).then(function (a) {
+    Promise.all([
+      isNew ? Promise.resolve({ title: '', teaser: '', body: '', category: BSN.categories[0], image_url: '', image_credit: '', status: 'draft', featured: false }) : BSN.getById(id),
+      BSN.listAll().catch(function () { return []; })
+    ]).then(function (res) {
+      var a = res[0];
       if (!a) { view.innerHTML = '<h1>Beitrag nicht gefunden</h1><p><a href="#beitraege">Zurück zur Liste</a></p>'; return; }
       dirty = false;
-      var cats = BSN.categories.slice(); if (cats.indexOf(a.category) < 0) cats.push(a.category);
+      var cats = BSN.themen(res[1].concat([a]));
       var live = a.status === 'published';
       view.innerHTML = '<div class="editor-grid"><div>' +
         (isNew ? '<details class="panel artikel-import" id="aiBox"><summary>Fertigen Artikel einfügen</summary>' +
@@ -185,7 +190,9 @@
         '<input type="file" id="fFile" accept="image/*" class="sr-only">' +
         '<label class="field"><span>Bildnachweis (z. B. „Foto: Name“)</span><input id="fCredit" value="' + esc(a.image_credit) + '"></label>' +
         '<div class="credit-vorschlaege" role="group" aria-label="Bildnachweis-Vorschläge">' + CREDITS.map(function (c) { return '<button type="button" class="chip" data-credit="' + esc(c) + '"' + (c === a.image_credit ? ' aria-pressed="true"' : '') + '>' + esc(c.replace(/^Foto: /, '')) + '</button>'; }).join('') + '</div></div>' +
-        '<div class="panel"><label class="field" style="margin-top:0"><span>Thema</span><select id="fCat">' + cats.map(function (c) { return '<option' + (c === a.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></label>' +
+        '<div class="panel"><label class="field" style="margin-top:0"><span>Thema</span><select id="fCat">' + cats.map(function (c) { return '<option' + (c === a.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '<option value="' + NEU + '">+ Neues Thema …</option></select></label>' +
+        '<div class="thema-neu" id="catNeuBox" hidden><label class="field"><span>Name des neuen Themas</span><input id="fCatNeu" maxlength="40" placeholder="z. B. Sport"></label>' +
+        '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="catNeuOk">Hinzufügen</button><button class="btn-ghost" type="button" id="catNeuNein">Abbrechen</button></div></div>' +
         '<label class="check"><input type="checkbox" id="fFeat"' + (a.featured ? ' checked' : '') + '><span>Als große Kachel oben auf der Startseite zeigen</span></label></div>' +
         '<div class="panel stack"><div class="save-state" id="state">' + (live ? 'Veröffentlicht am ' + R.date(a.published_at) : 'Entwurf — noch nicht sichtbar') + '</div>' +
         (live
@@ -310,6 +317,31 @@
       creditBtns.forEach(function (b) { b.addEventListener('click', function () { fCredit.value = b.dataset.credit; markCredit(); dirty = true; }); });
       fCredit.addEventListener('input', markCredit);
 
+      // Eigenes Thema anlegen: gilt, sobald der Beitrag gespeichert ist.
+      var fCat = document.getElementById('fCat'), catBox = document.getElementById('catNeuBox'), catNeu = document.getElementById('fCatNeu'), catVorher = fCat.value;
+      function themaWaehlen(name) {
+        name = String(name || '').replace(/\s+/g, ' ').trim(); if (!name) return false;
+        var hit = Array.prototype.filter.call(fCat.options, function (o) { return o.value !== NEU && o.value.toLowerCase() === name.toLowerCase(); })[0];
+        if (!hit) { hit = new Option(name, name); fCat.add(hit, fCat.options[fCat.options.length - 1]); }
+        fCat.value = hit.value; catVorher = hit.value; return true;
+      }
+      fCat.addEventListener('change', function () {
+        if (fCat.value !== NEU) { catVorher = fCat.value; return; }
+        catBox.hidden = false; catNeu.value = ''; catNeu.focus();
+      });
+      function catNeuFertig(ok) {
+        if (ok && !themaWaehlen(catNeu.value)) { toast('Bitte einen Namen für das Thema eingeben.', true); catNeu.focus(); return; }
+        if (!ok) fCat.value = catVorher;
+        catBox.hidden = true; dirty = true;
+        if (ok) toast('Thema „' + fCat.value + '“ gewählt. Es bleibt, sobald du den Beitrag speicherst.');
+      }
+      document.getElementById('catNeuOk').addEventListener('click', function () { catNeuFertig(true); });
+      document.getElementById('catNeuNein').addEventListener('click', function () { catNeuFertig(false); });
+      catNeu.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); catNeuFertig(true); }
+        if (e.key === 'Escape') { e.preventDefault(); catNeuFertig(false); }
+      });
+
       // Fertigen Artikel-Block übernehmen: füllt Überschrift, Kurzfassung, Text, Thema und Bildnachweis.
       var aiGo = document.getElementById('aiGo');
       if (aiGo) aiGo.addEventListener('click', function () {
@@ -318,10 +350,7 @@
         document.getElementById('fTitle').value = r.title;
         document.getElementById('fTeaser').value = r.teaser;
         body.innerHTML = R.sanitize(r.body);
-        if (r.category) {
-          var sel = document.getElementById('fCat');
-          Array.prototype.forEach.call(sel.options, function (o) { if (o.value.toLowerCase() === r.category.toLowerCase()) sel.value = o.value; });
-        }
+        if (r.category) themaWaehlen(r.category);
         if (r.credit) { fCredit.value = r.credit; markCredit(); }
         roh.value = ''; document.getElementById('aiBox').open = false; dirty = true;
         toast('Artikel ist drin. Jetzt noch das Titelbild wählen.');
@@ -331,7 +360,7 @@
       function collect(status) {
         return {
           id: st.id, title: document.getElementById('fTitle').value.trim(), teaser: document.getElementById('fTeaser').value.trim(),
-          body: R.sanitize(body.innerHTML), category: document.getElementById('fCat').value, image_url: R.withFocus(st.image_url, st.focus),
+          body: R.sanitize(body.innerHTML), category: fCat.value === NEU ? catVorher : fCat.value, image_url: R.withFocus(st.image_url, st.focus),
           image_credit: document.getElementById('fCredit').value.trim(), featured: document.getElementById('fFeat').checked,
           status: status, published_at: st.published_at
         };

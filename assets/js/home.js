@@ -57,7 +57,7 @@
     if (!p.length) note.textContent = filter ? 'Zu diesem Thema gibt es noch keine Beiträge.' : '';
   }
   function renderChips() {
-    var cats = BSN.categories.filter(function (c) { return all.some(function (a) { return a.category === c; }); });
+    var cats = BSN.themen(all).filter(function (c) { return all.some(function (a) { return a.category === c; }); });
     if (!cats.length) { chips.innerHTML = ''; return; }
     chips.innerHTML = ['Alle'].concat(cats).map(function (c) {
       var on = (c === 'Alle' && !filter) || c === filter;

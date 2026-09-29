@@ -14,6 +14,17 @@
   }
   BSN.slugify = slugify;
 
+  /* Themen: die festen aus config.js plus alle, die in Beiträgen schon vorkommen
+     (so bleibt ein selbst angelegtes Thema erhalten, sobald ein Beitrag es trägt). */
+  BSN.themen = function (list) {
+    var seen = {}, out = [];
+    BSN.categories.concat((list || []).map(function (a) { return a.category; })).forEach(function (c) {
+      c = String(c || '').trim(); var k = c.toLowerCase();
+      if (c && !seen[k]) { seen[k] = 1; out.push(c); }
+    });
+    return out;
+  };
+
   /* Bild vor dem Hochladen verkleinern (spart Platz und Ladezeit). */
   BSN.prepareImage = function (file) {
     return new Promise(function (resolve, reject) {
