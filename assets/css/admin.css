@@ -350,3 +350,12 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 /* Nachtmodus: Hauptknöpfe in Gold wie der aktive Reiter – Navy-Schrift auf Navy war kaum lesbar. */
 :root[data-theme="dark"] body.admin .btn-primary { background: var(--color-gold); color: #142845; }
 :root[data-theme="dark"] body.admin .btn-primary:hover { background: #E6B65A; }
+
+/* Fertigen Artikel einfügen (nur bei neuen Beiträgen) */
+.artikel-import summary { cursor: pointer; font: 700 1.05rem var(--font-head); color: var(--color-navy); min-height: 44px; display: flex; align-items: center; }
+:root[data-theme="dark"] .artikel-import summary { color: #F1EEF9; }
+.artikel-import textarea { min-height: 160px; font-family: inherit; }
+.artikel-import .side-row { margin-top: 12px; }
+.artikel-import summary::-webkit-details-marker { display: none; }
+.artikel-import summary::after { content: "+"; margin-left: auto; font: 400 1.5rem var(--font-body); line-height: 1; }
+.artikel-import[open] summary::after { content: "–"; }

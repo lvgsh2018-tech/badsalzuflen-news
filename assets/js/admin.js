@@ -117,6 +117,40 @@
     }
   });
 
+  /* ---------- Fertigen Artikel-Block lesen ----------
+     Erwartet „Überschrift:“, „Kurzfassung:“, optional „Thema:“ und „Foto:“, danach „Text:“ und den Artikel.
+     Ohne diese Wörter gilt: erste Zeile Überschrift, zweite Kurzfassung, Rest Text.
+     Im Text: Leerzeile = neuer Absatz, „## “ = Zwischenüberschrift, „- “ = Liste, **fett**. */
+  function articleImport(txt) {
+    var r = { title: '', teaser: '', category: '', credit: '', body: '' }, rest = [], inText = false, marked = false;
+    String(txt || '').replace(/\r/g, '').split('\n').forEach(function (line) {
+      var m = !inText && line.match(/^\s*\**\s*(Überschrift|Headline|Titel|Kurzfassung|Zusammenfassung|Thema|Kategorie|Foto|Bildnachweis|Text|Artikel)\s*\**\s*:\s*\**\s*(.*?)\s*\**\s*$/i);
+      if (!m) { rest.push(line); return; }
+      var k = m[1].toLowerCase(), v = m[2];
+      if (!/^(thema|kategorie|foto|bildnachweis)$/.test(k)) marked = true;
+      if (k === 'überschrift' || k === 'headline' || k === 'titel') r.title = v;
+      else if (k === 'kurzfassung' || k === 'zusammenfassung') r.teaser = v;
+      else if (k === 'thema' || k === 'kategorie') r.category = v;
+      else if (k === 'foto' || k === 'bildnachweis') r.credit = v && !/ergänzen/i.test(v) ? 'Foto: ' + v.replace(/^Foto:\s*/i, '') : '';
+      else { inText = true; if (v) rest.push(v); }
+    });
+    if (!marked) {
+      while (rest.length && !rest[0].trim()) rest.shift();
+      r.title = (rest.shift() || '').replace(/^#+\s*/, '').trim();
+      while (rest.length && !rest[0].trim()) rest.shift();
+      r.teaser = (rest.shift() || '').trim();
+    }
+    function inline(t) { return esc(t.trim()).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+    r.body = rest.join('\n').trim().split(/\n\s*\n/).map(function (block) {
+      var lines = block.split('\n').filter(function (l) { return l.trim(); });
+      if (!lines.length) return '';
+      if (/^#{1,3}\s/.test(lines[0]) && lines.length === 1) return '<h2>' + inline(lines[0].replace(/^#+\s*/, '')) + '</h2>';
+      if (lines.every(function (l) { return /^\s*[-•]\s/.test(l); })) return '<ul>' + lines.map(function (l) { return '<li>' + inline(l.replace(/^\s*[-•]\s*/, '')) + '</li>'; }).join('') + '</ul>';
+      return '<p>' + lines.map(inline).join('<br>') + '</p>';
+    }).join('');
+    return r;
+  }
+
   /* ---------- Editor ---------- */
   function pageEditor(id) {
     var isNew = id === 'neu';
@@ -126,6 +160,10 @@
       var cats = BSN.categories.slice(); if (cats.indexOf(a.category) < 0) cats.push(a.category);
       var live = a.status === 'published';
       view.innerHTML = '<div class="editor-grid"><div>' +
+        (isNew ? '<details class="panel artikel-import" id="aiBox"><summary>Fertigen Artikel einfügen</summary>' +
+          '<label class="field"><span>Den fertigen Artikel-Block hier hineinkopieren</span>' +
+          '<textarea id="aiRoh" rows="8" placeholder="Überschrift: …&#10;Kurzfassung: …&#10;Thema: Schötmar&#10;Text:&#10;Bad Salzuflen-Schötmar. …"></textarea></label>' +
+          '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" id="aiGo">In die Felder übernehmen</button></div></details>' : '') +
         '<input class="title-input" id="fTitle" placeholder="Überschrift" aria-label="Überschrift" value="' + esc(a.title) + '">' +
         '<label class="field" style="margin-top:0"><span>Kurzfassung (erscheint unter der Überschrift und auf Kacheln)</span><textarea id="fTeaser" maxlength="220">' + esc(a.teaser) + '</textarea></label>' +
         '<div class="field"><span>Text</span></div>' +
@@ -271,6 +309,24 @@
       function markCredit() { creditBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.credit === fCredit.value.trim() ? 'true' : 'false'); }); }
       creditBtns.forEach(function (b) { b.addEventListener('click', function () { fCredit.value = b.dataset.credit; markCredit(); dirty = true; }); });
       fCredit.addEventListener('input', markCredit);
+
+      // Fertigen Artikel-Block übernehmen: füllt Überschrift, Kurzfassung, Text, Thema und Bildnachweis.
+      var aiGo = document.getElementById('aiGo');
+      if (aiGo) aiGo.addEventListener('click', function () {
+        var roh = document.getElementById('aiRoh'), r = articleImport(roh.value);
+        if (!r.title && !r.body) { toast('Im eingefügten Text habe ich keinen Artikel gefunden.', true); return; }
+        document.getElementById('fTitle').value = r.title;
+        document.getElementById('fTeaser').value = r.teaser;
+        body.innerHTML = R.sanitize(r.body);
+        if (r.category) {
+          var sel = document.getElementById('fCat');
+          Array.prototype.forEach.call(sel.options, function (o) { if (o.value.toLowerCase() === r.category.toLowerCase()) sel.value = o.value; });
+        }
+        if (r.credit) { fCredit.value = r.credit; markCredit(); }
+        roh.value = ''; document.getElementById('aiBox').open = false; dirty = true;
+        toast('Artikel ist drin. Jetzt noch das Titelbild wählen.');
+        document.getElementById('fTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
 
       function collect(status) {
         return {
