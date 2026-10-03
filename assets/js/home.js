@@ -4,29 +4,29 @@
   var grid = document.getElementById('boardGrid'), pg = document.getElementById('postGrid');
   var chips = document.getElementById('chips'), more = document.getElementById('moreBtn'), note = document.getElementById('postNote');
 
-  /* Neueste Blaulicht-Meldung als feste Kachel (gleich neben der Titelkachel) */
+  /* Blaulicht-Meldungen laufen nach Datum zwischen den Beiträgen mit (nur auf der Kacheltafel) */
   var BL_BILD = 'assets/img/blaulicht.jpg#fp=40,30';
-  function blaulichtTile() {
-    if (!BSN.listBlaulicht) return Promise.resolve(null);
+  function blaulichtTiles() {
+    if (!BSN.listBlaulicht) return Promise.resolve([]);
     return BSN.listBlaulicht().then(function (l) {
-      var m = l.filter(function (x) { return !x.hidden; })[0];
-      if (!m) return null;
-      return { title: m.title, category: m.place || 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
-        href: 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true };
-    }).catch(function () { return null; });
+      return l.filter(function (x) { return !x.hidden; }).slice(0, BOARD).map(function (m) {
+        return { title: m.title, category: m.place || 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
+          href: 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true };
+      });
+    }).catch(function () { return []; });
   }
+  function time(a) { var t = Date.parse(a.published_at || a.created_at); return isNaN(t) ? 0 : t; }
 
-  function board(list, bl) {
-    if (bl) {
-      if (!list.length) list = [bl];
-      else { var f = list.filter(function (a) { return a.featured; })[0] || list[0]; list = [f, bl].concat(list.filter(function (a) { return a !== f; })); }
-    }
-    if (!list.length) {
+  function board(articles, bls) {
+    if (!articles.length && !bls.length) {
       grid.innerHTML = '<div class="board-empty"><h2>Bald gibt es hier Neuigkeiten</h2><p>Sobald der erste Beitrag erscheint, siehst du ihn an dieser Stelle.</p></div>';
       return;
     }
-    var featured = list.filter(function (a) { return a.featured; })[0] || list[0];
-    var rest = list.filter(function (a) { return a !== featured; }).slice(0, BOARD - 1);
+    /* Titelkachel bleibt ein Beitrag; alles andere rückt nach Datum nach */
+    var top = articles.filter(function (a) { return a.featured; })[0] || articles[0] || bls[0];
+    var featured = top;
+    var rest = articles.concat(bls).filter(function (a) { return a !== top; })
+      .sort(function (a, b) { return time(b) - time(a); }).slice(0, BOARD - 1);
     var html = '';
     /* Links die Titelkachel (doppelt hoch), rechts bis zu vier kleine, darunter bis zu zwei breite */
     if (!rest.length) html += R.tile(featured, 's12');
@@ -71,7 +71,7 @@
   });
   more.addEventListener('click', function () { renderList(false); });
 
-  Promise.all([BSN.listPublished(), blaulichtTile()]).then(function (r) {
+  Promise.all([BSN.listPublished(), blaulichtTiles()]).then(function (r) {
     var list = r[0]; all = list; board(list, r[1]); renderChips(); renderList(true);
   }).catch(function (err) {
     grid.innerHTML = '<div class="board-empty"><h2>Die Beiträge lassen sich gerade nicht laden</h2><p>Bitte versuche es in ein paar Minuten noch einmal.</p></div>';
