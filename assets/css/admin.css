@@ -310,7 +310,11 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .cp-dlg { max-width: 600px; max-height: calc(100dvh - 32px); overflow-y: auto; }
 .cp-dlg h2 { margin: 0 0 4px; }
 .cp-dlg .field > span small { font-weight: 500; color: var(--color-text-soft); }
-.cp-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.cp-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 16px; }
+.cp-2 > .field { min-width: 0; }
+/* iPad/iPhone-Safari: Datum und Uhrzeit sonst breiter als die Spalte und mittig */
+.field input[type="date"], .field input[type="time"] { -webkit-appearance: none; appearance: none; min-width: 0; max-width: 100%; display: block; text-align: left; }
+.field input[type="date"]::-webkit-date-and-time-value, .field input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 @media (max-width: 520px) { .cp-2 { grid-template-columns: 1fr; } }
 .cp-farbhinweis { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; font-size: 0.85rem; color: var(--color-text-soft); }
 .cp-dlg-knoepfe { flex-wrap: wrap; align-items: center; }
