@@ -4,12 +4,12 @@
   var grid = document.getElementById('boardGrid'), pg = document.getElementById('postGrid');
   var chips = document.getElementById('chips'), more = document.getElementById('moreBtn'), note = document.getElementById('postNote');
 
-  /* Blaulicht-Meldungen laufen nach Datum zwischen den Beiträgen mit (nur auf der Kacheltafel) */
+  /* Nur die neueste Blaulicht-Meldung läuft nach Datum zwischen den Beiträgen mit (nur auf der Kacheltafel) */
   var BL_BILD = 'assets/img/blaulicht.jpg#fp=40,30';
   function blaulichtTiles() {
     if (!BSN.listBlaulicht) return Promise.resolve([]);
     return BSN.listBlaulicht().then(function (l) {
-      return l.filter(function (x) { return !x.hidden; }).slice(0, BOARD).map(function (m) {
+      return l.filter(function (x) { return !x.hidden; }).slice(0, 1).map(function (m) {
         return { title: m.title, category: m.place || 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
           href: 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true };
       });
