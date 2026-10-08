@@ -269,8 +269,18 @@
   BSN.addView = function (id) {
     return client().then(function (c) { return c.from('views').insert({ article_id: id }); }).catch(function () {});
   };
+  /* Supabase liefert pro Abfrage höchstens 1000 Zeilen – deshalb seitenweise holen. */
   BSN.getViews = function () {
-    return client().then(function (c) { return c.from('views').select('article_id,created_at').order('created_at', { ascending: false }).limit(20000); }).then(ok);
+    var size = 1000, all = [];
+    return client().then(function (c) {
+      function page(from) {
+        return c.from('views').select('article_id,created_at').order('id', { ascending: false }).range(from, from + size - 1).then(ok).then(function (rows) {
+          all = all.concat(rows);
+          return rows.length === size && all.length < 100000 ? page(from + size) : all;
+        });
+      }
+      return page(0);
+    });
   };
 
   BSN.listEvents = function () {
