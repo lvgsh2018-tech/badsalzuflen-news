@@ -67,7 +67,7 @@
       days.forEach(function (x) { if (x.d.getTime() === t.getTime()) x.n++; });
     });
     days.forEach(function (x) { if (x.n > max) max = x.n; });
-    var top = pub.map(function (a) { return { a: a, n: viewsOf(a.id) }; }).sort(function (x, y) { return y.n - x.n; }).slice(0, 5);
+    var top = pub.slice().sort(function (x, y) { return new Date(y.published_at || y.created_at) - new Date(x.published_at || x.created_at); }).slice(0, 5).map(function (a) { return { a: a, n: viewsOf(a.id) }; });
     view.innerHTML = '<h1>Übersicht</h1>' +
       '<div class="stat-grid">' +
       '<div class="stat"><strong>' + views.length + '</strong><span>Aufrufe insgesamt</span></div>' +
@@ -80,8 +80,8 @@
       days.map(function (x) {
         return '<div class="bar" title="' + x.d.toLocaleDateString('de-DE') + ': ' + x.n + '"><b>' + (x.n || '') + '</b><i style="height:' + Math.round(x.n / max * 100) + '%"></i><small>' + x.d.getDate() + '.</small></div>';
       }).join('') + '</div></section>' +
-      '<section class="panel"><h2>Meistgelesen</h2>' + (top.length ? '<ol class="rank">' + top.map(function (t) {
-        return '<li><a href="#editor/' + esc(t.a.id) + '">' + esc(title(t.a)) + '</a><span>' + t.n + ' Aufrufe</span></li>';
+      '<section class="panel"><h2>Neueste Beiträge</h2>' + (top.length ? '<ol class="rank">' + top.map(function (t) {
+        return '<li><a href="#editor/' + esc(t.a.id) + '">' + esc(title(t.a)) + '</a><span>' + t.n + (t.n === 1 ? ' Aufruf' : ' Aufrufe') + '</span></li>';
       }).join('') + '</ol>' : '<p class="empty">Noch keine veröffentlichten Beiträge.</p>') + '</section></div>' +
       '<p><a class="btn btn-primary" href="#editor/neu">Neuen Beitrag schreiben</a></p>';
   }
