@@ -240,7 +240,8 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 .bl-wrap > .section { padding-top: clamp(24px, 4vw, 48px); }
 
 /* ---------- Teilen-Leiste unter Beiträgen ---------- */
-.share { margin: 40px 0 8px; padding: 22px 24px 24px; border-radius: var(--radius-l); background: var(--color-white); box-shadow: var(--shadow-card); }
+.share { margin: 40px 0 8px; padding: 22px 24px 24px; border-radius: var(--radius-l); background: var(--color-lilac-soft); border: 1px solid rgba(30, 58, 102, 0.12); }
+:root[data-theme="dark"] .share { border-color: rgba(255, 255, 255, 0.1); }
 .share-title { margin: 0 0 14px; font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-soft); }
 .share-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .share-btn {
@@ -250,12 +251,12 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 120ms ease;
 }
 .share-btn svg { width: 18px; height: 18px; flex: none; }
-.share-btn:hover { background: var(--color-lilac); border-color: transparent; }
+.share-btn:hover { background: var(--color-lilac); border-color: rgba(30, 58, 102, 0.22); }
 .share-btn:active { transform: scale(0.97); }
 .share-btn:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
 .share-native { background: var(--color-navy); border-color: var(--color-navy); color: #fff; }
 .share-native:hover { background: var(--color-navy-dark); border-color: var(--color-navy-dark); }
-.share-btn.is-done { background: var(--color-lilac); border-color: transparent; }
+.share-btn.is-done { background: var(--color-lilac); }
 :root[data-theme="dark"] .share-btn { color: #F1EEF9; border-color: rgba(255, 255, 255, 0.22); }
 :root[data-theme="dark"] .share-btn:hover, :root[data-theme="dark"] .share-btn.is-done { background: #33294A; border-color: transparent; }
 :root[data-theme="dark"] .share-native { background: var(--color-gold); border-color: var(--color-gold); color: #142845; }
