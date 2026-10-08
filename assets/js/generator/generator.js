@@ -300,7 +300,9 @@
   function story(view, toast, format) {
     var beitrag = format === 'beitrag', NAME = beitrag ? 'Beitrag' : 'Story';
     var S = Object.assign({}, Z.STORY_STANDARD, beitrag ? Z.BEITRAG_STANDARD : {}, { format: format });
-    S.nachweis = lesen(KN, '');
+    // Bildnachweis startet immer leer – er gehört zum jeweiligen Foto, nicht zum letzten Bild.
+    S.nachweis = '';
+    try { localStorage.removeItem(KN); } catch (e) {}
     var foto = null, daten = null, uhr = null;
 
     view.innerHTML = kopfNavigation(format) +
@@ -352,11 +354,10 @@
     REGLER.forEach(function (k) { $('s_' + k).value = S[k]; $('s_' + k).addEventListener('input', function () { S[k] = Number(this.value); werte(); spaeter(); }); });
     TEXTE.forEach(function (k) { var el = $('s_' + k); if (!el) return; el.value = S[k] || ''; el.addEventListener('input', function () { S[k] = this.value; spaeter(); }); });
     SCHALTER.forEach(function (k) { var el = $('s_' + k); if (!el) return; el.checked = !!S[k]; el.addEventListener('change', function () { S[k] = this.checked; spaeter(); }); });
-    $('s_nachweis').addEventListener('change', function () { merken(KN, this.value); });
     // Bildnachweis-Vorschläge: ein Tipp füllt das Feld, Knopf zeigt, welcher gerade drinsteht.
     var nachweisBtns = document.querySelectorAll('[data-nachweis]');
     function nachweisMarken() { nachweisBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.nachweis === $('s_nachweis').value.trim() ? 'true' : 'false'); }); }
-    nachweisBtns.forEach(function (b) { b.addEventListener('click', function () { var el = $('s_nachweis'); el.value = S.nachweis = b.dataset.nachweis; merken(KN, el.value); nachweisMarken(); spaeter(); }); });
+    nachweisBtns.forEach(function (b) { b.addEventListener('click', function () { var el = $('s_nachweis'); el.value = S.nachweis = b.dataset.nachweis; nachweisMarken(); spaeter(); }); });
     $('s_nachweis').addEventListener('input', nachweisMarken);
     nachweisMarken();
     werte();
@@ -401,6 +402,8 @@
       var url = URL.createObjectURL(datei), bild = new Image();
       bild.onload = function () {
         foto = bild;
+        // Neues Foto → alter Bildnachweis passt nicht mehr, Feld leeren
+        $('s_nachweis').value = S.nachweis = ''; nachweisMarken();
         $('sAblageTitel').textContent = datei.name; $('sAblageText').textContent = 'Tippen, um ein anderes Foto zu nehmen';
         vorschau();
       };
