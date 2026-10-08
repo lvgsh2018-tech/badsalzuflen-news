@@ -238,3 +238,32 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 /* Blaulicht: gleicher Lavendel-Verlauf wie die Nachrichtenseite, aber nur oben (die Liste ist lang). */
 .bl-wrap { padding-bottom: 0; background-color: var(--color-cream); background-repeat: no-repeat; background-size: 100% 900px; }
 .bl-wrap > .section { padding-top: clamp(24px, 4vw, 48px); }
+
+/* ---------- Teilen-Leiste unter Beiträgen ---------- */
+.share { margin: 40px 0 8px; padding: 22px 24px 24px; border-radius: var(--radius-l); background: var(--color-white); box-shadow: var(--shadow-card); }
+.share-title { margin: 0 0 14px; font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-soft); }
+.share-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.share-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid rgba(30, 58, 102, 0.22); background: transparent; color: var(--color-navy);
+  font: 600 0.9rem/1 var(--font-body); text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+.share-btn svg { width: 18px; height: 18px; flex: none; }
+.share-btn:hover { background: var(--color-lilac); border-color: transparent; }
+.share-btn:active { transform: scale(0.97); }
+.share-btn:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
+.share-native { background: var(--color-navy); border-color: var(--color-navy); color: #fff; }
+.share-native:hover { background: var(--color-navy-dark); border-color: var(--color-navy-dark); }
+.share-btn.is-done { background: var(--color-lilac); border-color: transparent; }
+:root[data-theme="dark"] .share-btn { color: #F1EEF9; border-color: rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .share-btn:hover, :root[data-theme="dark"] .share-btn.is-done { background: #33294A; border-color: transparent; }
+:root[data-theme="dark"] .share-native { background: var(--color-gold); border-color: var(--color-gold); color: #142845; }
+:root[data-theme="dark"] .share-native:hover { background: var(--color-gold); opacity: 0.9; }
+@media (max-width: 520px) {
+  .share { padding: 18px 16px 20px; }
+  .share-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .share-btn { justify-content: center; padding: 0 12px; }
+  .share-native { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { .share-btn { transition: none; } .share-btn:active { transform: none; } }

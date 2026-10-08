@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css?v=5">
-<link rel="stylesheet" href="assets/css/news.css?v=3">
+<link rel="stylesheet" href="assets/css/news.css?v=4">
 <script src="assets/js/theme.js"></script>
 </head>
 <body class="verlauf">
@@ -71,7 +71,7 @@
 </footer>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
-<script src="assets/js/render.js?v=4"></script>
+<script src="assets/js/render.js?v=6"></script>
 <script src="assets/js/push.js?v=2"></script>
 <script>
 (function () {
@@ -93,7 +93,8 @@
       '<p class="article-meta">' + (a.published_at ? R.date(a.published_at) + ' · ' : '') + R.readMinutes(a.body) + ' Min. Lesezeit</p>' +
       (a.image_url ? '<figure><img src="' + R.esc(a.image_url) + '" alt="">' + (a.image_credit ? '<figcaption>' + R.esc(a.image_credit) + '</figcaption>' : '') + '</figure>' : '') +
       (a.teaser ? '<p class="article-lede">' + R.esc(a.teaser) + '</p>' : '') +
-      '<div class="article-body">' + R.sanitize(a.body) + '</div>';
+      '<div class="article-body">' + R.sanitize(a.body) + '</div>' +
+      (draft ? '' : R.shareHTML(a));
     if (!draft) BSN.addView(a.id);
   }).catch(function () { box.innerHTML = '<h1>Der Beitrag lässt sich gerade nicht laden</h1><p>Bitte versuche es gleich noch einmal.</p>'; });
   R.demoBadge();
