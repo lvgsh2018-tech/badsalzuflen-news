@@ -475,11 +475,101 @@
       p.then(function (x) { return teilen([new File([x.blob], x.name, { type: 'image/png' })]); }).catch(function (x) { toast(x.message, true); });
     });
 
+    // Kommt man über „Anpassen“ von einem Artikel, ist schon alles vorausgefüllt.
+    var U = null;
+    try { U = JSON.parse(sessionStorage.getItem(KU)); sessionStorage.removeItem(KU); } catch (x) { U = null; }
+    if (U) {
+      $('s_titel').value = S.titel = U.titel || '';
+      if ($('sArtikel')) $('sArtikel').value = U.link || '';
+      S.foto_x = U.foto_x; S.foto_y = U.foto_y; $('s_foto_x').value = S.foto_x; $('s_foto_y').value = S.foto_y; werte();
+      bildVon(U.bild).then(function (b) {
+        if (!b) return;
+        foto = b; $('sAblageTitel').textContent = 'Titelbild des Artikels'; $('sAblageText').textContent = 'Tippen, um ein anderes Foto zu nehmen';
+        $('s_nachweis').value = S.nachweis = U.nachweis || ''; nachweisMarken(); vorschau();
+      }).catch(function (x) { toast(x.message, true); });
+    }
+
     $('sStatus').textContent = 'Vorlage und Schriften werden geladen …';
     return Z.laden().then(function (d) { daten = d; $('sStatus').textContent = ''; vorschau(); }, function (x) { ladeFehler(view, x); });
   }
 
+  /* ============================== Story + Beitrag direkt zum Artikel */
+  var KU = 'bsn_gen_uebernahme';
+  // Foto über fetch holen, damit die Zeichenfläche es wieder als Datei herausgeben darf.
+  function bildVon(url) {
+    url = String(url || '').replace(/#fp=[^#]*$/, '');
+    if (!url) return Promise.resolve(null);
+    return fetch(url).then(function (r) { if (!r.ok) throw new Error('Titelbild ließ sich nicht laden.'); return r.blob(); }).then(function (b) {
+      return new Promise(function (ok, nein) {
+        var bild = new Image(); bild.onload = function () { ok(bild); };
+        bild.onerror = function () { nein(new Error('Titelbild ließ sich nicht öffnen.')); }; bild.src = URL.createObjectURL(b);
+      });
+    });
+  }
+  function ausArtikel(a) {
+    var f = window.BSNR.focus(a.image_url) || { x: 50, y: 50 };
+    return {
+      titel: a.title || '', nachweis: String(a.image_credit || '').replace(/^Foto:\s*/i, ''),
+      bild: a.image_url || '', foto_x: f.x, foto_y: f.y,
+      link: location.origin + '/artikel.html?s=' + encodeURIComponent(a.slug || '')
+    };
+  }
+
+  function paket(view, toast, a) {
+    var U = ausArtikel(a), fertig = {};
+    view.innerHTML = '<div class="gen-kopf"><h1>Story und Beitrag</h1></div>' +
+      '<p class="gen-hilfe">Zum Artikel „' + esc(U.titel) + '“ — gleiches Foto, gleiche Überschrift. ' + (U.bild ? '' : 'Der Artikel hat kein Titelbild, deshalb ist der Hintergrund leer.') + '</p>' +
+      '<div class="paket-grid">' + [['story', 'Story'], ['beitrag', 'Beitrag']].map(function (f) {
+        return '<section class="panel paket-karte"><h2>' + f[1] + '</h2>' +
+          '<div class="gen-rahmen gen-' + f[0] + '"><div class="gen-bild" id="p_' + f[0] + '" role="img" aria-label="' + f[1] + ' zum Artikel"></div></div>' +
+          '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" data-laden="' + f[0] + '" disabled>' + f[1] + ' herunterladen</button>' +
+          '<a class="btn-ghost" href="#generator/' + f[0] + '" data-anpassen="' + f[0] + '">Anpassen</a></div></section>';
+      }).join('') + '</div>' +
+      '<section class="panel paket-ende"><label class="field" style="margin-top:0"><span>Artikel-Adresse (für den Link-Sticker)</span><input type="url" id="pLink" readonly value="' + esc(U.link) + '"></label>' +
+      '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="pKopieren">Link kopieren</button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" id="pBeide" disabled>Beide herunterladen</button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" id="pTeilen" hidden disabled>Teilen / in Fotos sichern</button>' +
+      '<a class="btn-ghost" href="#beitraege">Zur Beitragsliste</a></div>' +
+      '<p class="gen-status" id="pStatus" aria-live="polite">Bilder werden gezeichnet …</p></section>';
+
+    Promise.all([Z.laden(), bildVon(U.bild).catch(function (x) { toast(x.message, true); return null; })]).then(function (r) {
+      var daten = r[0], foto = r[1];
+      return Promise.all(['story', 'beitrag'].map(function (format) {
+        var S = Object.assign({}, Z.STORY_STANDARD, format === 'beitrag' ? Z.BEITRAG_STANDARD : {},
+          { format: format, titel: U.titel, nachweis: U.nachweis, foto_x: U.foto_x, foto_y: U.foto_y });
+        var c = Z.story(foto, S, daten).canvas;
+        $('p_' + format).appendChild(c);
+        return alsBlob(c, 'png').then(function (b) { fertig[format] = { blob: b, name: dateiname(format, wortFuerDatei(U.titel), 'png') }; });
+      }));
+    }).then(function () {
+      view.querySelectorAll('[data-laden], #pBeide, #pTeilen').forEach(function (k) { k.disabled = false; });
+      $('pTeilen').hidden = !kannTeilen();
+      $('pStatus').textContent = '';
+    }).catch(function (x) { $('pStatus').textContent = 'Das hat nicht geklappt: ' + x.message; });
+
+    view.querySelectorAll('[data-laden]').forEach(function (k) {
+      k.addEventListener('click', function () { var x = fertig[k.dataset.laden]; herunterladen(x.blob, x.name); });
+    });
+    $('pBeide').addEventListener('click', function () {
+      herunterladen(fertig.story.blob, fertig.story.name);
+      setTimeout(function () { herunterladen(fertig.beitrag.blob, fertig.beitrag.name); }, 400);
+    });
+    $('pTeilen').addEventListener('click', function () {
+      teilen(['story', 'beitrag'].map(function (f) { return new File([fertig[f].blob], fertig[f].name, { type: 'image/png' }); })).catch(function (x) { toast(x.message, true); });
+    });
+    $('pKopieren').addEventListener('click', function () {
+      var k = this;
+      (navigator.clipboard ? navigator.clipboard.writeText(U.link) : Promise.reject()).catch(function () { $('pLink').select(); document.execCommand('copy'); })
+        .then(function () { k.textContent = 'Kopiert ✓'; setTimeout(function () { k.textContent = 'Link kopieren'; }, 1600); });
+    });
+    // „Anpassen“ öffnet den normalen Generator, schon mit Foto, Überschrift, Bildnachweis und Link gefüllt.
+    view.querySelectorAll('[data-anpassen]').forEach(function (k) {
+      k.addEventListener('click', function () { try { sessionStorage.setItem(KU, JSON.stringify(U)); } catch (x) { /* egal */ } });
+    });
+  }
+
   window.BSNGenerator = {
+    paket: paket,
     zeigen: function (view, unterseite, toast) {
       if (unterseite === 'story' || unterseite === 'beitrag') return story(view, toast, unterseite);
       return montag(view, toast);

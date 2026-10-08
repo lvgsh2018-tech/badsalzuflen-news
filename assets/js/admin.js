@@ -198,6 +198,7 @@
         (live
           ? '<button class="btn btn-primary" id="bSave" type="button">Änderungen speichern</button><button class="btn btn-secondary" id="bDraft" type="button">Zurück zum Entwurf</button>'
           : '<button class="btn btn-primary" id="bPub" type="button">Veröffentlichen</button><button class="btn btn-secondary" id="bSave" type="button">Als Entwurf speichern</button>') +
+        (live ? '<a class="btn btn-secondary" href="#teilen/' + esc(a.id) + '">Story und Beitrag erstellen</a>' : '') +
         (live && !a.notified_at && BSN.live ? '<button class="btn-ghost" type="button" id="bNotify">Leser per Mitteilung informieren</button>' : '') +
         '<button class="btn-ghost" type="button" id="bPrev"' + (isNew ? ' disabled' : '') + '>Vorschau in neuem Tab</button></div></aside></div>';
 
@@ -375,7 +376,8 @@
         BSN.saveArticle(rec).then(function (saved) {
           dirty = false; toast(msg);
           var first = status === 'published' && !live && !saved.notified_at;
-          return (first ? notify(saved) : Promise.resolve()).then(load).then(function () { location.hash = '#beitraege'; });
+          // Beim ersten Veröffentlichen gleich Story und Beitrag mit Titelbild und Überschrift zeigen.
+          return (first ? notify(saved) : Promise.resolve()).then(load).then(function () { location.hash = first ? '#teilen/' + saved.id : '#beitraege'; });
         }).catch(function (x) { toast(x.message, true); btns.forEach(function (b) { b.disabled = false; }); });
       }
       var nb = document.getElementById('bNotify');
@@ -495,7 +497,7 @@
   function route() {
     var h = location.hash.replace('#', '') || 'uebersicht', p = h.split('/');
     document.querySelectorAll('[data-tab]').forEach(function (a) {
-      if (a.dataset.tab === (p[0] === 'termin' ? 'termine' : p[0] === 'editor' ? 'beitraege' : p[0])) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      if (a.dataset.tab === (p[0] === 'termin' ? 'termine' : p[0] === 'editor' || p[0] === 'teilen' ? 'beitraege' : p[0])) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     window.scrollTo(0, 0);
     view.onclick = view.ondragstart = view.ondragover = view.ondragend = view.ondrop = null; // Reste der Planung
@@ -504,6 +506,10 @@
     if (p[0] === 'termine') return pageEvents();
     if (p[0] === 'termin') return pageEvent(p[1] || 'neu');
     if (p[0] === 'generator') return window.BSNGenerator.zeigen(view, p[1], toast);
+    if (p[0] === 'teilen') return BSN.getById(p[1]).then(function (a) {
+      if (!a) { view.innerHTML = '<h1>Beitrag nicht gefunden</h1><p><a href="#beitraege">Zurück zur Liste</a></p>'; return; }
+      window.BSNGenerator.paket(view, toast, a);
+    }).catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
     load().then(function () { p[0] === 'beitraege' ? pageList() : pageOverview(); })
       .catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
   }

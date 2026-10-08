@@ -370,3 +370,10 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .gen-zuletzt button { display: flex; gap: 8px; align-items: baseline; width: 100%; min-height: 44px; text-align: left; padding: 9px 12px; border-radius: 12px; font: inherit; font-size: 0.9rem; line-height: 1.3; color: inherit; background: transparent; border: 1px solid currentColor; border-color: rgba(128, 128, 128, 0.35); cursor: pointer; }
 .gen-zuletzt button small { opacity: 0.65; white-space: nowrap; }
 .gen-zuletzt button[aria-pressed="true"] { outline: 2px solid #3D74BE; outline-offset: -2px; }
+
+/* Story + Beitrag direkt nach dem Veröffentlichen */
+.paket-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; margin-top: 16px; }
+@media (max-width: 760px) { .paket-grid { grid-template-columns: 1fr; } }
+.paket-karte h2 { margin-top: 0; }
+.paket-karte .gen-rahmen { margin: 0 auto 14px; max-width: 340px; }
+.paket-ende { margin-top: 24px; }
