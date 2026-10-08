@@ -518,7 +518,9 @@
   function paket(view, toast, a) {
     var U = ausArtikel(a), fertig = {};
     view.innerHTML = '<div class="gen-kopf"><h1>Story und Beitrag</h1></div>' +
-      '<p class="gen-hilfe">Zum Artikel „' + esc(U.titel) + '“ — gleiches Foto, gleiche Überschrift. ' + (U.bild ? '' : 'Der Artikel hat kein Titelbild, deshalb ist der Hintergrund leer.') + '</p>' +
+      '<p class="gen-hilfe">Zum Artikel „' + esc(U.titel) + '“ — gleiches Foto, gleiche Überschrift. ' + (U.bild ? '' : 'Der Artikel hat kein Titelbild, deshalb ist der Hintergrund leer. ') +
+      (a.status === 'published' ? '' : 'Der Artikel ist noch ein Entwurf – der Link funktioniert erst nach dem Veröffentlichen. ') +
+      '<a href="#editor/' + esc(a.id) + '">Zurück zum Artikel</a></p>' +
       '<div class="paket-grid">' + [['story', 'Story'], ['beitrag', 'Beitrag']].map(function (f) {
         return '<section class="panel paket-karte"><h2>' + f[1] + '</h2>' +
           '<div class="gen-rahmen gen-' + f[0] + '"><div class="gen-bild" id="p_' + f[0] + '" role="img" aria-label="' + f[1] + ' zum Artikel"></div></div>' +

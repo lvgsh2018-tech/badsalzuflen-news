@@ -190,6 +190,8 @@
         '<input type="file" id="fFile" accept="image/*" class="sr-only">' +
         '<label class="field"><span>Bildnachweis (z. B. „Foto: Name“)</span><input id="fCredit" value="' + esc(a.image_credit) + '"></label>' +
         '<div class="credit-vorschlaege" role="group" aria-label="Bildnachweis-Vorschläge">' + CREDITS.map(function (c) { return '<button type="button" class="chip" data-credit="' + esc(c) + '"' + (c === a.image_credit ? ' aria-pressed="true"' : '') + '>' + esc(c.replace(/^Foto: /, '')) + '</button>'; }).join('') + '</div></div>' +
+        '<div class="panel"><h2 class="side-h">Für Instagram</h2><p class="gen-hilfe">Story und Beitrag mit Titelbild und Überschrift – fertig zum Herunterladen.</p>' +
+        '<button class="btn btn-primary gen-breit" type="button" id="bInsta">Story und Beitrag erstellen</button></div>' +
         '<div class="panel"><label class="field" style="margin-top:0"><span>Thema</span><select id="fCat">' + cats.map(function (c) { return '<option' + (c === a.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '<option value="' + NEU + '">+ Neues Thema …</option></select></label>' +
         '<div class="thema-neu" id="catNeuBox" hidden><label class="field"><span>Name des neuen Themas</span><input id="fCatNeu" maxlength="40" placeholder="z. B. Sport"></label>' +
         '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="catNeuOk">Hinzufügen</button><button class="btn-ghost" type="button" id="catNeuNein">Abbrechen</button></div></div>' +
@@ -198,7 +200,6 @@
         (live
           ? '<button class="btn btn-primary" id="bSave" type="button">Änderungen speichern</button><button class="btn btn-secondary" id="bDraft" type="button">Zurück zum Entwurf</button>'
           : '<button class="btn btn-primary" id="bPub" type="button">Veröffentlichen</button><button class="btn btn-secondary" id="bSave" type="button">Als Entwurf speichern</button>') +
-        (live ? '<a class="btn btn-secondary" href="#teilen/' + esc(a.id) + '">Story und Beitrag erstellen</a>' : '') +
         (live && !a.notified_at && BSN.live ? '<button class="btn-ghost" type="button" id="bNotify">Leser per Mitteilung informieren</button>' : '') +
         '<button class="btn-ghost" type="button" id="bPrev"' + (isNew ? ' disabled' : '') + '>Vorschau in neuem Tab</button></div></aside></div>';
 
@@ -388,6 +389,16 @@
       });
       if (sv) sv.addEventListener('click', function () { save(live ? 'published' : 'draft', live ? 'Änderungen gespeichert.' : 'Entwurf gespeichert.'); });
       if (dr) dr.addEventListener('click', function () { save('draft', 'Beitrag ist wieder ein Entwurf.'); });
+      // Story + Beitrag: speichert kurz (wie die Vorschau) und öffnet die fertigen Bilder.
+      document.getElementById('bInsta').addEventListener('click', function () {
+        var rec = collect(st.status);
+        if (!rec.title) { toast('Gib zuerst eine Überschrift ein.', true); document.getElementById('fTitle').focus(); return; }
+        if (!st.image_url) toast('Noch kein Titelbild – die Bilder bekommen dann keinen Hintergrund.', true);
+        this.disabled = true;
+        var k = this;
+        BSN.saveArticle(rec).then(function (s) { dirty = false; location.hash = '#teilen/' + s.id; })
+          .catch(function (x) { toast(x.message, true); k.disabled = false; });
+      });
       document.getElementById('bPrev').addEventListener('click', function () {
         var rec = collect(st.status);
         var open = function (s) { window.open('artikel.html?s=' + encodeURIComponent(s.slug), '_blank'); };

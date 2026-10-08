@@ -377,3 +377,4 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .paket-karte h2 { margin-top: 0; }
 .paket-karte .gen-rahmen { margin: 0 auto 14px; max-width: 340px; }
 .paket-ende { margin-top: 24px; }
+.side-h { margin: 0 0 4px; font-size: 1.05rem; }
