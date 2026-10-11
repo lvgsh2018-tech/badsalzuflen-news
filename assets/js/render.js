@@ -53,7 +53,13 @@
     var words = (html || '').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.round(words / 200));
   };
-  R.url = function (a) { return a.href || 'artikel.html?s=' + encodeURIComponent(a.slug); };
+  /* Feste Seite unter beitrag/, sobald sie gebaut ist (beitrag/liste.js kennt die fertigen), sonst artikel.html?s=… */
+  R.hasPage = function (a) { return !!(window.BSN_SEITEN && window.BSN_SEITEN[a.slug]); };
+  R.url = function (a) {
+    if (a.href) return a.href;
+    return R.hasPage(a) ? 'beitrag/' + encodeURIComponent(a.slug) + '.html' : 'artikel.html?s=' + encodeURIComponent(a.slug);
+  };
+  R.pageUrl = function (a) { return new URL(R.url(a), document.baseURI).href; };
 
   /* Ohne Foto: ruhiger Farbverlauf aus den Markenfarben, je Kategorie anders. */
   var PH = [
@@ -138,7 +144,7 @@
     ok: ico('<path d="M20 6 9 17l-5-5"/>')
   };
   R.shareHTML = function (a) {
-    var url = location.origin + location.pathname + '?s=' + encodeURIComponent(a.slug);
+    var url = R.pageUrl(a);
     var u = encodeURIComponent(url), t = encodeURIComponent(a.title);
     var btn = function (cls, href, icon, label) {
       return '<a class="share-btn ' + cls + '" href="' + href + '" target="_blank" rel="noopener noreferrer">' + icon + '<span>' + label + '</span></a>';

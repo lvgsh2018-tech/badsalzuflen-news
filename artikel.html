@@ -71,34 +71,9 @@
 </footer>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api.js"></script>
-<script src="assets/js/render.js?v=6"></script>
+<script src="beitrag/liste.js"></script>
+<script src="assets/js/render.js?v=7"></script>
 <script src="assets/js/push.js?v=2"></script>
-<script>
-(function () {
-  var R = window.BSNR, q = new URLSearchParams(location.search), slug = q.get('s'), box = document.getElementById('article');
-  function missing() {
-    document.title = 'Beitrag nicht gefunden — Bad Salzuflen News';
-    box.innerHTML = '<h1>Diesen Beitrag gibt es nicht</h1><p>Vielleicht wurde er entfernt oder der Link ist unvollständig.</p><a class="btn btn-primary" href="index.html">Zu allen Nachrichten</a>';
-  }
-  if (!slug) { missing(); return; }
-  BSN.getUser().catch(function () { return null; }).then(function (u) {
-    return BSN.getArticle(slug, { preview: !!u }).then(function (a) { return [a, u]; });
-  }).then(function (r) {
-    var a = r[0]; if (!a) { missing(); return; }
-    var draft = a.status !== 'published';
-    document.getElementById('previewFlag').hidden = !draft;
-    document.title = a.title + ' — Bad Salzuflen News';
-    var meta = document.querySelector('meta[name=robots]'); if (draft) meta.content = 'noindex';
-    box.innerHTML = '<span class="tag tag-dark">' + R.esc(a.category) + '</span><h1>' + R.esc(a.title) + '</h1>' +
-      '<p class="article-meta">' + (a.published_at ? R.date(a.published_at) + ' · ' : '') + R.readMinutes(a.body) + ' Min. Lesezeit</p>' +
-      (a.image_url ? '<figure><img src="' + R.esc(a.image_url) + '" alt="">' + (a.image_credit ? '<figcaption>' + R.esc(a.image_credit) + '</figcaption>' : '') + '</figure>' : '') +
-      (a.teaser ? '<p class="article-lede">' + R.esc(a.teaser) + '</p>' : '') +
-      '<div class="article-body">' + R.sanitize(a.body) + '</div>' +
-      (draft ? '' : R.shareHTML(a));
-    if (!draft) BSN.addView(a.id);
-  }).catch(function () { box.innerHTML = '<h1>Der Beitrag lässt sich gerade nicht laden</h1><p>Bitte versuche es gleich noch einmal.</p>'; });
-  R.demoBadge();
-})();
-</script>
+<script src="assets/js/artikel.js?v=1"></script>
 </body>
 </html>

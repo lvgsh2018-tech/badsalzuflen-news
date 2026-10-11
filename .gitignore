@@ -1,3 +1,5 @@
 design-system/
 .DS_Store
 supabase/
+_site/
+__pycache__/

@@ -117,3 +117,10 @@ Nur für die Redaktion sichtbar, Besucher sehen nichts davon.
 - `assets/js/planung.js` — die Bedienung
 - `supabase/content.sql` — Tabellen `content_kanaele` und `content_beitraege` plus
   einmalige Übernahme der Einträge aus MeinOrbit (Stand 2026-09-26)
+
+## Feste Beitragsseiten und Inhaltsverzeichnis für Suchmaschinen (seit 2026-10-11)
+
+`python3 werkzeug/seiten_bauen.py` baut die fertige Seite nach `_site/`: eine feste Seite pro
+veröffentlichtem Beitrag (`beitrag/<slug>.html`, Vorlage `artikel.html`), `beitrag/liste.js`,
+`sitemap.xml` und `stand.txt`. Online erledigt das `.github/workflows/seite.yml` (bei jedem Push
+und alle 10 Minuten); dafür muss GitHub Pages auf die Quelle „GitHub Actions“ gestellt sein.
