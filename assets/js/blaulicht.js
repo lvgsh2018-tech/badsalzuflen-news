@@ -1,7 +1,9 @@
-/* Blaulicht: Liste aller Meldungen oder eine einzelne (blaulicht.html?m=<Nummer bei presseportal>). */
+/* Blaulicht: Liste aller Meldungen oder eine einzelne (blaulicht.html?m=<Nummer bei presseportal>).
+   Auf den festen Seiten unter blaulicht/ steht die Meldung schon im HTML (data-id nennt die Nummer). */
 (function () {
   var R = window.BSNR;
-  var sid = new URLSearchParams(location.search).get('m');
+  var built = document.getElementById('bl-article').getAttribute('data-id');
+  var sid = built || new URLSearchParams(location.search).get('m');
 
   function when(iso) {
     var d = new Date(iso);
@@ -11,10 +13,9 @@
   function safeUrl(u) { return /^https:\/\/(www\.)?presseportal\.de\//i.test(u || '') ? u : 'https://www.presseportal.de/blaulicht/nr/12727'; }
   /* Vorschau nicht mitten im Wort abschneiden */
   function teaser(t) { t = String(t || ''); return t.length < 200 ? t : t.replace(/\s+\S*$/, '') + ' …'; }
-  function url(m) { return 'blaulicht.html?m=' + encodeURIComponent(m.source_id); }
 
   function item(m) {
-    return '<a class="bl-item" href="' + url(m) + '"><div class="bl-meta"><span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
+    return '<a class="bl-item" href="' + R.blUrl(m) + '"><div class="bl-meta"><span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
       '<time datetime="' + R.esc(m.published_at) + '">' + R.esc(when(m.published_at)) + '</time></div>' +
       '<h3>' + R.esc(m.title) + '</h3><p>' + R.esc(teaser(m.teaser)) + '</p></a>';
   }
@@ -33,7 +34,13 @@
     document.getElementById('einzeln').hidden = false;
     var box = document.getElementById('bl-article');
     BSN.getBlaulicht(sid).then(function (m) {
-      if (!m || m.hidden) { box.innerHTML = '<h1>Meldung nicht gefunden</h1><p>Vielleicht ist sie nicht mehr verfügbar. <a href="blaulicht.html">Zu allen Blaulicht-Meldungen</a></p>'; return; }
+      if (!m || m.hidden) {
+        /* Zurückgezogene Meldung: auch Suchmaschinen sollen sie vergessen */
+        var r = document.createElement('meta'); r.name = 'robots'; r.content = 'noindex'; document.head.appendChild(r);
+        document.title = 'Meldung nicht gefunden — Bad Salzuflen News';
+        box.innerHTML = '<h1>Meldung nicht gefunden</h1><p>Vielleicht ist sie nicht mehr verfügbar. <a href="blaulicht.html">Zu allen Blaulicht-Meldungen</a></p>'; return;
+      }
+      if (built) return;
       document.title = m.title + ' — Blaulicht — Bad Salzuflen News';
       var src = safeUrl(m.source_url);
       box.innerHTML = '<span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
@@ -42,7 +49,7 @@
         '<div class="article-body">' + R.sanitize(m.body) + '</div>' +
         '<p class="bl-source"><strong>Quelle:</strong> ' + R.esc(m.source_name || 'Polizei Lippe') + ', presseportal.de — ' +
         '<a href="' + R.esc(src) + '" target="_blank" rel="noopener noreferrer">' + R.esc(src) + '</a></p>';
-    }).catch(function () { box.innerHTML = '<p class="posts-note">Die Meldung lässt sich gerade nicht laden.</p>'; });
+    }).catch(function () { if (!built) box.innerHTML = '<p class="posts-note">Die Meldung lässt sich gerade nicht laden.</p>'; });
   }
 
   if (sid) showOne(); else showList();

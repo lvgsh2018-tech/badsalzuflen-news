@@ -3,7 +3,8 @@
 
 Kopiert die Seite und legt zusätzlich an, was Suchmaschinen und Link-Vorschauen brauchen:
   beitrag/<slug>.html  eine feste Seite pro veröffentlichtem Beitrag (Vorlage: artikel.html)
-  beitrag/liste.js     welche Beiträge eine feste Seite haben
+  blaulicht/<nr>.html  eine feste Seite pro Blaulicht-Meldung (Vorlage: blaulicht.html)
+  beitrag/liste.js     welche Beiträge und Meldungen eine feste Seite haben
   sitemap.xml          Inhaltsverzeichnis für Suchmaschinen
   stand.txt            Prüfsumme; daran erkennt der Zeitplan, ob neu veröffentlicht werden muss
 
@@ -49,12 +50,25 @@ def config():
     return url.group(1).rstrip('/'), key.group(1)
 
 
-def articles(base, key):
-    req = urllib.request.Request(
-        base + '/rest/v1/articles?select=*&status=eq.published&order=published_at.desc&limit=1000',
-        headers={'apikey': key})
+def fetch(base, key, query):
+    req = urllib.request.Request(base + '/rest/v1/' + query, headers={'apikey': key})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r)
+
+
+def articles(base, key):
+    return fetch(base, key, 'articles?select=*&status=eq.published&order=published_at.desc&limit=1000')
+
+
+# Suchmeldungen nach Personen werden von der Polizei wieder zurückgezogen — die bekommen keine feste Seite
+# und landen damit nicht bei Suchmaschinen (auf der Blaulicht-Seite selbst stehen sie wie bisher).
+KEINE_SEITE = re.compile(r'vermiss|fahndung|wer kennt|identit', re.I)
+
+
+def blaulicht(base, key):
+    rows = fetch(base, key, 'blaulicht?select=*&hidden=eq.false&order=published_at.desc&limit=1000')
+    return [m for m in rows if re.fullmatch(r'[A-Za-z0-9_-]+', m.get('source_id') or '')
+            and not KEINE_SEITE.search(m.get('title') or '')]
 
 
 def when(iso):
@@ -204,7 +218,63 @@ def article_page(tpl, a, base):
     return page
 
 
-def sitemap(arts):
+def swap_bl(page, old, new):
+    if old not in page:
+        sys.exit('Vorlage blaulicht.html passt nicht mehr zum Bauwerkzeug, gesucht: ' + old[:70])
+    return page.replace(old, new, 1)
+
+
+def blaulicht_page(tpl, m, base):
+    url = SITE + 'blaulicht/' + m['source_id'] + '.html'
+    title, place, src_name = m['title'], m.get('place') or 'Bad Salzuflen', m.get('source_name') or 'Polizei Lippe'
+    src = m.get('source_url') or ''
+    if not re.match(r'https://(www\.)?presseportal\.de/', src, re.I):
+        src = 'https://www.presseportal.de/blaulicht/nr/12727'
+    desc = plain(m.get('body')) or ' '.join((m.get('teaser') or '').split())
+    if len(desc) > 160:
+        desc = desc[:158].rsplit(' ', 1)[0].rstrip(' ,;:–-') + ' …'
+    d = when(m['published_at']).astimezone(BERLIN)
+    stamp = '%d. %s %d, %02d:%02d Uhr' % (d.day, MONATE[d.month - 1], d.year, d.hour, d.minute)
+    full = '%s: %s' % (place, title) if place.lower() not in title.lower() else title
+    ld = {
+        '@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': full[:110], 'description': desc,
+        'image': [SITE + 'assets/img/blaulicht.jpg'], 'datePublished': when(m['published_at']).isoformat(),
+        'inLanguage': 'de', 'mainEntityOfPage': url, 'isBasedOn': src,
+        'author': {'@type': 'Organization', 'name': src_name},
+        'publisher': {'@type': 'Organization', 'name': NAME, 'url': SITE,
+                      'logo': {'@type': 'ImageObject', 'url': SITE + 'assets/img/icon-512.png'}},
+    }
+    body = (
+        '<span class="tag tag-dark">%s</span><h1>%s</h1>' % (esc(place), esc(title)) +
+        '<p class="article-meta">%s · <time datetime="%s">%s</time></p>' % (esc(src_name), esc(m['published_at']), stamp) +
+        '<div class="article-body">%s</div>' % sanitize(m.get('body'), base) +
+        '<p class="bl-source"><strong>Quelle:</strong> %s, presseportal.de — '
+        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a></p>' % (esc(src_name), esc(src), esc(src))
+    )
+    page = swap_bl(tpl, '<meta charset="UTF-8">', '<meta charset="UTF-8">\n<base href="/">')
+    page = swap_bl(page, '<title>Blaulicht — Bad Salzuflen News</title>',
+                   '<title>%s — Blaulicht — %s</title>' % (esc(full), NAME))
+    page = swap_bl(page, '<meta name="description" content="Polizeimeldungen aus Bad Salzuflen und den Ortsteilen — automatisch von der Polizei Lippe.">',
+                   '<meta name="description" content="%s">' % esc(desc))
+    page = swap_bl(page, '<meta property="og:title" content="Blaulicht — Bad Salzuflen News">',
+                   '<meta property="og:title" content="%s">' % esc(full))
+    page = swap_bl(page, '<meta property="og:description" content="Polizeimeldungen aus Bad Salzuflen und den Ortsteilen — automatisch von der Polizei Lippe.">',
+                   '<meta property="og:description" content="%s">' % esc(desc))
+    page = swap_bl(page, '<meta property="og:image" content="https://badsalzuflennews.de/assets/img/og-bild.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">',
+                   '<meta property="og:image" content="%sassets/img/blaulicht.jpg">' % SITE)
+    page = swap_bl(page, '<meta property="og:type" content="website">\n<link rel="canonical" href="https://badsalzuflennews.de/blaulicht.html">',
+                   '<meta property="og:type" content="article">\n<meta property="og:url" content="%s">\n<link rel="canonical" href="%s">\n'
+                   '<script type="application/ld+json">%s</script>'
+                   % (url, url, json.dumps(ld, ensure_ascii=False).replace('</', '<\\/')))
+    page = swap_bl(page, '<section class="section" id="liste">', '<section class="section" id="liste" hidden>')
+    page = swap_bl(page, '<div class="article-wrap" id="einzeln" hidden>', '<div class="article-wrap" id="einzeln">')
+    page = swap_bl(page, '<article class="article" id="bl-article" aria-live="polite"><p>Meldung wird geladen …</p></article>',
+                   '<article class="article" id="bl-article" aria-live="polite" data-id="%s">%s</article>'
+                   % (esc(m['source_id']), body))
+    return page
+
+
+def sitemap(arts, bls):
     fresh = datetime.now(timezone.utc) - timedelta(days=2)
     rows = ['  <url><loc>%s%s</loc></url>' % (SITE, p) for p in PAGES]
     for a in arts:
@@ -216,6 +286,9 @@ def sitemap(arts):
                     '<news:title>%s</news:title></news:news>' % (NAME, pub.isoformat(), esc(a['title'])))
         rows.append('  <url><loc>%sbeitrag/%s.html</loc><lastmod>%s</lastmod>%s</url>' % (
             SITE, a['slug'], when(a.get('updated_at') or a['published_at']).isoformat(), news))
+    for m in bls:
+        rows.append('  <url><loc>%sblaulicht/%s.html</loc><lastmod>%s</lastmod></url>' % (
+            SITE, m['source_id'], when(m['published_at']).isoformat()))
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
             'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">\n' + '\n'.join(rows) + '\n</urlset>\n')
@@ -229,6 +302,12 @@ def main():
         # Lieber gar nicht veröffentlichen als alle Beitragsseiten löschen
         sys.exit('Keine veröffentlichten Beiträge erhalten — Abbruch, die Seite bleibt wie sie ist.')
 
+    try:
+        bls = blaulicht(base, key)
+    except Exception as e:  # Blaulicht darf den Bau der Beiträge nicht aufhalten
+        print('Blaulicht-Meldungen nicht erreichbar, es werden keine Seiten dafür gebaut:', e)
+        bls = []
+
     if OUT.exists():
         shutil.rmtree(OUT)
     shutil.copytree(ROOT, OUT, ignore=SKIP)
@@ -237,17 +316,23 @@ def main():
     (OUT / 'beitrag').mkdir(exist_ok=True)
     for a in arts:
         (OUT / 'beitrag' / (a['slug'] + '.html')).write_text(article_page(tpl, a, base), encoding='utf-8')
+    tpl_bl = (ROOT / 'blaulicht.html').read_text(encoding='utf-8')
+    (OUT / 'blaulicht').mkdir(exist_ok=True)
+    for m in bls:
+        (OUT / 'blaulicht' / (m['source_id'] + '.html')).write_text(blaulicht_page(tpl_bl, m, base), encoding='utf-8')
     (OUT / 'beitrag/liste.js').write_text(
-        '/* Automatisch erzeugt: Beiträge mit fester Seite. */\nwindow.BSN_SEITEN = %s;\n'
-        % json.dumps({a['slug']: 1 for a in arts}, separators=(',', ':')), encoding='utf-8')
-    (OUT / 'sitemap.xml').write_text(sitemap(arts), encoding='utf-8')
+        '/* Automatisch erzeugt: Beiträge und Blaulicht-Meldungen mit fester Seite. */\n'
+        'window.BSN_SEITEN = %s;\nwindow.BSN_BLAULICHT = %s;\n' % (
+            json.dumps({a['slug']: 1 for a in arts}, separators=(',', ':')),
+            json.dumps({m['source_id']: 1 for m in bls}, separators=(',', ':'))), encoding='utf-8')
+    (OUT / 'sitemap.xml').write_text(sitemap(arts, bls), encoding='utf-8')
 
     h = hashlib.sha256()
     for f in sorted(p for p in OUT.rglob('*') if p.is_file()):
         h.update(str(f.relative_to(OUT)).encode())
         h.update(f.read_bytes())
     (OUT / 'stand.txt').write_text(h.hexdigest() + '\n', encoding='utf-8')
-    print('%d Beitragsseiten gebaut, Stand %s' % (len(arts), h.hexdigest()[:12]))
+    print('%d Beitragsseiten und %d Blaulicht-Seiten gebaut, Stand %s' % (len(arts), len(bls), h.hexdigest()[:12]))
 
 
 if __name__ == '__main__':

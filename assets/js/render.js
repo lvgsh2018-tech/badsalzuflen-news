@@ -59,6 +59,10 @@
     if (a.href) return a.href;
     return R.hasPage(a) ? 'beitrag/' + encodeURIComponent(a.slug) + '.html' : 'artikel.html?s=' + encodeURIComponent(a.slug);
   };
+  R.blUrl = function (m) {
+    return window.BSN_BLAULICHT && window.BSN_BLAULICHT[m.source_id]
+      ? 'blaulicht/' + encodeURIComponent(m.source_id) + '.html' : 'blaulicht.html?m=' + encodeURIComponent(m.source_id);
+  };
   R.pageUrl = function (a) { return new URL(R.url(a), document.baseURI).href; };
 
   /* Ohne Foto: ruhiger Farbverlauf aus den Markenfarben, je Kategorie anders. */
