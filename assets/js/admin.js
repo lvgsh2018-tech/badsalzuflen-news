@@ -107,6 +107,16 @@
   }
   view.addEventListener('click', function (e) {
     var f = e.target.closest('[data-f]'); if (f) { listFilter = f.dataset.f; pageList(); return; }
+    var b = e.target.closest('[data-bl]');
+    if (b) {
+      var aus = b.dataset.aus === '1';
+      b.disabled = true;
+      BSN.setBlaulichtHidden(b.dataset.bl, aus).then(function () {
+        toast(aus ? 'Ausgeblendet. Die eigene Seite der Meldung verschwindet in bis zu 10 Minuten.' : 'Die Meldung ist wieder zu sehen.');
+        return pageBlaulicht(b.dataset.bl);
+      }).catch(function (x) { b.disabled = false; toast(x.message, true); });
+      return;
+    }
     var d = e.target.closest('[data-del]');
     if (d) {
       var a = articles.filter(function (x) { return x.id === d.dataset.del; })[0];
@@ -116,6 +126,23 @@
       });
     }
   });
+
+  /* ---------- Blaulicht: einzelne Meldungen ausblenden ----------
+     Die Meldungen kommen automatisch von der Polizei; hier lässt sich nur umschalten, ob eine zu sehen ist. */
+  function pageBlaulicht(focusId) {
+    return BSN.listBlaulicht(true).then(function (list) {
+      var off = list.filter(function (m) { return m.hidden; }).length;
+      view.innerHTML = '<h1>Blaulicht</h1><p class="bl-hinweis">Die Meldungen kommen automatisch von der Polizei Lippe. Zieht die Polizei eine zurück, kannst du sie hier ausblenden – sie verschwindet dann von der Webseite.' +
+        (off ? ' Ausgeblendet: ' + off + '.' : '') + '</p><div class="panel">' +
+        (list.length ? '<ul class="bl-pflege">' + list.map(function (m) {
+          return '<li' + (m.hidden ? ' class="aus"' : '') + '><div class="bl-text"><a href="' + R.blUrl(m) + '" target="_blank" rel="noopener">' + esc(m.title) + '</a>' +
+            '<p><span>' + esc(m.place) + ' · ' + R.date(m.published_at) + '</span><span class="badge ' + (m.hidden ? 'off">Ausgeblendet' : 'live">Sichtbar') + '</span></p></div>' +
+            '<button class="btn ' + (m.hidden ? 'btn-primary' : 'btn-secondary') + ' btn-sm" type="button" data-bl="' + esc(m.id) + '" data-aus="' + (m.hidden ? '0' : '1') + '">' +
+            (m.hidden ? 'Wieder zeigen' : 'Ausblenden') + '<span class="sr-only">: ' + esc(m.title) + '</span></button></li>';
+        }).join('') + '</ul>' : '<p class="empty">Aktuell gibt es keine Polizeimeldungen aus Bad Salzuflen.</p>') + '</div>';
+      if (focusId) { var k = view.querySelector('[data-bl="' + focusId + '"]'); if (k) k.focus({ preventScroll: true }); }
+    }).catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
+  }
 
   /* ---------- Fertigen Artikel-Block lesen ----------
      Erwartet „Überschrift:“, „Kurzfassung:“, optional „Thema:“ und „Foto:“, danach „Text:“ und den Artikel.
@@ -515,6 +542,7 @@
     if (p[0] === 'planung') return window.BSNPlanung.zeigen(view, toast, ask);
     if (p[0] === 'editor') return pageEditor(p[1] || 'neu');
     if (p[0] === 'termine') return pageEvents();
+    if (p[0] === 'blaulicht') return pageBlaulicht();
     if (p[0] === 'termin') return pageEvent(p[1] || 'neu');
     if (p[0] === 'generator') return window.BSNGenerator.zeigen(view, p[1], toast);
     if (p[0] === 'teilen') return BSN.getById(p[1]).then(function (a) {

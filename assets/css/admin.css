@@ -21,11 +21,11 @@ body.admin { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(--
 .admin-tabs a[aria-current="page"] { background: var(--color-navy); color: #fff; }
 :root[data-theme="dark"] .admin-tabs a[aria-current="page"] { background: var(--color-gold); color: #142845; }
 .admin-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-/* Handy: Reiter über die volle Breite, alle fünf gleichzeitig sichtbar; Leiste scrollt mit, damit sie nicht den halben Bildschirm belegt. */
+/* Handy: Reiter über die volle Breite, alle sechs gleichzeitig sichtbar (zwei Reihen à drei); Leiste scrollt mit, damit sie nicht den halben Bildschirm belegt. */
 @media (max-width: 640px) {
   .admin-bar { position: static; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
-  .admin-tabs { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
-  .admin-tabs a { justify-content: center; padding: 8px 1px; font-size: 0.74rem; min-height: 44px; }
+  .admin-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; border-radius: 26px; }
+  .admin-tabs a { justify-content: center; padding: 8px 4px; font-size: 0.85rem; min-height: 44px; }
   .admin-actions { margin-left: 0; width: 100%; gap: 4px; }
 }
 .btn-sm { padding: 10px 20px; font-size: 0.9rem; }
@@ -81,6 +81,23 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .row-actions .btn-ghost { padding: 0 10px; }
 .row-actions .del:hover { color: #B3261E; }
 .empty { text-align: center; padding: 40px 12px; color: var(--color-text-soft); }
+
+/* Blaulicht: Meldungen ausblenden und wieder zeigen */
+.badge.off { background: #FBE3E0; color: #8A1C14; }
+:root[data-theme="dark"] .badge.off { background: #55231F; color: #FFD3CE; }
+.bl-hinweis { color: var(--color-text-soft); max-width: 62ch; margin: 0 0 20px; }
+.bl-pflege { list-style: none; margin: 0; padding: 0; }
+.bl-pflege li { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding: 14px 0; border-top: 1px solid rgba(30, 58, 102, 0.1); }
+:root[data-theme="dark"] .bl-pflege li { border-top-color: rgba(255, 255, 255, 0.1); }
+.bl-pflege li:first-child { border-top: 0; padding-top: 0; }
+.bl-pflege li:last-child { padding-bottom: 0; }
+.bl-pflege .bl-text { flex: 1 1 260px; min-width: 0; }
+.bl-pflege .bl-text a { color: var(--color-text); text-decoration: none; font-weight: 600; }
+.bl-pflege .bl-text a:hover { text-decoration: underline; }
+.bl-pflege .bl-text p { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.86rem; color: var(--color-text-soft); }
+.bl-pflege li.aus .bl-text a { color: var(--color-text-soft); text-decoration: line-through; }
+.bl-pflege .btn { flex: 0 0 auto; min-width: 150px; min-height: 44px; justify-content: center; }
+@media (max-width: 520px) { .bl-pflege .btn { width: 100%; } }
 
 /* Editor */
 .editor-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
