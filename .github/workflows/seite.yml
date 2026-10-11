@@ -1,0 +1,60 @@
+# Baut die Webseite (feste Seite pro Beitrag, Inhaltsverzeichnis für Suchmaschinen) und veröffentlicht sie.
+# Läuft bei jeder Änderung am Code sofort und sonst alle 10 Minuten; veröffentlicht wird dann nur,
+# wenn sich an den Beiträgen etwas geändert hat.
+name: Seite bauen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  seite:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Seite bauen
+        run: python3 werkzeug/seiten_bauen.py
+
+      - name: Hat sich etwas geändert?
+        id: stand
+        run: |
+          live=$(curl -fsS --max-time 20 "https://badsalzuflennews.de/stand.txt?t=$(date +%s)" || true)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$live" = "$(cat _site/stand.txt)" ]; then
+            echo "neu=nein" >> "$GITHUB_OUTPUT"
+          else
+            echo "neu=ja" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/configure-pages@v5
+        if: steps.stand.outputs.neu == 'ja'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.stand.outputs.neu == 'ja'
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v4
+        id: deploy
+        if: steps.stand.outputs.neu == 'ja'
+
+      # GitHub schaltet Zeitpläne ab, wenn 60 Tage lang nichts am Code geändert wurde — das hier verhindert es.
+      - name: Zeitplan wach halten
+        if: github.event_name == 'schedule'
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/seite.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
