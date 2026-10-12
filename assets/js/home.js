@@ -6,10 +6,12 @@
 
   /* Nur die neueste Blaulicht-Meldung läuft nach Datum zwischen den Beiträgen mit (nur auf der Kacheltafel) */
   var BL_BILD = 'assets/img/blaulicht.jpg#fp=40,30';
+  /* Verspätet nachgeholte Meldungen (mehr als 3 Stunden nach Erscheinen geholt) stehen nur im Reiter „Blaulicht“ */
+  function nachgeholt(m) { return Date.parse(m.created_at) - Date.parse(m.published_at) > 3 * 3600e3; }
   function blaulichtTiles() {
     if (!BSN.listBlaulicht) return Promise.resolve([]);
     return BSN.listBlaulicht().then(function (l) {
-      return l.filter(function (x) { return !x.hidden; }).slice(0, 1).map(function (m) {
+      return l.filter(function (x) { return !x.hidden && !nachgeholt(x); }).slice(0, 1).map(function (m) {
         return { title: m.title, category: m.place || 'Blaulicht', image_url: BL_BILD, published_at: m.published_at,
           href: R.blUrl(m), blaulicht: true };
       });
