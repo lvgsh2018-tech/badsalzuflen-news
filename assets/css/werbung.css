@@ -499,3 +499,25 @@
 @media (max-width: 760px) {
   .wb-teaser-beitrag .wb-teaser { padding: 30px 22px 0; }
 }
+
+/* Handyansicht: Schild in einer Zeile, Handy-Bild aufgeräumt */
+@media (max-width: 760px) {
+  .wb-pill { white-space: nowrap; font-size: 0.8rem; padding: 6px 14px; gap: 8px; }
+  .wb-handy-hero { width: 46%; min-width: 150px; max-width: 170px; }
+  .wb-handy-hero .wb-story-kopf { flex-wrap: nowrap; padding: 8px 9px; }
+  .wb-handy-hero .wb-story-kopf::after { display: none; }
+  .wb-handy-hero .wb-story-name { display: none; }
+  .wb-handy-hero .wb-story-kopf b { margin-left: auto; order: 0; }
+  .wb-handy-hero .wb-story-mitte { top: 30%; padding: 0 10px; }
+  .wb-handy-hero .wb-story-mitte strong { font-size: 1.15rem; }
+  .wb-handy-hero .wb-story-mitte span { font-size: 0.68rem; }
+}
+@media (max-width: 400px) {
+  .wb-pill-zusatz { display: none; }
+}
+@media (max-width: 760px) {
+  .wb-teaser-bild,
+  .wb-teaser-beitrag .wb-teaser-bild { height: 250px; }
+  .wb-teaser-bild .wb-handy-hero,
+  .wb-teaser-beitrag .wb-teaser-bild .wb-handy-hero { bottom: -110px; }
+}
