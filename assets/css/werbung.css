@@ -1,0 +1,501 @@
+/* Seite „Werbung“ (Werbepartnerprogramm).
+   Richtung nach dem Vorbild Stripe: farbiger Verlauf als Tiefe im Kopfbereich,
+   schwebende Vorschau-Bilder der Werbeformen, ein einziger gefüllter Knopf pro Band. */
+
+:root {
+  --wb-ink: #0F1E38;
+  --wb-navy: #1E3A66;
+  --wb-gold: #D9A441;
+  --wb-gold-hell: #F2C66B;
+  --wb-schatten: 0 24px 60px rgba(8, 16, 34, 0.35), 0 4px 12px rgba(8, 16, 34, 0.2);
+}
+
+/* ---------- Kopfbereich ---------- */
+.wb-hero-wrap { padding: 24px 0 0; }
+.wb-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-l);
+  padding: clamp(40px, 6vw, 72px);
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 40px;
+  align-items: center;
+  color: #FFFFFF;
+  background: var(--wb-ink);
+}
+/* Farbwolken in den Logofarben statt eines flachen Hintergrunds */
+.wb-hero::before {
+  content: "";
+  position: absolute; inset: -20%;
+  z-index: -1;
+  background:
+    radial-gradient(38% 45% at 88% 18%, rgba(217, 164, 65, 0.55), transparent 70%),
+    radial-gradient(40% 50% at 70% 95%, rgba(231, 182, 160, 0.40), transparent 70%),
+    radial-gradient(45% 55% at 8% 10%, rgba(140, 110, 210, 0.45), transparent 70%),
+    radial-gradient(60% 70% at 40% 60%, rgba(30, 58, 102, 0.9), transparent 75%);
+  filter: blur(10px);
+}
+/* feines Punktraster für Struktur */
+.wb-hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+}
+
+.wb-hero h1 {
+  color: #FFFFFF !important;
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 18px 0 18px;
+  text-wrap: balance;
+}
+.wb-gold { color: var(--wb-gold-hell); font-style: italic; }
+.wb-hero p { color: rgba(255, 255, 255, 0.82); font-size: 1.1rem; max-width: 30em; }
+
+.wb-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem; font-weight: 600;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.wb-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--wb-gold-hell);
+  box-shadow: 0 0 0 4px rgba(242, 198, 107, 0.25);
+}
+
+.wb-knoepfe { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.wb-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-weight: 700; font-size: 1rem;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.wb-btn:active { transform: scale(0.97); }
+.wb-btn-gold { background: var(--wb-gold); color: var(--wb-ink) !important; box-shadow: 0 8px 24px rgba(217, 164, 65, 0.35); }
+.wb-btn-gold:hover { background: var(--wb-gold-hell); transform: translateY(-2px); }
+.wb-btn-ghost { color: #FFFFFF !important; border: 1.5px solid rgba(255, 255, 255, 0.4); }
+.wb-btn-ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: #FFFFFF; }
+.wb-btn:focus-visible { outline: 3px solid var(--wb-gold-hell); outline-offset: 3px; }
+
+/* Vorschau rechts: Browser + Handy übereinander */
+.wb-hero-bild { position: relative; min-height: 400px; }
+.wb-browser {
+  position: absolute; top: 20px; left: 0; width: 82%;
+  background: #FFFFFF;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--wb-schatten);
+  transform: rotate(-3deg);
+}
+.wb-browser-leiste {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 12px;
+  background: #EEE8F7;
+}
+.wb-browser-leiste i { width: 9px; height: 9px; border-radius: 50%; background: #CFC3E6; }
+.wb-browser-leiste span {
+  margin-left: 10px; padding: 3px 12px;
+  background: #FFFFFF; border-radius: 999px;
+  font-size: 0.7rem; color: #5B6478;
+}
+.wb-browser-inhalt {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 14px;
+  background: #F8F2E7;
+}
+.wb-kachel { height: 92px; border-radius: 10px; background: linear-gradient(160deg, #E7DDF6, #F1EBFA); }
+.wb-kachel-anzeige {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 2px;
+  padding: 10px 12px;
+  background: linear-gradient(150deg, #1E3A66, #2E4F85);
+  outline: 3px solid var(--wb-gold);
+  outline-offset: 2px;
+}
+.wb-kachel-anzeige b, .wb-browser b, .wb-handy b, .wb-mini-artikel b, .wb-an {
+  align-self: flex-start;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px;
+  background: var(--wb-gold); color: var(--wb-ink);
+}
+.wb-kachel-anzeige strong { color: #FFFFFF; font-family: var(--font-head); font-size: 0.95rem; }
+.wb-kachel-anzeige em { color: var(--wb-gold-hell); font-style: normal; font-size: 0.7rem; font-weight: 600; }
+
+/* Handy-Rahmen (Story / Reel) */
+.wb-handy {
+  position: relative;
+  border-radius: 26px;
+  border: 6px solid #0A1222;
+  overflow: hidden;
+  color: #FFFFFF;
+  background:
+    radial-gradient(80% 60% at 70% 20%, rgba(242, 198, 107, 0.85), transparent 70%),
+    radial-gradient(90% 70% at 20% 90%, rgba(140, 110, 210, 0.9), transparent 70%),
+    linear-gradient(170deg, #2E4F85, #1E3A66);
+  box-shadow: var(--wb-schatten);
+}
+.wb-handy-hero {
+  position: absolute; right: 0; bottom: 0;
+  width: 46%; max-width: 210px; aspect-ratio: 9 / 18;
+  transform: rotate(5deg);
+}
+.wb-story-balken { display: flex; gap: 4px; padding: 10px 10px 0; }
+.wb-story-balken i { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.45); }
+.wb-story-balken i:first-child { background: #FFFFFF; }
+.wb-story-kopf {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px;
+  font-size: 0.62rem; font-weight: 600;
+}
+.wb-story-kopf b { margin-left: auto; }
+.wb-avatar {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  background: #F8F2E7;
+  border: 2px solid var(--wb-gold);
+}
+.wb-story-mitte {
+  position: absolute; left: 0; right: 0; top: 38%;
+  text-align: center; padding: 0 12px;
+}
+.wb-story-mitte strong { display: block; font-family: var(--font-head); font-size: 1.4rem; line-height: 1.1; }
+.wb-story-mitte span { display: block; margin-top: 6px; font-size: 0.72rem; opacity: 0.9; }
+.wb-sticker {
+  position: absolute; left: 50%; bottom: 14%;
+  transform: translateX(-50%) rotate(-3deg);
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #FFFFFF; color: #1E3A66;
+  font-size: 0.7rem; font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.wb-sticker svg { width: 12px; height: 12px; }
+
+/* ---------- Werbeformen ---------- */
+.wb-formen .section-head { margin-bottom: 40px; }
+.wb-raster { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.wb-karte {
+  display: flex; flex-direction: column;
+  background: var(--color-white);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+@media (hover: hover) {
+  .wb-karte:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(30, 58, 102, 0.16); }
+}
+.wb-vorschau {
+  position: relative;
+  height: 210px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 80% at 85% 10%, rgba(217, 164, 65, 0.28), transparent 70%),
+    linear-gradient(160deg, #E7DDF6, #F1EBFA);
+}
+:root[data-theme="dark"] .wb-vorschau {
+  background:
+    radial-gradient(60% 80% at 85% 10%, rgba(217, 164, 65, 0.22), transparent 70%),
+    linear-gradient(160deg, #33294A, #2A2438);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wb-vorschau {
+    background:
+      radial-gradient(60% 80% at 85% 10%, rgba(217, 164, 65, 0.22), transparent 70%),
+      linear-gradient(160deg, #33294A, #2A2438);
+  }
+}
+.wb-karte-text { padding: 28px 30px 30px; }
+.wb-nr {
+  display: block;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-gold-ink);
+  margin-bottom: 8px;
+}
+.wb-liste { margin: 0; padding: 0; list-style: none; }
+.wb-liste li {
+  position: relative;
+  padding-left: 26px; margin-bottom: 6px;
+  color: var(--color-text-soft);
+}
+.wb-liste li::before {
+  content: "";
+  position: absolute; left: 0; top: 0.35em;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--wb-gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230F1E38' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+
+/* Mini-Vorschauen in den Karten */
+.wb-mini-browser {
+  width: 74%;
+  margin-top: 40px;
+  background: #FFFFFF;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(30, 58, 102, 0.18);
+}
+.wb-mini-raster {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 12px;
+  background: #F8F2E7;
+}
+.wb-mini-raster span { height: 62px; border-radius: 8px; background: #E7DDF6; }
+.wb-mini-raster .wb-an {
+  height: 62px; align-self: auto;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 6px;
+  background: linear-gradient(150deg, #1E3A66, #2E4F85);
+  outline: 2px solid var(--wb-gold); outline-offset: 2px;
+  border-radius: 8px;
+  font-size: 0;
+  position: relative;
+}
+.wb-mini-raster .wb-an::after {
+  content: "Anzeige";
+  font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 999px;
+  background: var(--wb-gold); color: var(--wb-ink);
+}
+
+.wb-mini-artikel {
+  width: 70%;
+  margin-top: 46px;
+  padding: 18px 20px 0;
+  display: flex; flex-direction: column; gap: 8px;
+  background: #FFFFFF;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 12px 30px rgba(30, 58, 102, 0.18);
+  height: 100%;
+}
+.wb-mini-artikel strong { font-family: var(--font-head); color: #1E3A66; font-size: 1.05rem; line-height: 1.2; }
+.wb-mini-foto {
+  height: 58px; border-radius: 8px;
+  background: linear-gradient(135deg, #E7B6A0, #D9A441 60%, #1E3A66);
+}
+.wb-mini-artikel i { display: block; height: 6px; border-radius: 3px; background: #E7DDF6; }
+.wb-mini-artikel i.kurz { width: 60%; }
+
+.wb-handy-mini {
+  width: 132px; aspect-ratio: 9 / 18;
+  margin-top: 70px;
+  border-width: 5px;
+  border-radius: 22px;
+  box-shadow: 0 14px 32px rgba(30, 58, 102, 0.25);
+}
+.wb-handy-mini .wb-story-mitte { top: 30%; }
+.wb-handy-mini .wb-story-mitte strong { font-size: 1.6rem; }
+.wb-handy-mini .wb-sticker { bottom: auto; top: 62%; }
+
+.wb-reel {
+  background:
+    radial-gradient(70% 50% at 30% 30%, rgba(231, 182, 160, 0.9), transparent 70%),
+    radial-gradient(80% 60% at 80% 80%, rgba(217, 164, 65, 0.8), transparent 70%),
+    linear-gradient(170deg, #1E3A66, #0F1E38);
+}
+.wb-reel-play {
+  position: absolute; left: 50%; top: 32%;
+  transform: translate(-50%, -50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+}
+.wb-reel-play svg { width: 20px; height: 20px; margin-left: 3px; }
+.wb-reel-seite { position: absolute; right: 8px; top: 30%; display: flex; flex-direction: column; gap: 9px; }
+.wb-reel-seite i { width: 14px; height: 14px; border-radius: 50%; background: rgba(255, 255, 255, 0.75); }
+.wb-reel-unten { position: absolute; left: 8px; top: 52%; display: flex; align-items: center; gap: 6px; }
+
+/* ---------- Ablauf ---------- */
+.wb-schritte {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+  position: relative;
+}
+/* gestrichelte Verbindungslinie zwischen den Nummern */
+.wb-schritte::before {
+  content: "";
+  position: absolute; top: 28px; left: 16%; right: 16%;
+  border-top: 2px dashed var(--wb-gold);
+  opacity: 0.6;
+}
+.wb-schritte li { position: relative; text-align: center; }
+.wb-schritte p { margin: 0 auto; max-width: 18em; }
+.wb-schritt-nr {
+  display: flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--wb-navy); color: #FFFFFF;
+  font-family: var(--font-head); font-size: 1.5rem; font-weight: 700;
+  box-shadow: 0 0 0 8px var(--color-white);
+  position: relative;
+}
+:root[data-theme="dark"] .wb-schritt-nr { background: var(--wb-gold); color: var(--wb-ink); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wb-schritt-nr { background: var(--wb-gold); color: var(--wb-ink); }
+}
+
+/* ---------- Versprechen ---------- */
+.wb-versprechen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.wb-versprechen > div {
+  padding: 26px 28px;
+  border-radius: var(--radius-m);
+  background: var(--color-white);
+  border: 1px solid rgba(30, 58, 102, 0.08);
+  border-top: 3px solid var(--wb-gold);
+}
+.wb-versprechen p { margin: 0; }
+
+/* ---------- Abschluss-Band ---------- */
+.wb-cta-wrap { padding: var(--space-section) 0; scroll-margin-top: 90px; }
+.wb-cta {
+  position: relative; overflow: hidden; isolation: isolate;
+  text-align: center;
+  border-radius: var(--radius-l);
+  padding: clamp(48px, 7vw, 80px) 24px;
+  background: var(--wb-ink);
+  color: #FFFFFF;
+}
+.wb-cta::before {
+  content: "";
+  position: absolute; inset: -30%;
+  z-index: -1;
+  background:
+    radial-gradient(35% 50% at 15% 85%, rgba(217, 164, 65, 0.5), transparent 70%),
+    radial-gradient(40% 55% at 90% 10%, rgba(140, 110, 210, 0.5), transparent 70%),
+    radial-gradient(50% 60% at 55% 50%, rgba(30, 58, 102, 0.9), transparent 75%);
+  filter: blur(10px);
+}
+.wb-cta h2 { color: #FFFFFF !important; font-size: clamp(2rem, 4.5vw, 3.2rem); }
+.wb-cta p { color: rgba(255, 255, 255, 0.82); max-width: 32em; margin: 0 auto 28px; font-size: 1.1rem; }
+.wb-cta .wb-cta-mail { margin: 18px auto 0; font-size: 0.95rem; }
+.wb-cta-mail a { color: var(--wb-gold-hell) !important; }
+
+/* ---------- Kleine Bildschirme ---------- */
+@media (max-width: 900px) {
+  .wb-hero { grid-template-columns: 1fr; }
+  .wb-hero-bild { min-height: 340px; max-width: 460px; width: 100%; margin: 0 auto; }
+}
+@media (max-width: 760px) {
+  .wb-raster, .wb-versprechen { grid-template-columns: 1fr; }
+  .wb-schritte { grid-template-columns: 1fr; gap: 28px; }
+  .wb-schritte::before { display: none; }
+  .wb-hero { padding: 36px 22px; border-radius: 22px; }
+  .wb-hero-wrap .container, .wb-cta-wrap .container { padding: 0 12px; }
+  .wb-btn { flex: 1 1 auto; }
+}
+@media (max-width: 420px) {
+  .wb-hero-bild { min-height: 290px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-karte, .wb-btn { transition: none; }
+  .wb-karte:hover, .wb-btn-gold:hover { transform: none; }
+}
+
+/* Handy im Kopfbereich: „Anzeige“ unter den Namen statt rechts daneben, damit es nicht aus dem Bildschirm ragt */
+.wb-handy-hero .wb-story-kopf { flex-wrap: wrap; row-gap: 4px; }
+.wb-handy-hero .wb-story-kopf b { margin-left: auto; flex-basis: auto; order: 3; }
+.wb-handy-hero .wb-story-kopf::after { content: ""; order: 2; flex-basis: 100%; }
+
+/* Reel hervorheben: größte Reichweite */
+.wb-karte-top { position: relative; outline: 2px solid var(--wb-gold); outline-offset: -2px; }
+.wb-karte-top p strong { color: var(--color-text); }
+.wb-top-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--wb-ink); color: var(--wb-gold-hell);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(15, 30, 56, 0.25);
+}
+
+/* ---------- Hinweis auf der Nachrichtenseite (zwischen Kacheln und „Alle Nachrichten“) ---------- */
+.wb-teaser-wrap { padding: clamp(8px, 2vw, 24px) 0 0; }
+.wb-teaser {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; align-items: center;
+  min-height: 300px;
+  padding: clamp(32px, 4.5vw, 52px);
+  border-radius: var(--radius-l);
+  background: var(--wb-ink);
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.wb-teaser::before {
+  content: ""; position: absolute; inset: -20%; z-index: -1;
+  background:
+    radial-gradient(38% 55% at 92% 15%, rgba(217, 164, 65, 0.55), transparent 70%),
+    radial-gradient(40% 55% at 70% 100%, rgba(231, 182, 160, 0.35), transparent 70%),
+    radial-gradient(45% 60% at 5% 5%, rgba(140, 110, 210, 0.45), transparent 70%),
+    radial-gradient(60% 70% at 40% 60%, rgba(30, 58, 102, 0.9), transparent 75%);
+  filter: blur(10px);
+}
+.wb-teaser::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+}
+@media (hover: hover) {
+  .wb-teaser:hover { transform: translateY(-3px); box-shadow: 0 24px 50px rgba(15, 30, 56, 0.28); }
+  .wb-teaser:hover .wb-btn-gold { background: var(--wb-gold-hell); }
+}
+.wb-teaser:focus-visible { outline: 3px solid var(--wb-gold); outline-offset: 4px; }
+.wb-teaser h2 {
+  color: #FFFFFF !important;
+  font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+  line-height: 1.08; letter-spacing: -0.02em;
+  margin: 16px 0 12px;
+  text-wrap: balance;
+}
+.wb-teaser p { color: rgba(255, 255, 255, 0.82); margin-bottom: 22px; max-width: 30em; }
+.wb-teaser-bild { position: relative; height: 250px; }
+.wb-teaser-bild .wb-browser { top: 16px; width: 78%; }
+.wb-teaser-bild .wb-kachel { height: 70px; }
+.wb-teaser-bild .wb-handy-hero { width: 40%; max-width: 160px; bottom: -40px; }
+.wb-teaser-bild .wb-story-mitte strong { font-size: 1.2rem; }
+@media (max-width: 760px) {
+  .wb-teaser { grid-template-columns: 1fr; }
+  .wb-teaser-bild { height: 210px; margin: 0 -8px -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-teaser { transition: none; }
+  .wb-teaser:hover { transform: none; }
+}
+.wb-teaser-bild .wb-kachel-anzeige { height: auto; min-height: 70px; }
+
+/* Band direkt unter die Kacheln rücken: gleicher Abstand wie zwischen den Kacheln */
+.wb-teaser-wrap { padding-top: 0; margin-top: calc(20px - clamp(40px, 6vw, 72px)); }
+@media (max-width: 600px) { .wb-teaser-wrap { margin-top: calc(12px - clamp(40px, 6vw, 72px)); } }
+.wb-teaser p strong { color: #FFFFFF; }
+.wb-teaser p strong { display: inline-block; margin-top: 8px; }
+
+/* Band unter jedem Beitrag (schmale Spalte, Vorlage artikel.html) */
+.wb-teaser-beitrag { margin-top: 48px; }
+.wb-teaser-beitrag .wb-teaser { grid-template-columns: 1fr; padding: 36px 32px 0; }
+.wb-teaser-beitrag .wb-teaser h2 { font-size: clamp(1.7rem, 4vw, 2.2rem); }
+.wb-teaser-beitrag .wb-teaser-bild { height: 200px; max-width: 420px; width: 100%; margin: 0 auto; }
+.wb-teaser-beitrag .wb-teaser-bild .wb-handy-hero { bottom: -60px; }
+@media (max-width: 760px) {
+  .wb-teaser-beitrag .wb-teaser { padding: 30px 22px 0; }
+}

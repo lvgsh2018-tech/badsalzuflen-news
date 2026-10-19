@@ -34,7 +34,7 @@ MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August'
 SKIP = shutil.ignore_patterns('.git', '.github', '.claude', '.DS_Store', '.gitignore', '_site', '__pycache__',
                               'werkzeug', 'supabase', 'design-system', 'README.md')
 # Feste Unterseiten fürs Inhaltsverzeichnis (Impressum, Datenschutz, Redaktion bleiben draußen)
-PAGES = ['', 'blaulicht.html', 'termine.html', 'angebot.html', 'team.html', 'kontakt.html']
+PAGES = ['', 'blaulicht.html', 'termine.html', 'angebot.html', 'werbung.html', 'team.html', 'kontakt.html']
 
 
 def esc(s):
