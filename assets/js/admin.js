@@ -96,7 +96,7 @@
       }).join('') + '</div><div class="panel"><div class="table-wrap">' +
       (rows.length ? '<table class="posts"><thead><tr><th>Titel</th><th>Thema</th><th>Status</th><th>Datum</th><th>Aufrufe</th><th><span class="sr-only">Aktionen</span></th></tr></thead><tbody>' +
         rows.map(function (a) {
-          return '<tr><td class="t"><a href="#editor/' + esc(a.id) + '">' + esc(title(a)) + '</a></td><td>' + esc(a.category) + '</td>' +
+          return '<tr><td class="t"><a href="#editor/' + esc(a.id) + '">' + esc(title(a)) + '</a>' + (a.anzeige ? ' <span class="ad-label">Anzeige</span>' : '') + '</td><td>' + esc(a.category) + '</td>' +
             '<td><span class="badge ' + (a.status === 'published' ? 'live' : 'draft') + '">' + (a.status === 'published' ? 'Veröffentlicht' : 'Entwurf') + '</span></td>' +
             '<td>' + R.date(a.published_at || a.created_at) + '</td><td>' + viewsOf(a.id) + '</td>' +
             '<td><div class="row-actions"><a class="btn-ghost" href="#editor/' + esc(a.id) + '">Bearbeiten</a>' +
@@ -222,7 +222,8 @@
         '<div class="panel"><label class="field" style="margin-top:0"><span>Thema</span><select id="fCat">' + cats.map(function (c) { return '<option' + (c === a.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '<option value="' + NEU + '">+ Neues Thema …</option></select></label>' +
         '<div class="thema-neu" id="catNeuBox" hidden><label class="field"><span>Name des neuen Themas</span><input id="fCatNeu" maxlength="40" placeholder="z. B. Sport"></label>' +
         '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="catNeuOk">Hinzufügen</button><button class="btn-ghost" type="button" id="catNeuNein">Abbrechen</button></div></div>' +
-        '<label class="check"><input type="checkbox" id="fFeat"' + (a.featured ? ' checked' : '') + '><span>Als große Kachel oben auf der Startseite zeigen</span></label></div>' +
+        '<label class="check"><input type="checkbox" id="fFeat"' + (a.featured ? ' checked' : '') + '><span>Als große Kachel oben auf der Startseite zeigen</span></label>' +
+        '<label class="check"><input type="checkbox" id="fAnz"' + (a.anzeige ? ' checked' : '') + '><span>Bezahlte Anzeige (der Beitrag wird überall als „Anzeige“ gekennzeichnet)</span></label></div>' +
         '<div class="panel stack"><div class="save-state" id="state">' + (live ? 'Veröffentlicht am ' + R.date(a.published_at) : 'Entwurf — noch nicht sichtbar') + '</div>' +
         (live
           ? '<button class="btn btn-primary" id="bSave" type="button">Änderungen speichern</button><button class="btn btn-secondary" id="bDraft" type="button">Zurück zum Entwurf</button>'
@@ -391,6 +392,7 @@
           id: st.id, title: document.getElementById('fTitle').value.trim(), teaser: document.getElementById('fTeaser').value.trim(),
           body: R.sanitize(body.innerHTML), category: fCat.value === NEU ? catVorher : fCat.value, image_url: R.withFocus(st.image_url, st.focus),
           image_credit: document.getElementById('fCredit').value.trim(), featured: document.getElementById('fFeat').checked,
+          anzeige: document.getElementById('fAnz').checked, _hatAnzeige: 'anzeige' in a,
           status: status, published_at: st.published_at
         };
       }
@@ -535,11 +537,12 @@
   function route() {
     var h = location.hash.replace('#', '') || 'uebersicht', p = h.split('/');
     document.querySelectorAll('[data-tab]').forEach(function (a) {
-      if (a.dataset.tab === (p[0] === 'termin' ? 'termine' : p[0] === 'editor' || p[0] === 'teilen' ? 'beitraege' : p[0])) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      if (a.dataset.tab === (p[0] === 'termin' ? 'termine' : p[0] === 'anzeige' ? 'werbung' : p[0] === 'editor' || p[0] === 'teilen' ? 'beitraege' : p[0])) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     window.scrollTo(0, 0);
     view.onclick = view.ondragstart = view.ondragover = view.ondragend = view.ondrop = null; // Reste der Planung
     if (p[0] === 'planung') return window.BSNPlanung.zeigen(view, toast, ask);
+    if (p[0] === 'werbung' || p[0] === 'anzeige') return window.BSNWerbung.zeigen(view, p, toast, ask, function (d) { dirty = d; });
     if (p[0] === 'editor') return pageEditor(p[1] || 'neu');
     if (p[0] === 'termine') return pageEvents();
     if (p[0] === 'blaulicht') return pageBlaulicht();

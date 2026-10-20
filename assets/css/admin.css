@@ -395,3 +395,52 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .paket-karte .gen-rahmen { margin: 0 auto 14px; max-width: 340px; }
 .paket-ende { margin-top: 24px; }
 .side-h { margin: 0 0 4px; font-size: 1.05rem; }
+
+/* ---------- Werbung (Anzeigen der Werbepartner) ---------- */
+.wa-kopf { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.wa-kopf h1 { margin-bottom: 0; }
+.wa-hilfe { margin: 10px 0 24px; color: var(--color-text-soft); max-width: 70ch; }
+.wa-zurueck { margin: 0 0 6px; }
+.wa-zurueck a { font-weight: 600; text-decoration: none; }
+.wa-sub { display: block; font-size: .82rem; font-weight: 500; color: var(--color-text-soft); }
+.wa-nowrap { white-space: nowrap; }
+.badge.alt { background: #ECEEF2; color: #4A5163; }
+:root[data-theme="dark"] .badge.alt { background: #33313D; color: #D8D6E2; }
+.wa-plaetze { list-style: none; margin: 12px 0 0; padding: 0; }
+.wa-plaetze li { display: grid; gap: 2px; padding: 10px 0; border-top: 1px solid rgba(30, 58, 102, 0.1); font-size: .95rem; }
+.wa-plaetze li:first-child { border-top: 0; }
+.wa-plaetze span { color: var(--color-text-soft); }
+.wa-plaetze em { font-style: normal; font-weight: 700; color: #0F5B2B; }
+:root[data-theme="dark"] .wa-plaetze em { color: #BFEBCB; }
+.wa-bald { border-left: 4px solid var(--color-gold); }
+.wa-feldhilfe { display: block; margin-top: 6px; font-size: .85rem; color: var(--color-text-soft); }
+.wa-zeit { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.wa-laufzeit { align-items: center; margin: 10px 0 0; }
+.wa-laufzeit > span { font-size: .88rem; color: var(--color-text-soft); margin-right: 4px; }
+.wa-hinweis { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: var(--color-lilac-soft); color: var(--color-text); font-size: .92rem; }
+.field[hidden] { display: none; }
+
+/* Vorschau im Editor: dieselben Bausteine wie auf der Webseite */
+.wa-vorschau { margin-top: 12px; }
+.wa-vorschau .tile { min-height: 240px; }
+.wa-vorschau--kachel_klein .tile { max-width: 260px; aspect-ratio: 1; min-height: 0; }
+.wa-vorschau .ad-inline { margin: 0; grid-template-columns: 1fr; }
+.wa-vorschau .ad-partners { padding: 0; }
+.wa-vorschau .ad-band .ad-go { display: none; }
+.wa-vorschau .ad-band span.txt { flex: 1 1 100%; }
+
+/* Bericht für den Kunden */
+.wa-bericht-kopf { display: flex; gap: 18px; align-items: center; margin-bottom: 24px; }
+.wa-bericht-kopf img { width: 64px; height: 64px; border-radius: 16px; flex: none; }
+.wa-bericht-kopf h1 { margin: 0 0 4px; }
+.wa-bericht-kopf p { margin: 0; color: var(--color-text-soft); }
+.wa-summe td { font-weight: 700; }
+.wa-erklaerung { font-size: .9rem; color: var(--color-text-soft); max-width: 75ch; }
+.wa-absender { font-size: .85rem; color: var(--color-text-soft); margin-top: 18px; }
+@media (max-width: 600px) { .wa-zeit { grid-template-columns: 1fr; gap: 0; } }
+@media print {
+  .admin-bar, .no-print, .demo-badge, .toast { display: none !important; }
+  body.admin { background: #fff; }
+  .admin-main { padding: 0; max-width: none; }
+  .panel, .stat { box-shadow: none; border: 1px solid #DDD; break-inside: avoid; }
+}

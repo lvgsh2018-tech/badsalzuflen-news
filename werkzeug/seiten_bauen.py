@@ -199,6 +199,8 @@ def article_page(tpl, a, base):
         '<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False).replace('</', '<\\/'),
     ])
     body = (
+        ('<p class="ad-kennung"><span class="ad-label">Anzeige</span> Dieser Beitrag ist eine bezahlte Anzeige.</p>'
+         if a.get('anzeige') else '') +
         '<span class="tag tag-dark">%s</span><h1>%s</h1>' % (esc(a.get('category')), esc(title)) +
         '<p class="article-meta">%s · %d Min. Lesezeit</p>' % (date_de(a['published_at']), read_minutes(a.get('body'))) +
         ('<figure><img src="%s" alt="">%s</figure>' % (

@@ -196,13 +196,43 @@
     BSN.savePlan = function (p) { return Promise.resolve(merge(KP, p)); };
     BSN.deletePlan = function (id) { write(KP, read(KP, []).filter(function (p) { return p.id !== id; })); return Promise.resolve(); };
 
+    /* Werbung (Demo) — Anzeigen und Zähler nur im eigenen Browser */
+    var KW = 'bsn_demo_anzeigen', KZ = 'bsn_demo_anzeigen_zaehler';
+    var heuteIso = function () { return iso(0); };
+    BSN.listAnzeigen = function () { return Promise.resolve(read(KW, []).sort(function (a, b) { return String(b.start_am).localeCompare(String(a.start_am)); })); };
+    BSN.getAnzeige = function (id) { return Promise.resolve(read(KW, []).filter(function (x) { return x.id === id; })[0] || null); };
+    BSN.saveAnzeige = function (a) {
+      var list = read(KW, []), now = new Date().toISOString();
+      a = Object.assign({}, a, { updated_at: now });
+      if (!a.id) { a.id = 'wb-' + rid(8); a.created_at = now; list.push(a); }
+      else { var i = list.findIndex(function (x) { return x.id === a.id; }); if (i < 0) list.push(a); else list[i] = Object.assign({}, list[i], a); }
+      write(KW, list); return Promise.resolve(a);
+    };
+    BSN.deleteAnzeige = function (id) {
+      write(KW, read(KW, []).filter(function (x) { return x.id !== id; }));
+      write(KZ, read(KZ, []).filter(function (z) { return z.id !== id; }));
+      return Promise.resolve();
+    };
+    function laeuft(a) { var t = heuteIso(); return !a.pausiert && a.start_am <= t && a.ende_am >= t; }
+    BSN.aktiveAnzeigen = function () { return Promise.resolve(read(KW, []).filter(laeuft)); };
+    BSN.anzeigeZaehlen = function (id, art) {
+      var a = read(KW, []).filter(function (x) { return x.id === id; })[0];
+      if (!a || !laeuft(a)) return Promise.resolve();
+      var z = read(KZ, []), t = heuteIso(), r = z.filter(function (x) { return x.id === id && x.tag === t; })[0];
+      if (!r) { r = { id: id, tag: t, gesehen: 0, klick: 0 }; z.push(r); }
+      r[art === 'klick' ? 'klick' : 'gesehen']++;
+      try { write(KZ, z); } catch (e) {}
+      return Promise.resolve();
+    };
+    BSN.anzeigenStatistik = function () { return Promise.resolve(read(KZ, [])); };
+
     BSN.signIn = function (email, pw) {
       if (!email || !pw) return Promise.reject(new Error('Bitte E-Mail und Passwort eingeben.'));
       sessionStorage.setItem(KS, email); return Promise.resolve({ email: email });
     };
     BSN.signOut = function () { sessionStorage.removeItem(KS); return Promise.resolve(); };
     BSN.getUser = function () { var e = sessionStorage.getItem(KS); return Promise.resolve(e ? { email: e } : null); };
-    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); localStorage.removeItem(KK); localStorage.removeItem(KP); seed(); };
+    BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); localStorage.removeItem(KK); localStorage.removeItem(KP); localStorage.removeItem(KW); localStorage.removeItem(KZ); seed(); };
     /* Mitteilungen (Demo: nichts wird gespeichert oder verschickt) */
     BSN.pushPublicKey = function () { return Promise.resolve(null); };
     BSN.pushSubscribe = function () { return Promise.resolve(); };
@@ -247,6 +277,8 @@
       title: a.title, teaser: a.teaser, body: a.body, category: a.category, image_url: a.image_url || '',
       image_credit: a.image_credit || '', status: a.status, featured: !!a.featured, updated_at: now
     };
+    /* „Anzeige“ nur mitschicken, wenn es den Schalter im Speicher schon gibt (supabase/werbung.sql) */
+    if (a.anzeige || a._hatAnzeige) row.anzeige = !!a.anzeige;
     if (a.status === 'published') row.published_at = a.published_at || now; else row.published_at = null;
     return client().then(function (c) {
       if (a.id) return c.from('articles').update(row).eq('id', a.id).select().single();
@@ -344,6 +376,30 @@
   };
   BSN.savePlan = function (p) { return upsert('content_beitraege', p, PLAN); };
   BSN.deletePlan = function (id) { return client().then(function (c) { return c.from('content_beitraege').delete().eq('id', id); }).then(ok); };
+
+  /* Werbung — Anzeigen pflegt nur die Redaktion; Besucher bekommen über anzeigen_aktiv()
+     nur, was heute läuft (siehe supabase/werbung.sql). */
+  var ANZEIGE = ['firma', 'platz', 'titel', 'text', 'knopf', 'bild_url', 'link', 'start_am', 'ende_am', 'pausiert', 'notiz'];
+  BSN.listAnzeigen = function () {
+    return client().then(function (c) { return c.from('anzeigen').select('*').order('start_am', { ascending: false }); }).then(ok);
+  };
+  BSN.getAnzeige = function (id) { return client().then(function (c) { return c.from('anzeigen').select('*').eq('id', id).maybeSingle(); }).then(ok); };
+  BSN.saveAnzeige = function (a) {
+    var row = pick(a, ANZEIGE); row.updated_at = new Date().toISOString();
+    return client().then(function (c) {
+      return a.id ? c.from('anzeigen').update(row).eq('id', a.id).select().single() : c.from('anzeigen').insert(row).select().single();
+    }).then(ok);
+  };
+  BSN.deleteAnzeige = function (id) { return client().then(function (c) { return c.from('anzeigen').delete().eq('id', id); }).then(ok); };
+  var aktivP = null;
+  BSN.aktiveAnzeigen = function () {
+    if (!aktivP) aktivP = client().then(function (c) { return c.rpc('anzeigen_aktiv'); }).then(ok).catch(function () { return []; });
+    return aktivP;
+  };
+  BSN.anzeigeZaehlen = function (id, art) {
+    return client().then(function (c) { return c.rpc('anzeige_zaehlen', { p_id: id, p_art: art }); }).catch(function () {});
+  };
+  BSN.anzeigenStatistik = function () { return client().then(function (c) { return c.rpc('anzeigen_statistik'); }).then(ok); };
 
   /* Mitteilungen bei neuen Beiträgen */
   BSN.pushPublicKey = function () {

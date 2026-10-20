@@ -106,12 +106,12 @@
     var h = k ? '<span class="t-lang">' + R.esc(a.title) + '</span><span class="t-kurz" aria-hidden="true">' + R.esc(k) + '</span>'
               : R.esc(a.title);
     return '<a class="tile ' + cls + '" href="' + R.url(a) + '">' + media(a) +
-      '<div class="tile-body"><span class="tag">' + R.esc(a.category) + '</span>' +
+      '<div class="tile-body">' + (a.anzeige ? '<span class="tag-row"><span class="ad-label">Anzeige</span><span class="tag">' + R.esc(a.category) + '</span></span>' : '<span class="tag">' + R.esc(a.category) + '</span>') +
       '<h3>' + h + '</h3></div></a>';
   };
   R.card = function (a) {
     return '<a class="post-card" href="' + R.url(a) + '"><div class="post-media">' + media(a) + '</div>' +
-      '<div class="post-text"><span class="tag tag-dark">' + R.esc(a.category) + '</span>' +
+      '<div class="post-text">' + (a.anzeige ? '<span class="tag-row"><span class="ad-label">Anzeige</span><span class="tag tag-dark">' + R.esc(a.category) + '</span></span>' : '<span class="tag tag-dark">' + R.esc(a.category) + '</span>') +
       '<h3>' + R.esc(a.title) + '</h3><p>' + R.esc(a.teaser) + '</p>' +
       '<time datetime="' + R.esc(a.published_at) + '">' + R.date(a.published_at) + '</time></div></a>';
   };
