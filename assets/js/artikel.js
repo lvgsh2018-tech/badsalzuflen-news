@@ -37,6 +37,9 @@
     if (!built || draft || box.getAttribute('data-stand') !== a.updated_at) box.innerHTML = html(a);
     if (draft) return;
     box.insertAdjacentHTML('beforeend', R.shareHTML(a));
+    /* Hinweis auf das Werbepartnerprogramm direkt über „Beitrag teilen“ */
+    var wb = document.querySelector('.wb-teaser-beitrag');
+    if (wb) box.querySelector('.share').before(wb);
     if (!built && R.hasPage(a)) {
       var c = document.createElement('link'); c.rel = 'canonical'; c.href = R.pageUrl(a); document.head.appendChild(c);
     }
