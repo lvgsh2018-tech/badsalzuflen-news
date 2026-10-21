@@ -492,6 +492,7 @@
 
 /* Band unter jedem Beitrag (schmale Spalte, Vorlage artikel.html) */
 .wb-teaser-beitrag { margin-top: 48px; }
+#article .wb-teaser-beitrag + .share { margin-top: 20px; }
 .wb-teaser-beitrag .wb-teaser { grid-template-columns: 1fr; padding: 36px 32px 0; }
 .wb-teaser-beitrag .wb-teaser h2 { font-size: clamp(1.7rem, 4vw, 2.2rem); }
 .wb-teaser-beitrag .wb-teaser-bild { height: 200px; max-width: 420px; width: 100%; margin: 0 auto; }

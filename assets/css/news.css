@@ -206,6 +206,7 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
   background: var(--color-lilac-soft); border: 1px solid rgba(30, 58, 102, 0.12);
 }
 :root[data-theme="dark"] .push-card { border-color: rgba(255, 255, 255, 0.1); }
+.article-wrap .push-card { margin-top: 20px; }
 .push-icon {
   display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
   background: var(--color-navy); color: #fff;
