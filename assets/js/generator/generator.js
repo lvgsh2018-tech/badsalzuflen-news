@@ -8,7 +8,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var KN = 'bsn_gen_nachweis';
-  var NACHWEISE = ['Stadt Bad Salzuflen', 'Lennart Schleef'];
+  var NACHWEISE = ['Stadt Bad Salzuflen', 'Lennart Schleef', 'Symbolbild', 'Symbolbild (KI-generiert)'];
 
   function heuteIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function dateiname(art, zusatz, endung) { return heuteIso() + '_' + art + (zusatz ? '_' + zusatz : '') + '.' + endung; }

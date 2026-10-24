@@ -2,7 +2,7 @@
 (function () {
   var R = window.BSNR, esc = R.esc, view = document.getElementById('view');
   var articles = [], views = [], pushN = null, dirty = false;
-  var CREDITS = ['Foto: Stadt Bad Salzuflen', 'Foto: Lennart Schleef'];
+  var CREDITS = ['Foto: Stadt Bad Salzuflen', 'Foto: Lennart Schleef', 'Symbolbild', 'Symbolbild (KI-generiert)'];
 
   /* ---------- Hilfen ---------- */
   function toast(msg, bad) {

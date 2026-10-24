@@ -419,7 +419,8 @@
     /* Bildnachweis oben rechts, auf Höhe des Logos */
     var nachweis = String(e.nachweis || '').trim();
     if (nachweis) {
-      if (nachweis.charAt(0) !== '©') nachweis = '© ' + nachweis;
+      // Symbolbilder bekommen kein ©, alle anderen Nachweise schon
+      if (nachweis.charAt(0) !== '©' && !/^symbolbild/i.test(nachweis)) nachweis = '© ' + nachweis;
       var nS = schrift(SANS, 500, 22);
       ctx.font = nS.css; ctx.textAlign = 'right';
       ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 6;
