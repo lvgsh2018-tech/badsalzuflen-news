@@ -321,7 +321,7 @@
       '</section>' +
 
       '<section class="panel"><h2>2 · Text</h2>' +
-      '<label class="field" style="margin-top:0"><span>Kleine Zeile darüber (freiwillig)</span><input type="text" id="s_zusatz" placeholder="' + (beitrag ? 'z. B. bis zum Jahresende' : 'z. B. 152.889 km') + '"></label>' +
+      '<label class="field" style="margin-top:0"><span>Schild über der Überschrift: Ort oder Rubrik (freiwillig)</span><input type="text" id="s_zusatz" placeholder="z. B. Bad Salzuflen"></label>' +
       '<details class="gen-klein" open><summary>Letzte Überschriften übernehmen</summary><div class="gen-zuletzt" id="sZuletzt"><span class="gen-hilfe">Wird geladen …</span></div></details>' +
       '<label class="field"><span>Überschrift</span><textarea id="s_titel" placeholder="' + (beitrag ? 'z. B. Weg „An den Gleisen“ wird saniert' : 'z. B. Stadtradeln 2026') + '"></textarea></label>' +
       '<label class="field"><span>Bildnachweis (freiwillig)</span><input type="text" id="s_nachweis" placeholder="z. B. Stadt Bad Salzuflen"></label>' +
@@ -329,9 +329,9 @@
       (beitrag ? '' : '<label class="check"><input type="checkbox" id="s_link_zeigen"><span>Hinweis für den Link-Sticker zeigen</span></label>' +
         '<label class="field"><span>Text des Hinweises</span><input type="text" id="s_link_text"></label>') +
       '<details class="gen-klein"><summary>Größe und Lage</summary><p class="gen-hilfe">Den Text kannst du auch direkt in der Vorschau verschieben.</p>' +
-      regler('titel_x', 'Text links / rechts', 0, 60, 0.1, ' %') + regler('titel_y', 'Text oben / unten', 20, 88, 0.1, ' %') +
-      regler('titel_pt', 'Schriftgröße Überschrift', 36, 100, 1, '') + regler('zusatz_pt', 'Schriftgröße kleine Zeile', 20, 56, 1, '') +
-      '<label class="check"><input type="checkbox" id="s_deko"><span>Kreise und Striche zeigen</span></label></details></section>' +
+      regler('titel_x', 'Text links / rechts', 0, 60, 0.1, ' %') + regler('titel_y', 'Text oben / unten', 20, 96, 0.1, ' %') +
+      regler('titel_pt', 'Schriftgröße Überschrift', 36, 100, 1, '') + regler('zusatz_pt', 'Schriftgröße Schild', 20, 56, 1, '') +
+      '<label class="check"><input type="checkbox" id="s_deko"><span>Dunklen Verlauf hinter dem Text zeigen</span></label></details></section>' +
 
       (beitrag ? '' : '<section class="panel"><h2>3 · Link zum Artikel</h2>' +
         '<label class="field" style="margin-top:0"><span>Artikel-Adresse (für den Link-Sticker)</span><input type="url" id="sArtikel" placeholder="https://www.badsalzuflennews.de/…"></label>' +
@@ -388,7 +388,7 @@
       d.addEventListener('pointermove', function (ev) {
         if (!start) return;
         S.titel_x = Math.min(60, Math.max(0, start.tx + (ev.clientX - start.x) / start.w * 100));
-        S.titel_y = Math.min(88, Math.max(20, start.ty + (ev.clientY - start.y) / start.h * 100));
+        S.titel_y = Math.min(96, Math.max(20, start.ty + (ev.clientY - start.y) / start.h * 100));
         $('s_titel_x').value = S.titel_x; $('s_titel_y').value = S.titel_y; werte(); vorschau();
       });
       function los() { start = null; d.classList.remove('zieht'); }
@@ -429,8 +429,8 @@
     var basis = location.origin + '/';
     Promise.all([BSN.listPublished(), BSN.listBlaulicht()]).then(function (r) {
       var gruppen = [
-        ['Nachrichten', r[0].slice(0, 5).map(function (a) { return { titel: a.title, datum: a.published_at, link: basis + 'artikel.html?s=' + encodeURIComponent(a.slug) }; })],
-        ['Blaulicht', r[1].filter(function (m) { return !m.hidden; }).slice(0, 5).map(function (m) { return { titel: m.title, datum: m.published_at, link: basis + 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true }; })]
+        ['Nachrichten', r[0].slice(0, 5).map(function (a) { return { titel: a.title, rubrik: a.category || '', datum: a.published_at, link: basis + 'artikel.html?s=' + encodeURIComponent(a.slug) }; })],
+        ['Blaulicht', r[1].filter(function (m) { return !m.hidden; }).slice(0, 5).map(function (m) { return { titel: m.title, rubrik: 'Blaulicht', datum: m.published_at, link: basis + 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true }; })]
       ];
       var box = $('sZuletzt'), alle = [];
       box.innerHTML = gruppen.map(function (g, gi) {
@@ -443,6 +443,7 @@
         b.addEventListener('click', function () {
           var x = alle[Number(b.dataset.zuletzt)];
           $('s_titel').value = S.titel = x.titel;
+          $('s_zusatz').value = S.zusatz = x.rubrik;
           if ($('sArtikel')) $('sArtikel').value = x.link;
           box.querySelectorAll('[data-zuletzt]').forEach(function (k) { k.setAttribute('aria-pressed', k === b ? 'true' : 'false'); });
           if (x.blaulicht && !foto) $('sBlaulicht').click();
@@ -480,6 +481,7 @@
     try { U = JSON.parse(sessionStorage.getItem(KU)); sessionStorage.removeItem(KU); } catch (x) { U = null; }
     if (U) {
       $('s_titel').value = S.titel = U.titel || '';
+      $('s_zusatz').value = S.zusatz = U.rubrik || '';
       if ($('sArtikel')) $('sArtikel').value = U.link || '';
       S.foto_x = U.foto_x; S.foto_y = U.foto_y; $('s_foto_x').value = S.foto_x; $('s_foto_y').value = S.foto_y; werte();
       bildVon(U.bild).then(function (b) {
@@ -509,7 +511,7 @@
   function ausArtikel(a) {
     var f = window.BSNR.focus(a.image_url) || { x: 50, y: 50 };
     return {
-      titel: a.title || '', nachweis: String(a.image_credit || '').replace(/^Foto:\s*/i, ''),
+      titel: a.title || '', rubrik: a.category || '', nachweis: String(a.image_credit || '').replace(/^Foto:\s*/i, ''),
       bild: a.image_url || '', foto_x: f.x, foto_y: f.y,
       link: location.origin + '/artikel.html?s=' + encodeURIComponent(a.slug || '')
     };
@@ -538,7 +540,7 @@
       var daten = r[0], foto = r[1];
       return Promise.all(['story', 'beitrag'].map(function (format) {
         var S = Object.assign({}, Z.STORY_STANDARD, format === 'beitrag' ? Z.BEITRAG_STANDARD : {},
-          { format: format, titel: U.titel, nachweis: U.nachweis, foto_x: U.foto_x, foto_y: U.foto_y });
+          { format: format, titel: U.titel, zusatz: U.rubrik, nachweis: U.nachweis, foto_x: U.foto_x, foto_y: U.foto_y });
         var c = Z.story(foto, S, daten).canvas;
         $('p_' + format).appendChild(c);
         return alsBlob(c, 'png').then(function (b) { fertig[format] = { blob: b, name: dateiname(format, wortFuerDatei(U.titel), 'png') }; });

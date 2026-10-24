@@ -1,6 +1,6 @@
 /* Zeichnet die Bilder für @badsalzuflen_news im Browser.
    Übertragen aus dem Update-Generator auf dem Mac (bildbearbeitung.py und
-   story.py): gleiche Maße, gleiche Schriften, gleiche Regeln.
+   story.py). Story und Beitrag seit 2026-10-24 im Stil der Webseiten-Kacheln.
 
    - montagsupdate(termine, e) → Liste von <canvas> (1080 × 1920)
    - story(foto, e)            → {canvas, feld} (Story 1080 × 1920 oder
@@ -9,7 +9,8 @@
   'use strict';
   var TM = window.BSNTermine;
   var ORDNER = 'assets/generator/';
-  var SANS = 'BSNMontserrat', SERIF = 'BSNPlayfair';
+  var MONTSERRAT = 'BSNMontserrat';
+  var SANS = 'BSNPublicSans', SERIF = 'BSNBodoni';   // Story und Beitrag: Schriften der Webseite
 
   /* ------------------------------------------------ Schriften und Bilder */
   var bereit = null;
@@ -18,21 +19,26 @@
       var i = new Image(); i.onload = function () { ok(i); }; i.onerror = function () { nein(new Error('Datei fehlt: ' + src)); }; i.src = src;
     });
   }
+  var LATEIN = 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
+  var LATEIN_EXT = 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF';
   function laden() {
     if (bereit) return bereit;
     var schriften = [
-      [SANS, 'Montserrat-Light.ttf', '300'], [SANS, 'Montserrat-Regular.ttf', '400'],
-      [SANS, 'Montserrat-Medium.ttf', '500'], [SANS, 'Montserrat-SemiBold.ttf', '600'],
-      [SANS, 'Montserrat-Bold.ttf', '700'], [SERIF, 'PlayfairDisplay-VariableFont_wght.ttf', '400 900']
+      [MONTSERRAT, ORDNER + 'Montserrat-Light.ttf', '300'], [MONTSERRAT, ORDNER + 'Montserrat-Regular.ttf', '400'],
+      [MONTSERRAT, ORDNER + 'Montserrat-Medium.ttf', '500'], [MONTSERRAT, ORDNER + 'Montserrat-SemiBold.ttf', '600'],
+      [MONTSERRAT, ORDNER + 'Montserrat-Bold.ttf', '700'],
+      [SERIF, 'assets/fonts/libre-bodoni-latin-3e48d7.woff2', '400 700', LATEIN], [SERIF, 'assets/fonts/libre-bodoni-latin-ext-a3e342.woff2', '400 700', LATEIN_EXT],
+      [SANS, 'assets/fonts/public-sans-latin-f63147.woff2', '100 900', LATEIN], [SANS, 'assets/fonts/public-sans-latin-ext-da9f89.woff2', '100 900', LATEIN_EXT]
     ].map(function (s) {
-      var f = new FontFace(s[0], 'url(' + ORDNER + s[1] + ')', { weight: s[2] });
+      var f = new FontFace(s[0], 'url(' + s[1] + ')', s[3] ? { weight: s[2], unicodeRange: s[3] } : { weight: s[2] });
       return f.load().then(function (x) { document.fonts.add(x); });
     });
     bereit = Promise.all([
       Promise.all(schriften),
       bildLaden(ORDNER + 'montagsupdate-vorlage.png'),
-      bildLaden(ORDNER + 'logo-durchsichtig.png')
-    ]).then(function (r) { return { vorlage: r[1], logo: r[2] }; });
+      bildLaden(ORDNER + 'logo-durchsichtig.png'),
+      bildLaden(ORDNER + 'logo-weiss.png')
+    ]).then(function (r) { return { vorlage: r[1], logo: r[2], logoWeiss: r[3] }; });
     bereit.catch(function () { bereit = null; });
     return bereit;
   }
@@ -152,7 +158,7 @@
 
   function blockBauen(t, e, skala, platz) {
     var kopfGr = pt(e, 'zeile_pt', skala, 40), titelGr = pt(e, 'titel_pt', skala, 40), ortGr = pt(e, 'ort_pt', skala, 36);
-    var fKopf = schrift(SANS, e.zeile_gewicht, kopfGr), fTitel = schrift(SANS, e.titel_gewicht, titelGr), fOrt = schrift(SANS, e.ort_gewicht, ortGr);
+    var fKopf = schrift(MONTSERRAT, e.zeile_gewicht, kopfGr), fTitel = schrift(MONTSERRAT, e.titel_gewicht, titelGr), fOrt = schrift(MONTSERRAT, e.ort_gewicht, ortGr);
     var spKopf = pt(e, 'zeile_sperrung', skala), spTitel = pt(e, 'titel_sperrung', skala), spOrt = pt(e, 'ort_sperrung', skala);
     var lh = titelGr * Number(e.zeilenabstand || 1.5);
     var einzug = platz * Number(e.ort_einzug == null ? 4.5 : e.ort_einzug) / 100;
@@ -219,7 +225,7 @@
     for (var i = 0; i < liste.length; i += n) gruppen.push(liste.slice(i, i + n));
     function passt(faktor) {
       var z = mitFaktor(e, faktor);
-      var fKopf = schrift(SANS, z.zeile_gewicht, pt(z, 'zeile_pt', 1, 40)), sp = pt(z, 'zeile_sperrung', 1);
+      var fKopf = schrift(MONTSERRAT, z.zeile_gewicht, pt(z, 'zeile_pt', 1, 40)), sp = pt(z, 'zeile_sperrung', 1);
       for (var k = 0; k < liste.length; k++) {
         var kopf = kopfzeile(liste[k], z);
         if (kopf && breiteVon(kopf, fKopf, sp) > breite) return false;
@@ -284,34 +290,28 @@
   }
 
   /* ================================================= Story und Beitrag */
+  /* Seit 2026-10-24 im Stil der Kacheln auf der Startseite: Foto vollflächig,
+     unten dunkler Verlauf, Ort/Rubrik im Lavendel-Schild, Überschrift weiß in
+     Libre Bodoni, Hinweis für den Link-Sticker als Lavendel-Pille. */
 
   var FORMATE = {
-    story: {
-      groesse: [1080, 1920], logoForm: ['oval', [805, 167, 1145, 403]], logo: [958, 285, 190],
-      kreise: [[830, 2070, 280], [1060, 1900, 240]], ring: [960, 2020, 149], punkte: [792, 1772],
-      nachweisY: 1712, randRechts: 150
-    },
-    beitrag: {
-      groesse: [1080, 1350], logoForm: ['kreis', [1030, -60, 236]], logo: [968, 76, 180],
-      kreise: [[830, 1525, 285], [1070, 1300, 250]], ring: [1000, 1425, 155], punkte: [830, 1165],
-      nachweisY: 1300, randRechts: 45
-    }
+    story: { groesse: [1080, 1920], logo: [72, 110, 250], nachweis: 132 },
+    beitrag: { groesse: [1080, 1350], logo: [64, 64, 210], nachweis: 84 }
   };
   var STORY_STANDARD = {
-    zusatz: '', titel: '', nachweis: '', titel_pt: 60, zusatz_pt: 32, titel_x: 5.1, titel_y: 66,
+    zusatz: '', titel: '', nachweis: '', titel_pt: 80, zusatz_pt: 28, titel_x: 6.7, titel_y: 69,
     link_zeigen: true, link_text: 'Alles Weitere hier', foto_x: 50, foto_y: 50, zoom: 100, deko: true, format: 'story'
   };
-  var BEITRAG_STANDARD = { titel_pt: 58, zusatz_pt: 36, titel_x: 3.5, titel_y: 76, link_zeigen: false };
-  var CREME = '243,240,234', CREME_KREIS = 'rgb(241,236,230)', FLIEDER = 'rgb(148,154,196)', PUNKTE = 'rgb(216,196,206)', WEISS = 'rgb(248,245,240)';
+  var BEITRAG_STANDARD = { titel_pt: 80, zusatz_pt: 30, titel_x: 5.9, titel_y: 92.9, link_zeigen: false };
+  var NAVY = '#1E3A66', NAVY_DUNKEL = '#142845', LAVENDEL = '#E7DDF6', SCHATTEN = '10,18,36';
 
-  function kreis(ctx, mx, my, r) { ctx.beginPath(); ctx.arc(mx, my, Math.max(0, r), 0, Math.PI * 2); }
   function strich(ctx, a, b, breite, farbe) {
-    ctx.strokeStyle = farbe; ctx.lineWidth = breite; ctx.lineCap = 'round';
+    ctx.strokeStyle = farbe; ctx.lineWidth = breite; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
   }
-  function rund(ctx, l, o, r, u, radius) {
+  function pille(ctx, l, o, b, h) {
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(l, o, r - l, u - o, radius); else ctx.rect(l, o, r - l, u - o);
+    if (ctx.roundRect) ctx.roundRect(l, o, b, h, h / 2); else ctx.rect(l, o, b, h);
   }
   function woerterUmbrechen(text, f, grenze) {
     var zeilen = [], aktuell = '';
@@ -322,17 +322,17 @@
     if (aktuell) zeilen.push(aktuell);
     return zeilen;
   }
-  /* Flieder-Kasten mit weißem Text; Großbuchstaben optisch mittig */
-  function kasten(ctx, links, oben, zeilen, f, ptGr, innenX, innenY, zh) {
-    var breite = Math.max.apply(null, zeilen.map(function (t) { return breiteVon(t, f, 0); })) + 2 * innenX;
-    var hoehe = zh * zeilen.length + 2 * innenY;
-    ctx.fillStyle = FLIEDER; rund(ctx, links, oben, links + breite, oben + hoehe, Math.round(ptGr * 0.16)); ctx.fill();
-    ctx.font = f.css; ctx.fillStyle = WEISS; ctx.textBaseline = 'alphabetic';
-    zeilen.forEach(function (t, i) {
-      var zo = oben + innenY + i * zh;
-      ctx.fillText(t, links + innenX, zo + (zh + f.versal) / 2);
-    });
-    return [links, oben, links + breite, oben + hoehe];
+  /* Wie text-wrap: balance auf der Webseite: gleiche Zeilenzahl, aber
+     möglichst gleich lange Zeilen, damit kein einzelnes Wort allein steht. */
+  function ausgewogen(text, f, grenze) {
+    var zeilen = woerterUmbrechen(text, f, grenze);
+    if (zeilen.length < 2) return zeilen;
+    var lo = grenze * 0.5, hi = grenze;
+    for (var i = 0; i < 12; i++) {
+      var mitte = (lo + hi) / 2;
+      if (woerterUmbrechen(text, f, mitte).length > zeilen.length) lo = mitte; else hi = mitte;
+    }
+    return woerterUmbrechen(text, f, hi);
   }
 
   function story(foto, einst, daten) {
@@ -341,7 +341,7 @@
     ['titel_pt', 'zusatz_pt', 'titel_x', 'titel_y', 'foto_x', 'foto_y', 'zoom'].forEach(function (k) { e[k] = Number(e[k]); });
     var f = FORMATE[e.format] || FORMATE.story, B = f.groesse[0], H = f.groesse[1];
     var c = leinwand(B, H), ctx = c.getContext('2d');
-    ctx.fillStyle = 'rgb(' + CREME + ')'; ctx.fillRect(0, 0, B, H);
+    ctx.fillStyle = NAVY_DUNKEL; ctx.fillRect(0, 0, B, H);
 
     /* Foto füllend zugeschnitten */
     if (foto) {
@@ -353,82 +353,79 @@
       ctx.drawImage(foto, -x, -y, nb, nh);
     }
 
-    /* Oben rechts: Creme-Form mit Logo */
-    ctx.fillStyle = CREME_KREIS;
-    if (f.logoForm[0] === 'oval') {
-      var o = f.logoForm[1];
-      ctx.beginPath(); ctx.ellipse((o[0] + o[2]) / 2, (o[1] + o[3]) / 2, (o[2] - o[0]) / 2, (o[3] - o[1]) / 2, 0, 0, Math.PI * 2); ctx.fill();
-    } else { kreis(ctx, f.logoForm[1][0], f.logoForm[1][1], f.logoForm[1][2]); ctx.fill(); }
-    if (daten.logo) {
-      var lb = f.logo[2], lh = Math.round(daten.logo.naturalHeight * lb / daten.logo.naturalWidth);
-      ctx.drawImage(daten.logo, Math.trunc(f.logo[0] - lb / 2), Math.trunc(f.logo[1] - lh / 2), lb, lh);
-    }
-
-    /* Unten rechts: Kreise, Flieder-Ring, Punkteraster */
-    if (e.deko) {
-      ctx.fillStyle = CREME_KREIS;
-      f.kreise.forEach(function (k) { kreis(ctx, k[0], k[1], k[2]); ctx.fill(); });
-      ctx.strokeStyle = FLIEDER; ctx.lineWidth = 22; kreis(ctx, f.ring[0], f.ring[1], f.ring[2] - 11); ctx.stroke();
-      ctx.fillStyle = PUNKTE;
-      for (var reihe = 0; reihe < 3; reihe++) for (var sp = 0; sp < 4; sp++) { kreis(ctx, f.punkte[0] + sp * 25, f.punkte[1] + reihe * 25, 3.2); ctx.fill(); }
-    }
-
-    /* Titelblock, Unterkante bei titel_y */
-    var links = Math.round(B * e.titel_x / 100), grenze = Math.max(300, B - links - f.randRechts);
+    /* Text vorbereiten: Schild, Überschrift, Link-Hinweis */
+    var links = Math.round(B * e.titel_x / 100), grenze = Math.max(300, B - links - Math.max(links, 56));
     var titel = String(e.titel || '').split(/\s+/).filter(Boolean).join(' ');
-    var zusatz = String(e.zusatz || '').split(/\s+/).filter(Boolean).join(' ');
-    var tPt = e.titel_pt, tSchrift = schrift(SERIF, 600, tPt), innenX = Math.round(tPt * 0.24);
-    var tZeilen = titel ? woerterUmbrechen(titel, tSchrift, grenze - 2 * innenX) : [];
-    var unten = H * e.titel_y / 100, titelKanten = null, feld = [links, unten, links + 1, unten];
-    if (tZeilen.length) {
-      var zh = Math.round(tPt * 1.2), hoehe = zh * tZeilen.length + 2 * Math.round(tPt * 0.13);
-      titelKanten = kasten(ctx, links, unten - hoehe, tZeilen, tSchrift, tPt, innenX, Math.round(tPt * 0.13), zh);
-      feld = titelKanten.slice();
+    var zusatz = String(e.zusatz || '').split(/\s+/).filter(Boolean).join(' ').toLocaleUpperCase('de-DE');
+    var tPt = e.titel_pt, tS = schrift(SERIF, 600, tPt), zh = Math.round(tPt * 1.1);
+    var tZeilen = titel ? ausgewogen(titel, tS, grenze) : [];
+    var unten = Math.round(H * e.titel_y / 100), oben = unten - zh * tZeilen.length;
+    var zPt = e.zusatz_pt, zS = schrift(SANS, 700, zPt), zSp = zPt * 0.08;
+    var zH = Math.round(zPt * 2.07), zB = zusatz ? Math.round(breiteVon(zusatz, zS, zSp) + zPt * 1.87) : 0;
+    var zOben = tZeilen.length ? oben - Math.round(tPt * 0.3) - zH : unten - zH;
+    var linkText = String(e.link_text || '').trim(), mitLink = e.link_zeigen && linkText && e.format !== 'beitrag';
+    var lPt = Math.max(22, Math.round(tPt * 0.37)), lS = schrift(SANS, 600, lPt), pfeil = lPt;
+    var lH = Math.round(lPt * 2.41), lOben = unten + Math.round(tPt * 0.52), innen = Math.round(lPt * 1.06);
+    var lB = Math.round(breiteVon(linkText, lS, 0) + lPt * 0.53 + pfeil + innen * 2);
+    var blockOben = zusatz ? zOben : oben, blockUnten = mitLink ? lOben + lH : unten;
+
+    /* Dunkler Verlauf: unten hinter dem Text, oben schmal hinter dem Logo */
+    if (e.deko) {
+      var bis = Math.max(0, blockOben - H * 0.28), g = ctx.createLinearGradient(0, H, 0, bis);
+      g.addColorStop(0, 'rgba(' + SCHATTEN + ',0.9)');
+      g.addColorStop(Math.min(0.9, Math.max(0.05, (H - blockUnten) / (H - bis))), 'rgba(' + SCHATTEN + ',0.82)');
+      g.addColorStop(Math.min(0.95, (H - blockOben) / (H - bis) + 0.05), 'rgba(' + SCHATTEN + ',0.5)');
+      g.addColorStop(1, 'rgba(' + SCHATTEN + ',0)');
+      ctx.fillStyle = g; ctx.fillRect(0, bis, B, H - bis);
+      var go = ctx.createLinearGradient(0, 0, 0, H * 0.2);
+      go.addColorStop(0, 'rgba(' + SCHATTEN + ',0.45)'); go.addColorStop(1, 'rgba(' + SCHATTEN + ',0)');
+      ctx.fillStyle = go; ctx.fillRect(0, 0, B, H * 0.2);
     }
+
+    /* Oben links: Logo in Weiß mit goldenem Blatt */
+    if (daten.logoWeiss) {
+      var lb = f.logo[2], lhh = Math.round(daten.logoWeiss.naturalHeight * lb / daten.logoWeiss.naturalWidth);
+      ctx.drawImage(daten.logoWeiss, f.logo[0], f.logo[1], lb, lhh);
+    }
+
+    var feld = [links, unten, links + 1, unten];
+    ctx.textBaseline = 'alphabetic';
     if (zusatz) {
-      var zPt = e.zusatz_pt, zSchrift = schrift(SERIF, 600, zPt), zi = Math.round(zPt * 0.3);
-      var zZeilen = woerterUmbrechen(zusatz, zSchrift, grenze - 2 * zi), zzh = Math.round(zPt * 1.2);
-      var zHoehe = zzh * zZeilen.length + 2 * Math.round(zPt * 0.2), obenTitel = titelKanten ? titelKanten[1] : unten;
-      /* Wie in Canva: der kleine Kasten sitzt knapp auf dem großen */
-      var k = kasten(ctx, links + Math.round(tPt * 0.02), obenTitel - zHoehe + 4, zZeilen, zSchrift, zPt, zi, Math.round(zPt * 0.2), zzh);
-      feld = [Math.min(feld[0], k[0]), k[1], Math.max(feld[2], k[2]), feld[3]];
+      ctx.fillStyle = LAVENDEL; pille(ctx, links, zOben, zB, zH); ctx.fill();
+      zeileSchreiben(ctx, links + Math.round(zPt * 0.93), zOben + (zH + zS.versal) / 2 - zS.oben, zusatz, zS, NAVY, zSp);
+      feld = [links, zOben, links + zB, unten];
+    }
+    if (tZeilen.length) {
+      ctx.font = tS.css; ctx.fillStyle = '#FFFFFF';
+      var breit = 0;
+      tZeilen.forEach(function (t, i) {
+        ctx.fillText(t, links, oben + i * zh + (zh + tS.versal) / 2);
+        breit = Math.max(breit, breiteVon(t, tS, 0));
+      });
+      feld = [links, zusatz ? zOben : oben, links + Math.max(breit, zB), unten];
     }
 
     /* „Alles Weitere hier ↓" — darunter kommt in Instagram der Link-Sticker */
-    var linkText = String(e.link_text || '').trim();
-    if (e.link_zeigen && linkText && e.format !== 'beitrag') {
-      var lPt = Math.max(22, Math.round(tPt * 0.45)), lS = schrift(SANS, 600, lPt);
-      var pfeil = Math.round(lPt * 0.9), innen = Math.round(lPt * 0.7), obenL = feld[3] + Math.round(tPt * 0.35);
-      var lBreite = breiteVon(linkText, lS, 0) + pfeil + innen * 2.6, lHoehe = Math.round(lPt * 2);
-      ctx.fillStyle = 'rgba(' + CREME + ',' + (245 / 255) + ')';
-      rund(ctx, links, obenL, links + lBreite, obenL + lHoehe, Math.floor(lHoehe / 2)); ctx.fill();
-      var blau = 'rgb(23,75,144)';
-      ctx.font = lS.css; ctx.fillStyle = blau; ctx.fillText(linkText, links + innen, obenL + (lHoehe + lS.versal) / 2);
-      var px = links + lBreite - innen - pfeil / 2, py1 = obenL + lHoehe * 0.28, py2 = obenL + lHoehe * 0.72, sb = Math.max(3, Math.round(lPt * 0.13));
-      strich(ctx, [px, py1], [px, py2], sb, blau);
-      strich(ctx, [px - pfeil * 0.34, py2 - pfeil * 0.34], [px, py2], sb, blau);
-      strich(ctx, [px + pfeil * 0.34, py2 - pfeil * 0.34], [px, py2], sb, blau);
-      feld = [feld[0], feld[1], Math.max(feld[2], links + lBreite), obenL + lHoehe];
+    if (mitLink) {
+      ctx.fillStyle = LAVENDEL; pille(ctx, links, lOben, lB, lH); ctx.fill();
+      ctx.font = lS.css; ctx.fillStyle = NAVY; ctx.fillText(linkText, links + innen, lOben + (lH + lS.versal) / 2);
+      var px = links + lB - innen - pfeil / 2, py1 = lOben + lH * 0.3, py2 = lOben + lH * 0.7, sb = Math.max(3, Math.round(lPt * 0.11));
+      strich(ctx, [px, py1], [px, py2], sb, NAVY);
+      strich(ctx, [px - pfeil * 0.3, py2 - pfeil * 0.3], [px, py2], sb, NAVY);
+      strich(ctx, [px + pfeil * 0.3, py2 - pfeil * 0.3], [px, py2], sb, NAVY);
+      feld = [feld[0], Math.min(feld[1], lOben), Math.max(feld[2], links + lB), lOben + lH];
     }
 
-    /* Die drei Striche an der oberen rechten Ecke der Überschrift */
-    if (titelKanten && e.deko) {
-      var rx = titelKanten[2], ry = titelKanten[1], farbe = 'rgba(' + CREME + ',' + (235 / 255) + ')';
-      strich(ctx, [rx + 2, ry - 52], [rx + 3, ry - 20], 7, farbe);
-      strich(ctx, [rx + 42, ry - 54], [rx + 25, ry - 10], 7, farbe);
-      strich(ctx, [rx + 40, ry + 8], [rx + 84, ry + 2], 7, farbe);
-    }
-
-    /* Bildnachweis unten links */
+    /* Bildnachweis oben rechts, auf Höhe des Logos */
     var nachweis = String(e.nachweis || '').trim();
     if (nachweis) {
       if (nachweis.charAt(0) !== '©') nachweis = '© ' + nachweis;
       var nS = schrift(SANS, 500, 22);
-      ctx.font = nS.css; ctx.lineJoin = 'round';
-      ctx.strokeStyle = 'rgba(0,0,0,' + (60 / 255) + ')'; ctx.lineWidth = 2;
-      ctx.strokeText(nachweis, links, f.nachweisY + nS.oben);
-      ctx.fillStyle = 'rgba(255,255,255,' + (230 / 255) + ')';
-      ctx.fillText(nachweis, links, f.nachweisY + nS.oben);
+      ctx.font = nS.css; ctx.textAlign = 'right';
+      ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 6;
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.fillText(nachweis, B - f.logo[0], f.nachweis + nS.oben);
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.textAlign = 'left';
     }
 
     return { canvas: c, feld: [feld[0] / B * 100, feld[1] / H * 100, (feld[2] - feld[0]) / B * 100, (feld[3] - feld[1]) / H * 100] };
