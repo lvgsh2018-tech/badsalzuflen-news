@@ -46,9 +46,8 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
   .s3 { grid-column: span 6; }
   .s3 .tile-body { padding: 14px 14px 16px; }
   .s3 h3 { font-size: 0.95rem; }
-  /* kleine Kacheln: Kurzfassung der Überschrift, höchstens drei Zeilen */
+  /* kleine Kacheln: ganze Überschrift, höchstens drei Zeilen, dann … */
   .s3 h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-  .s3 .t-lang { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .s3 .tag { font-size: 0.64rem; padding: 4px 9px; }
   .tile--lead .tile-body { padding: 22px 22px 24px; }
   .tile { border-radius: 22px; }
@@ -273,5 +272,3 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 }
 @media (prefers-reduced-motion: reduce) { .share-btn { transition: none; } .share-btn:active { transform: none; } }
 
-.t-kurz { display: none; }
-@media (max-width: 600px) { .s3 .t-kurz { display: inline; } }

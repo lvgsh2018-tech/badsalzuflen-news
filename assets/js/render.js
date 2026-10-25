@@ -94,20 +94,10 @@
       ? '<img src="' + R.esc(a.image_url) + '" alt="" loading="lazy" decoding="async" style="' + R.focusStyle(a.image_url) + '">'
       : '<div class="ph" style="' + R.placeholder(a.category) + '" aria-hidden="true"></div>';
   }
-  /* Kurzfassung der Überschrift für die kleinen Kacheln auf dem Handy:
-     bei „Thema: Erklärung“ nur der Teil vor dem Doppelpunkt. */
-  function shortTitle(t) {
-    var i = (t || '').indexOf(':');
-    var k = i > 0 ? t.slice(0, i).trim() : '';
-    return k.split(/\s+/).length >= 2 ? k : '';
-  }
   R.tile = function (a, cls) {
-    var k = shortTitle(a.title);
-    var h = k ? '<span class="t-lang">' + R.esc(a.title) + '</span><span class="t-kurz" aria-hidden="true">' + R.esc(k) + '</span>'
-              : R.esc(a.title);
     return '<a class="tile ' + cls + '" href="' + R.url(a) + '">' + media(a) +
       '<div class="tile-body">' + (a.anzeige ? '<span class="tag-row"><span class="ad-label">Anzeige</span><span class="tag">' + R.esc(a.category) + '</span></span>' : '<span class="tag">' + R.esc(a.category) + '</span>') +
-      '<h3>' + h + '</h3></div></a>';
+      '<h3>' + R.esc(a.title) + '</h3></div></a>';
   };
   R.card = function (a) {
     return '<a class="post-card" href="' + R.url(a) + '"><div class="post-media">' + media(a) + '</div>' +
