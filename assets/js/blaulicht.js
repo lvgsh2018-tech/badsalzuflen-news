@@ -23,7 +23,7 @@
   function teaser(t) { t = String(t || ''); return t.length < 200 ? t : t.replace(/\s+\S*$/, '') + ' …'; }
 
   function item(m) {
-    return '<a class="bl-item" href="' + R.blUrl(m) + '"><div class="bl-meta"><span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
+    return '<a class="bl-item" href="' + R.blUrl(m) + '"><div class="bl-meta"><span class="tag tag-dark">' + R.esc(R.ort(m.place)) + '</span>' +
       '<span class="bl-von">' + (istFw(m) ? 'Feuerwehr' : 'Polizei') + '</span>' +
       '<time datetime="' + R.esc(m.published_at) + '">' + R.esc(when(m.published_at)) + '</time></div>' +
       '<h3>' + R.esc(m.title) + '</h3><p>' + R.esc(teaser(m.teaser)) + '</p></a>';

@@ -12,7 +12,7 @@
     if (!BSN.listBlaulicht) return Promise.resolve([]);
     return BSN.listBlaulicht().then(function (l) {
       return l.filter(function (x) { return !x.hidden && !nachgeholt(x); }).slice(0, 1).map(function (m) {
-        return { title: m.title, category: m.place || 'Blaulicht', image_url: /^fw-/.test(m.source_id || '') ? FW_BILD : BL_BILD, published_at: m.published_at,
+        return { title: m.title, category: R.ort(m.place) || 'Blaulicht', image_url: /^fw-/.test(m.source_id || '') ? FW_BILD : BL_BILD, published_at: m.published_at,
           href: R.blUrl(m), blaulicht: true };
       });
     }).catch(function () { return []; });

@@ -63,6 +63,10 @@
     return window.BSN_BLAULICHT && window.BSN_BLAULICHT[m.source_id]
       ? 'blaulicht/' + encodeURIComponent(m.source_id) + '.html' : 'blaulicht.html?m=' + encodeURIComponent(m.source_id);
   };
+  /* Vorschau: nur der erste Ort („Schötmar/Werl-Aspe“ → „Schötmar“), die Meldung selbst zeigt alle */
+  R.ort = function (place) { return String(place || '').split(/\s*(?:\/|,|;|\bund\b)\s*/)[0] || String(place || ''); };
+  /* Jedes Wort einzeln: passt ein langes Wort nicht in die Kachel, endet es mit … statt abgeschnitten zu werden */
+  function words(t) { return R.esc(t).split(/(\s+)/).map(function (w) { return /^\s*$/.test(w) ? w : '<span class="w">' + w + '</span>'; }).join(''); }
   R.pageUrl = function (a) { return new URL(R.url(a), document.baseURI).href; };
 
   /* Ohne Foto: ruhiger Farbverlauf aus den Markenfarben, je Kategorie anders. */
@@ -97,7 +101,7 @@
   R.tile = function (a, cls) {
     return '<a class="tile ' + cls + '" href="' + R.url(a) + '">' + media(a) +
       '<div class="tile-body">' + (a.anzeige ? '<span class="tag-row"><span class="ad-label">Anzeige</span><span class="tag">' + R.esc(a.category) + '</span></span>' : '<span class="tag">' + R.esc(a.category) + '</span>') +
-      '<h3>' + R.esc(a.title) + '</h3></div></a>';
+      '<h3>' + words(a.title) + '</h3></div></a>';
   };
   R.card = function (a) {
     return '<a class="post-card" href="' + R.url(a) + '"><div class="post-media">' + media(a) + '</div>' +

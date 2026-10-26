@@ -65,6 +65,9 @@ body:has(.newsboard-wrap) .site-header::before { background: linear-gradient(to 
 .tile-body { padding: 22px 24px 24px; width: 100%; }
 .tile h3 { color: #fff !important; margin: 10px 0 0; font-size: 1.15rem; line-height: 1.25; text-wrap: balance; }
 .s3 h3 { font-size: 1.05rem; }
+/* Ort-Schild und überlange Wörter bleiben in der Kachel und enden mit … */
+.tile .tag { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile h3 .w { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: top; }
 .s6 h3 { font-size: 1.3rem; }
 .tile--lead h3 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.15; }
 .tile--lead .tile-body { padding: 28px 30px 30px; }
