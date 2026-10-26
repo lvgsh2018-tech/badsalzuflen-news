@@ -226,12 +226,21 @@ def swap_bl(page, old, new):
     return page.replace(old, new, 1)
 
 
+def bl_quelle(m):
+    """Link zur Original-Meldung und die Seite, von der sie stammt (Polizei: presseportal.de, Feuerwehr: ihre eigene Seite)."""
+    src = m.get('source_url') or ''
+    if (m.get('source_id') or '').startswith('fw-'):
+        ok = re.match(r'https://www\.feuerwehrbadsalzuflen\.de/', src, re.I)
+        return (src if ok else 'https://www.feuerwehrbadsalzuflen.de/einsatzberichte/'), 'feuerwehrbadsalzuflen.de'
+    ok = re.match(r'https://(www\.)?presseportal\.de/', src, re.I)
+    return (src if ok else 'https://www.presseportal.de/blaulicht/nr/12727'), 'presseportal.de'
+
+
 def blaulicht_page(tpl, m, base):
     url = SITE + 'blaulicht/' + m['source_id'] + '.html'
     title, place, src_name = m['title'], m.get('place') or 'Bad Salzuflen', m.get('source_name') or 'Polizei Lippe'
-    src = m.get('source_url') or ''
-    if not re.match(r'https://(www\.)?presseportal\.de/', src, re.I):
-        src = 'https://www.presseportal.de/blaulicht/nr/12727'
+    src, src_site = bl_quelle(m)
+    bild = SITE + 'assets/img/' + ('feuerwehr.jpg' if m['source_id'].startswith('fw-') else 'blaulicht.jpg')
     desc = plain(m.get('body')) or ' '.join((m.get('teaser') or '').split())
     if len(desc) > 160:
         desc = desc[:158].rsplit(' ', 1)[0].rstrip(' ,;:–-') + ' …'
@@ -240,7 +249,7 @@ def blaulicht_page(tpl, m, base):
     full = '%s: %s' % (place, title) if place.lower() not in title.lower() else title
     ld = {
         '@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': full[:110], 'description': desc,
-        'image': [SITE + 'assets/img/blaulicht.jpg'], 'datePublished': when(m['published_at']).isoformat(),
+        'image': [bild], 'datePublished': when(m['published_at']).isoformat(),
         'inLanguage': 'de', 'mainEntityOfPage': url, 'isBasedOn': src,
         'author': {'@type': 'Organization', 'name': src_name},
         'publisher': {'@type': 'Organization', 'name': NAME, 'url': SITE,
@@ -250,20 +259,20 @@ def blaulicht_page(tpl, m, base):
         '<span class="tag tag-dark">%s</span><h1>%s</h1>' % (esc(place), esc(title)) +
         '<p class="article-meta">%s · <time datetime="%s">%s</time></p>' % (esc(src_name), esc(m['published_at']), stamp) +
         '<div class="article-body">%s</div>' % sanitize(m.get('body'), base) +
-        '<p class="bl-source"><strong>Quelle:</strong> %s, presseportal.de — '
-        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a></p>' % (esc(src_name), esc(src), esc(src))
+        '<p class="bl-source"><strong>Quelle:</strong> %s, %s — '
+        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a></p>' % (esc(src_name), src_site, esc(src), esc(src))
     )
     page = swap_bl(tpl, '<meta charset="UTF-8">', '<meta charset="UTF-8">\n<base href="/">')
     page = swap_bl(page, '<title>Blaulicht — Bad Salzuflen News</title>',
                    '<title>%s — Blaulicht — %s</title>' % (esc(full), NAME))
-    page = swap_bl(page, '<meta name="description" content="Polizeimeldungen aus Bad Salzuflen und den Ortsteilen — automatisch von der Polizei Lippe.">',
+    page = swap_bl(page, '<meta name="description" content="Meldungen der Polizei und Einsätze der Feuerwehr in Bad Salzuflen und den Ortsteilen.">',
                    '<meta name="description" content="%s">' % esc(desc))
     page = swap_bl(page, '<meta property="og:title" content="Blaulicht — Bad Salzuflen News">',
                    '<meta property="og:title" content="%s">' % esc(full))
-    page = swap_bl(page, '<meta property="og:description" content="Polizeimeldungen aus Bad Salzuflen und den Ortsteilen — automatisch von der Polizei Lippe.">',
+    page = swap_bl(page, '<meta property="og:description" content="Meldungen der Polizei und Einsätze der Feuerwehr in Bad Salzuflen und den Ortsteilen.">',
                    '<meta property="og:description" content="%s">' % esc(desc))
     page = swap_bl(page, '<meta property="og:image" content="https://badsalzuflennews.de/assets/img/og-bild.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">',
-                   '<meta property="og:image" content="%sassets/img/blaulicht.jpg">' % SITE)
+                   '<meta property="og:image" content="%s">' % bild)
     page = swap_bl(page, '<meta property="og:type" content="website">\n<link rel="canonical" href="https://badsalzuflennews.de/blaulicht.html">',
                    '<meta property="og:type" content="article">\n<meta property="og:url" content="%s">\n<link rel="canonical" href="%s">\n'
                    '<script type="application/ld+json">%s</script>'

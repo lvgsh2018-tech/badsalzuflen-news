@@ -128,18 +128,18 @@
   });
 
   /* ---------- Blaulicht: einzelne Meldungen ausblenden ----------
-     Die Meldungen kommen automatisch von der Polizei; hier lässt sich nur umschalten, ob eine zu sehen ist. */
+     Die Meldungen kommen automatisch von Polizei und Feuerwehr; hier lässt sich nur umschalten, ob eine zu sehen ist. */
   function pageBlaulicht(focusId) {
     return BSN.listBlaulicht(true).then(function (list) {
       var off = list.filter(function (m) { return m.hidden; }).length;
-      view.innerHTML = '<h1>Blaulicht</h1><p class="bl-hinweis">Die Meldungen kommen automatisch von der Polizei Lippe. Zieht die Polizei eine zurück, kannst du sie hier ausblenden – sie verschwindet dann von der Webseite.' +
+      view.innerHTML = '<h1>Blaulicht</h1><p class="bl-hinweis">Die Meldungen kommen automatisch von der Polizei Lippe und der Feuerwehr Bad Salzuflen. Wird eine zurückgezogen, kannst du sie hier ausblenden – sie verschwindet dann von der Webseite.' +
         (off ? ' Ausgeblendet: ' + off + '.' : '') + '</p><div class="panel">' +
         (list.length ? '<ul class="bl-pflege">' + list.map(function (m) {
           return '<li' + (m.hidden ? ' class="aus"' : '') + '><div class="bl-text"><a href="' + R.blUrl(m) + '" target="_blank" rel="noopener">' + esc(m.title) + '</a>' +
-            '<p><span>' + esc(m.place) + ' · ' + R.date(m.published_at) + '</span><span class="badge ' + (m.hidden ? 'off">Ausgeblendet' : 'live">Sichtbar') + '</span></p></div>' +
+            '<p><span>' + (/^fw-/.test(m.source_id || '') ? 'Feuerwehr' : 'Polizei') + ' · ' + esc(m.place) + ' · ' + R.date(m.published_at) + '</span><span class="badge ' + (m.hidden ? 'off">Ausgeblendet' : 'live">Sichtbar') + '</span></p></div>' +
             '<button class="btn ' + (m.hidden ? 'btn-primary' : 'btn-secondary') + ' btn-sm" type="button" data-bl="' + esc(m.id) + '" data-aus="' + (m.hidden ? '0' : '1') + '">' +
             (m.hidden ? 'Wieder zeigen' : 'Ausblenden') + '<span class="sr-only">: ' + esc(m.title) + '</span></button></li>';
-        }).join('') + '</ul>' : '<p class="empty">Aktuell gibt es keine Polizeimeldungen aus Bad Salzuflen.</p>') + '</div>';
+        }).join('') + '</ul>' : '<p class="empty">Aktuell gibt es keine Meldungen von Polizei oder Feuerwehr.</p>') + '</div>';
       if (focusId) { var k = view.querySelector('[data-bl="' + focusId + '"]'); if (k) k.focus({ preventScroll: true }); }
     }).catch(function (x) { view.innerHTML = '<h1>Das hat nicht geklappt</h1><p>' + esc(x.message) + '</p>'; });
   }

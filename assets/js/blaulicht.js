@@ -1,4 +1,4 @@
-/* Blaulicht: Liste aller Meldungen oder eine einzelne (blaulicht.html?m=<Nummer bei presseportal>).
+/* Blaulicht: Liste aller Meldungen oder eine einzelne (blaulicht.html?m=<Nummer bei presseportal> bzw. fw-<Nummer> bei der Feuerwehr).
    Auf den festen Seiten unter blaulicht/ steht die Meldung schon im HTML (data-id nennt die Nummer). */
 (function () {
   var R = window.BSNR;
@@ -10,12 +10,21 @@
     return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' +
       d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
   }
-  function safeUrl(u) { return /^https:\/\/(www\.)?presseportal\.de\//i.test(u || '') ? u : 'https://www.presseportal.de/blaulicht/nr/12727'; }
+  /* Feuerwehr-Berichte tragen „fw-“ vor der Nummer, alles andere kommt von der Polizei */
+  function istFw(m) { return /^fw-/.test(m.source_id || ''); }
+  function quelle(m) {
+    return istFw(m)
+      ? { name: m.source_name || 'Feuerwehr Bad Salzuflen', seite: 'feuerwehrbadsalzuflen.de',
+          url: /^https:\/\/www\.feuerwehrbadsalzuflen\.de\//i.test(m.source_url || '') ? m.source_url : 'https://www.feuerwehrbadsalzuflen.de/einsatzberichte/' }
+      : { name: m.source_name || 'Polizei Lippe', seite: 'presseportal.de',
+          url: /^https:\/\/(www\.)?presseportal\.de\//i.test(m.source_url || '') ? m.source_url : 'https://www.presseportal.de/blaulicht/nr/12727' };
+  }
   /* Vorschau nicht mitten im Wort abschneiden */
   function teaser(t) { t = String(t || ''); return t.length < 200 ? t : t.replace(/\s+\S*$/, '') + ' …'; }
 
   function item(m) {
     return '<a class="bl-item" href="' + R.blUrl(m) + '"><div class="bl-meta"><span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
+      '<span class="bl-von">' + (istFw(m) ? 'Feuerwehr' : 'Polizei') + '</span>' +
       '<time datetime="' + R.esc(m.published_at) + '">' + R.esc(when(m.published_at)) + '</time></div>' +
       '<h3>' + R.esc(m.title) + '</h3><p>' + R.esc(teaser(m.teaser)) + '</p></a>';
   }
@@ -24,7 +33,7 @@
     var box = document.getElementById('bl-list');
     BSN.listBlaulicht().then(function (list) {
       list = list.filter(function (m) { return !m.hidden; });
-      if (!list.length) { box.innerHTML = '<p class="posts-note">Aktuell gibt es keine Polizeimeldungen aus Bad Salzuflen.</p>'; return; }
+      if (!list.length) { box.innerHTML = '<p class="posts-note">Aktuell gibt es keine Meldungen von Polizei oder Feuerwehr aus Bad Salzuflen.</p>'; return; }
       box.innerHTML = list.map(item).join('');
     }).catch(function () { box.innerHTML = '<p class="posts-note">Die Meldungen lassen sich gerade nicht laden.</p>'; });
   }
@@ -42,13 +51,13 @@
       }
       if (built) return;
       document.title = m.title + ' — Blaulicht — Bad Salzuflen News';
-      var src = safeUrl(m.source_url);
+      var q = quelle(m);
       box.innerHTML = '<span class="tag tag-dark">' + R.esc(m.place) + '</span>' +
         '<h1>' + R.esc(m.title) + '</h1>' +
-        '<p class="article-meta">' + R.esc(m.source_name || 'Polizei Lippe') + ' · <time datetime="' + R.esc(m.published_at) + '">' + R.esc(when(m.published_at)) + '</time></p>' +
+        '<p class="article-meta">' + R.esc(q.name) + ' · <time datetime="' + R.esc(m.published_at) + '">' + R.esc(when(m.published_at)) + '</time></p>' +
         '<div class="article-body">' + R.sanitize(m.body) + '</div>' +
-        '<p class="bl-source"><strong>Quelle:</strong> ' + R.esc(m.source_name || 'Polizei Lippe') + ', presseportal.de — ' +
-        '<a href="' + R.esc(src) + '" target="_blank" rel="noopener noreferrer">' + R.esc(src) + '</a></p>';
+        '<p class="bl-source"><strong>Quelle:</strong> ' + R.esc(q.name) + ', ' + q.seite + ' — ' +
+        '<a href="' + R.esc(q.url) + '" target="_blank" rel="noopener noreferrer">' + R.esc(q.url) + '</a></p>';
     }).catch(function () { if (!built) box.innerHTML = '<p class="posts-note">Die Meldung lässt sich gerade nicht laden.</p>'; });
   }
 
