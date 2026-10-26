@@ -27,6 +27,10 @@ body.admin { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(--
   .admin-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; border-radius: 26px; }
   .admin-tabs a { justify-content: center; padding: 8px 4px; font-size: 0.85rem; min-height: 44px; }
   .admin-actions { margin-left: 0; width: 100%; gap: 4px; }
+  /* Safari färbt die Statusleiste nach einer festen Fläche ganz oben (wie die Kopfleiste der Nachrichtenseite).
+     Ohne sie nimmt es Creme und legt seine Unschärfe über das Logo. */
+  body.admin::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 8px; background: #DCCBF3; z-index: 41; pointer-events: none; }
+  :root[data-theme="dark"] body.admin::before { background: #3A2D57; }
 }
 .btn-sm { padding: 10px 20px; font-size: 0.9rem; }
 .btn-ghost { background: none; border: 0; cursor: pointer; min-height: 44px; padding: 0 12px; font: 600 0.88rem var(--font-body); color: var(--color-text-soft); text-decoration: none; display: inline-flex; align-items: center; border-radius: 999px; }
