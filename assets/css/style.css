@@ -267,6 +267,7 @@ a { color: var(--color-navy); }
   padding: 8px;
   min-width: 44px;
   min-height: 44px;
+  color: var(--color-navy);
 }
 .nav-toggle svg { width: 26px; height: 26px; }
 :root[data-theme="dark"] .nav-toggle { color: #FFFFFF; }
