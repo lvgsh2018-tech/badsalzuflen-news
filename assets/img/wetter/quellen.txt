@@ -1,0 +1,9 @@
+Wetter-Kachel: Hintergrundbilder von Unsplash (freie Unsplash-Lizenz, Nutzung auch geschäftlich, ohne Namensnennung).
+Geholt am 2026-10-27, verkleinert auf 800 px.
+sonne.jpg   images.unsplash.com/photo-1787898617803-f56a70a2ddc4
+heiter.jpg  images.unsplash.com/photo-1677246579753-c44600a5ab39
+wolke.jpg   images.unsplash.com/photo-1534088568595-a066f410bcda
+nebel.jpg   images.unsplash.com/photo-1486707471592-8e7eb7e36f78
+regen.jpg   images.unsplash.com/photo-1515694346937-94d85e41e6f0
+schnee.jpg  images.unsplash.com/photo-1520084848344-f4c32b3f7b51
+nacht.jpg   images.unsplash.com/photo-1628498188904-036f5e25e93e

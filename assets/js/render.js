@@ -131,7 +131,8 @@
     var d = R.day(e.starts_on), when = [];
     if (e.starts_at) when.push(e.starts_at + ' Uhr'); if (e.location) when.push(e.location);
     var safe = e.link && /^https?:\/\//i.test(e.link);
-    return '<article class="event' + (e.starts_on === R.todayIso() ? ' today' : '') + '"><div class="event-date" aria-hidden="true"><strong>' + d.getDate() + '</strong><span>' +
+    return '<article class="event' + (e.starts_on === R.todayIso() ? ' today' : '') + '" data-tag="' + R.esc(e.starts_on) + '"' +
+      (e.starts_at ? ' data-zeit="' + R.esc(e.starts_at) + '"' : '') + '><div class="event-date" aria-hidden="true"><strong>' + d.getDate() + '</strong><span>' +
       d.toLocaleDateString('de-DE', { month: 'short' }).replace('.', '') + '</span></div><div><h3>' + R.esc(e.title) + '</h3>' +
       '<p class="event-meta"><span class="sr-only">' + R.dayLong(e.starts_on) + '. </span>' + R.esc(when.join(' · ')) + '</p>' +
       (e.description ? '<p>' + R.esc(e.description) + '</p>' : '') +

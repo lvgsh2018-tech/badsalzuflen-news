@@ -17,6 +17,7 @@
 
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css?v=6">
+<link rel="stylesheet" href="assets/css/wetter.css?v=5">
 <script src="assets/js/theme.js"></script>
 </head>
 <body class="verlauf">
@@ -26,6 +27,7 @@
     <a href="index.html" class="logo-link" aria-label="Bad Salzuflen News — Start">
       <img src="assets/img/logo.webp" alt="Bad Salzuflen News">
     </a>
+    <a class="wetter-kopf" id="wetterKopf" href="index.html#wetter" hidden></a>
     <nav class="main-nav" style="display:flex; position:static; padding:0; border:0; background:none;">
       <a href="index.html">Zur Startseite</a>
     </nav>
@@ -78,6 +80,19 @@
       IP-Adresse, keine Geräte-Kennung und nichts, womit wir dich
       wiedererkennen könnten. So sehen wir, welche Themen gelesen werden
       (Art. 6 Abs. 1 lit. f DSGVO).
+    </p>
+
+    <h2>Wettervorhersage (Bright Sky / Deutscher Wetterdienst)</h2>
+    <p>
+      Die Wetteranzeige oben auf der Seite, die Wetter-Kachel auf der
+      Startseite und die Vorhersage bei den Terminen laden ihre Daten beim
+      Aufruf direkt von Bright Sky (brightsky.dev), einem freien Dienst, der
+      die offenen Wetterdaten des Deutschen Wetterdienstes bereitstellt.
+      Dabei wird technisch bedingt deine IP-Adresse an Bright Sky übertragen;
+      gesendet wird nur der Ort Bad Salzuflen, nichts über dich. Wir wollen
+      dir so das aktuelle Wetter für die Stadt und deine Termine zeigen
+      (Art. 6 Abs. 1 lit. f DSGVO). Die Wetterdaten stammen vom
+      <a href="https://www.dwd.de" target="_blank" rel="noopener">Deutschen Wetterdienst</a>.
     </p>
 
     <h2 id="mitteilungen">Mitteilungen bei neuen Beiträgen</h2>
@@ -159,7 +174,7 @@
       40213 Düsseldorf.
     </p>
 
-    <p><small>Stand: September 2026</small></p>
+    <p><small>Stand: Oktober 2026</small></p>
   </div>
 </main>
 
@@ -176,5 +191,6 @@
 
 <script>document.getElementById('jahr').textContent = new Date().getFullYear();</script>
 
+<script src="assets/js/wetter.js?v=5"></script>
 </body>
 </html>

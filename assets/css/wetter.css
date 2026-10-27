@@ -1,0 +1,98 @@
+/* Wetter für Bad Salzuflen — Kopfzeile, Kachel auf der Startseite, Hinweis bei Terminen (wetter.js) */
+
+/* 1 · Kopfzeile: direkt links neben der Navigation bzw. neben dem Menüknopf */
+.wetter-kopf {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: var(--color-navy);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  animation: wetter-ein 300ms ease-out;
+}
+.wetter-kopf[hidden] { display: none; }
+.wetter-kopf svg { width: 18px; height: 18px; flex: none; }
+.wetter-kopf-ort { font-weight: 500; color: var(--color-text-soft); }
+:root[data-theme="dark"] .wetter-kopf { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); color: #F1EEF9; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wetter-kopf { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); color: #F1EEF9; }
+}
+/* Auf mittleren Breiten braucht die Navigation den Platz */
+@media (min-width: 761px) and (max-width: 1180px) { .wetter-kopf { display: none; } }
+@media (max-width: 760px) {
+  .wetter-kopf { margin-right: -6px; }
+}
+@media (max-width: 380px) { .wetter-kopf-ort { display: none; } }
+
+/* 2 · Kachel im Kachelraster */
+.tile.wetter-kachel { background: var(--color-navy); color: #fff; align-items: stretch; }
+/* Bild je nach Wetterlage; durchgehend abgedunkelt, damit Temperatur oben auch auf hellem Himmel lesbar bleibt */
+.tile.wetter-kachel::after { background: linear-gradient(to bottom, rgba(10, 18, 36, 0.62) 0%, rgba(10, 18, 36, 0.38) 45%, rgba(10, 18, 36, 0.86) 100%); }
+.wetter-kachel .tile-body { display: flex; flex-direction: column; opacity: 0; transition: opacity 300ms ease-out; }
+.wetter-kachel.bereit .tile-body { opacity: 1; }
+.wetter-oben { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wetter-quelle { font-size: 0.68rem; color: var(--color-lilac); white-space: nowrap; }
+.wetter-jetzt { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.wetter-jetzt svg { width: 34px; height: 34px; flex: none; }
+.wetter-jetzt strong { font: 500 2.6rem/1 var(--font-head); }
+.wetter-text { margin: 6px 0 0; font-size: 0.88rem; line-height: 1.35; color: var(--color-lilac); }
+.wetter-tage {
+  list-style: none; margin: auto 0 0; padding: 12px 0 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.78rem; text-align: center;
+}
+.wetter-tage li { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wetter-tage li > span:first-child { color: var(--color-lilac); }
+.wetter-tage svg { width: 18px; height: 18px; }
+.wetter-tage b { font-weight: 600; }
+:root[data-theme="dark"] .tile.wetter-kachel { background: #2A2438; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tile.wetter-kachel { background: #2A2438; } }
+@media (max-width: 600px) {
+  .wetter-jetzt { margin-top: 10px; }
+  .wetter-jetzt svg { width: 26px; height: 26px; }
+  .wetter-jetzt strong { font-size: 2rem; }
+  .wetter-text { font-size: 0.8rem; }
+  .wetter-tage { grid-template-columns: repeat(3, 1fr); }
+  .wetter-tage li:nth-child(4) { display: none; }
+}
+
+/* 3 · Termine: feste Spalte rechts, Gegenstück zum Datum links */
+.event.mit-wetter { grid-template-columns: 76px 1fr 108px; }
+.wetter-termin {
+  align-self: start; padding: 4px 0 4px 14px;
+  border-left: 1px solid var(--color-lilac);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: var(--color-navy); text-align: center; cursor: default;
+}
+.wetter-termin svg { width: 26px; height: 26px; }
+.wetter-termin b { font: 500 1.35rem/1.1 var(--font-head); }
+.wetter-termin-text { font-size: 0.78rem; line-height: 1.25; color: var(--color-text-soft); max-width: 96px; }
+:root[data-theme="dark"] .wetter-termin { color: #F1EEF9; border-left-color: rgba(255, 255, 255, 0.12); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wetter-termin { color: #F1EEF9; border-left-color: rgba(255, 255, 255, 0.12); }
+}
+/* Handy: nur Symbol und Temperatur */
+@media (max-width: 480px) {
+  .event.mit-wetter { grid-template-columns: 60px 1fr 52px; }
+  .wetter-termin { padding-left: 10px; }
+  .wetter-termin svg { width: 22px; height: 22px; }
+  .wetter-termin b { font-size: 1.1rem; }
+  .wetter-termin-text { display: none; }
+}
+
+.wetter-hinweis { margin: 18px 0 0; font-size: 0.82rem; color: var(--color-text-soft); }
+
+@keyframes wetter-ein { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .wetter-kopf { animation: none; }
+  .wetter-kachel .tile-body { transition: none; }
+}

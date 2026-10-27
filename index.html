@@ -23,6 +23,7 @@
 
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css?v=6">
+<link rel="stylesheet" href="assets/css/wetter.css?v=5">
 <link rel="stylesheet" href="assets/css/werbung.css?v=14">
 <link rel="stylesheet" href="assets/css/news.css?v=10">
 <link rel="stylesheet" href="assets/css/anzeigen.css?v=3">
@@ -35,6 +36,7 @@
     <a href="index.html" class="logo-link" aria-label="Bad Salzuflen News — Start">
       <img src="assets/img/logo.webp" alt="Bad Salzuflen News">
     </a>
+    <a class="wetter-kopf" id="wetterKopf" href="index.html#wetter" hidden></a>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="mainNav">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
@@ -134,12 +136,13 @@
   </div>
 </footer>
 
+<script src="assets/js/wetter.js?v=5"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api.js?v=6"></script>
 <script src="beitrag/liste.js"></script>
-<script src="assets/js/render.js?v=13"></script>
+<script src="assets/js/render.js?v=14"></script>
 <script src="assets/js/anzeigen.js?v=2"></script>
-<script src="assets/js/home.js?v=14"></script>
+<script src="assets/js/home.js?v=15"></script>
 <script src="assets/js/push.js?v=3"></script>
 <script>
   document.getElementById('jahr').textContent = new Date().getFullYear();

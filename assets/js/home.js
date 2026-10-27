@@ -21,6 +21,11 @@
 
   function mischen(l) { l = l.slice(); for (var i = l.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = l[i]; l[i] = l[j]; l[j] = t; } return l; }
   function istBl(a) { return !!a.blaulicht; }
+  /* Wetter-Kachel: steht unten rechts in den vier kleinen Kacheln, Inhalt kommt aus wetter.js */
+  var WETTER = { wetter: true };
+  function T(x, cls) {
+    return x === WETTER ? '<section class="tile wetter-kachel ' + cls + '" id="wetter" aria-label="Wetter in Bad Salzuflen"><div class="tile-body"></div></section>' : R.tile(x, cls);
+  }
 
   /* Mit Anzeigen-Kacheln: Anzeigen kommen zu den Beiträgen dazu, keine fällt weg und es gibt keine Obergrenze.
      Die erste kleine Anzeige sitzt oben rechts (nie direkt neben Blaulicht), alle weiteren bekommen eigene Reihen
@@ -54,7 +59,7 @@
       [1, 3, 0, 2].slice(0, ads4.length).forEach(function (pos, k) { row[pos] = ad(ads4[k]); });
       kleinReihen.push(row.map(function (x) { return x || fuellen(); }).filter(Boolean));
     }
-    function kachel(x, cls) { return x.werbekachel ? A.html(x.werbekachel) : R.tile(x, cls); }
+    function kachel(x, cls) { return x.werbekachel ? A.html(x.werbekachel) : T(x, cls); }
     var html = R.tile(featured, 's6 tile--lead') + side.map(function (x) { return kachel(x, 's3'); }).join('');
     for (i = 0; i < Math.max(breit.length, kleinReihen.length); i++) {
       if (breit[i]) html += breit[i].map(function (x) { return kachel(x, breit[i].length === 1 ? 's12' : 's6'); }).join('');
@@ -73,10 +78,12 @@
     var featured = top;
     var rest = articles.concat(bls).filter(function (a) { return a !== top; })
       .sort(function (a, b) { return time(b) - time(a); }).slice(0, BOARD - 1);
+    if (window.BSNWetter && rest.length >= 4) { rest = rest.slice(0, BOARD - 2); rest.splice(3, 0, WETTER); }
     var tileAds = (ads || []).filter(function (a) { return /^kachel/.test(a.platz); });
     if (tileAds.length && window.BSNAnzeigen && rest.length >= 4) {
       grid.innerHTML = boardMitAnzeigen(featured, rest, articles, tileAds);
       board.used = [featured].concat(rest);
+      if (window.BSNWetter) BSNWetter.kachel();
       return;
     }
     var html = '';
@@ -87,11 +94,12 @@
       html += R.tile(featured, 's6 tile--lead');
       var side = rest.slice(0, 4), low = rest.slice(4);
       var sw = side.length === 4 ? ['s3', 's3', 's3', 's3'] : side.length === 3 ? ['s6', 's3', 's3'] : ['s6', 's6'];
-      side.forEach(function (a, i) { html += R.tile(a, sw[i]); });
+      side.forEach(function (a, i) { html += T(a, sw[i]); });
       low.forEach(function (a) { html += R.tile(a, low.length === 1 ? 's12' : 's6'); });
     }
     grid.innerHTML = html;
     board.used = [featured].concat(rest);
+    if (window.BSNWetter) BSNWetter.kachel();
   }
 
   function pool() {
