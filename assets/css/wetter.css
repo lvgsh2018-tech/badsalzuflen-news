@@ -38,9 +38,10 @@
 .tile.wetter-kachel::after { background: linear-gradient(to bottom, rgba(10, 18, 36, 0.62) 0%, rgba(10, 18, 36, 0.38) 45%, rgba(10, 18, 36, 0.86) 100%); }
 .wetter-kachel .tile-body { display: flex; flex-direction: column; opacity: 0; transition: opacity 300ms ease-out; }
 .wetter-kachel.bereit .tile-body { opacity: 1; }
-.wetter-oben { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.wetter-quelle { font-size: 0.68rem; color: var(--color-lilac); white-space: nowrap; }
-.wetter-jetzt { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+/* Ohne Schild „Wetter“: Temperatur ganz oben, Quelle klein in der Ecke */
+.wetter-kachel .tile-body { position: relative; }
+.wetter-quelle { position: absolute; top: 24px; right: 22px; font-size: 0.68rem; color: var(--color-lilac); white-space: nowrap; }
+.wetter-jetzt { display: flex; align-items: center; gap: 10px; margin-top: 40px; }
 .wetter-jetzt svg { width: 34px; height: 34px; flex: none; }
 .wetter-jetzt strong { font: 500 2.6rem/1 var(--font-head); }
 .wetter-text { margin: 6px 0 0; font-size: 0.88rem; line-height: 1.35; color: var(--color-lilac); }
@@ -57,7 +58,9 @@
 :root[data-theme="dark"] .tile.wetter-kachel { background: #2A2438; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tile.wetter-kachel { background: #2A2438; } }
 @media (max-width: 600px) {
-  .wetter-jetzt { margin-top: 10px; }
+  .wetter-quelle { top: 16px; right: 14px; }
+  .wetter-jetzt { margin-top: 32px; }
+  .wetter-quelle-wort { display: none; }
   .wetter-jetzt svg { width: 26px; height: 26px; }
   .wetter-jetzt strong { font-size: 2rem; }
   .wetter-text { font-size: 0.8rem; }

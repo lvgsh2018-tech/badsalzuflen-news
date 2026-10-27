@@ -116,7 +116,7 @@
     }
     var bild = { mond: 'nacht', gewitter: 'regen' }[a[1]] || a[1];
     el.innerHTML = '<img src="assets/img/wetter/' + bild + '.jpg" alt="" loading="lazy" onerror="this.remove()">' +
-      '<div class="tile-body"><div class="wetter-oben"><span class="tag">Wetter</span><span class="wetter-quelle">Daten: DWD</span></div>' +
+      '<div class="tile-body"><span class="wetter-quelle" title="Daten: Deutscher Wetterdienst"><span class="wetter-quelle-wort">Daten: </span>DWD</span>' +
       '<div class="wetter-jetzt">' + ico(ICONS[a[1]]) + '<strong>' + grad(c.temperature_2m) + '</strong></div>' +
       '<p class="wetter-text">' + a[0] + ' · ' + grad(t.temperature_2m_min[0]) + ' bis ' + grad(t.temperature_2m_max[0]) + '</p>' +
       '<ul class="wetter-tage" aria-label="Die nächsten Tage">' + tage + '</ul></div>';
@@ -125,7 +125,7 @@
   function kachelFehler() {
     var el = document.getElementById('wetter');
     if (!el) return;
-    el.innerHTML = '<div class="tile-body"><span class="tag">Wetter</span><p class="wetter-text">Das Wetter lässt sich gerade nicht laden.</p></div>';
+    el.innerHTML = '<div class="tile-body"><p class="wetter-text">Das Wetter für Bad Salzuflen lässt sich gerade nicht laden.</p></div>';
     el.classList.add('bereit');
   }
 
