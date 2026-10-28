@@ -53,7 +53,7 @@
     // Bildnachweis startet immer leer – er gehört zum jeweiligen Foto, nicht zum letzten Bild.
     S.nachweis = '';
     try { localStorage.removeItem(KN); } catch (e) {}
-    var foto = null, daten = null, uhr = null;
+    var foto = null, fotoFest = false, daten = null, uhr = null;
 
     view.innerHTML = kopfNavigation(format) +
       '<div class="gen-grid"><div class="gen-buehne">' +
@@ -66,7 +66,7 @@
       '<section class="panel"><h2>1 · Foto</h2>' +
       '<div class="gen-ablage" id="sAblage" tabindex="0" role="button" aria-label="Foto auswählen oder hierher ziehen"><b id="sAblageTitel">Foto hierher ziehen</b><span id="sAblageText">oder tippen zum Auswählen</span></div>' +
       '<input type="file" id="sDatei" accept="image/*" class="sr-only" tabindex="-1">' +
-      '<div class="credit-vorschlaege"><button type="button" class="chip" id="sBlaulicht">Blaulicht-Foto nehmen</button></div>' +
+      '<div class="credit-vorschlaege"><button type="button" class="chip" id="sBlaulicht">Polizei-Foto nehmen</button><button type="button" class="chip" id="sFeuerwehr">Feuerwehr-Foto nehmen</button></div>' +
       regler('foto_x', 'Ausschnitt links / rechts', 0, 100, 1, ' %') + regler('foto_y', 'Ausschnitt oben / unten', 0, 100, 1, ' %') + regler('zoom', 'Vergrößern', 100, 250, 1, ' %') +
       '</section>' +
 
@@ -146,12 +146,12 @@
     })();
 
     /* ---------- Foto ---------- */
-    function fotoLaden(datei) {
+    function fotoLaden(datei, fest) {
       if (!datei || !/^image\//.test(datei.type)) { $('sAblageTitel').textContent = 'Das ist keine Bilddatei.'; return; }
       $('sAblageTitel').textContent = 'Foto wird geladen …';
       var url = URL.createObjectURL(datei), bild = new Image();
       bild.onload = function () {
-        foto = bild;
+        foto = bild; fotoFest = !!fest;
         // Neues Foto → alter Bildnachweis passt nicht mehr, Feld leeren
         $('s_nachweis').value = S.nachweis = ''; nachweisMarken();
         $('sAblageTitel').textContent = datei.name; $('sAblageText').textContent = 'Tippen, um ein anderes Foto zu nehmen';
@@ -167,12 +167,14 @@
     ['dragenter', 'dragover'].forEach(function (t) { ablage.addEventListener(t, function (ev) { ev.preventDefault(); ablage.classList.add('drueber'); }); });
     ['dragleave', 'drop'].forEach(function (t) { ablage.addEventListener(t, function (ev) { ev.preventDefault(); ablage.classList.remove('drueber'); }); });
     ablage.addEventListener('drop', function (ev) { fotoLaden(ev.dataTransfer.files[0]); });
-    // Fest hinterlegtes Blaulicht-Foto mit einem Tipp übernehmen
-    $('sBlaulicht').addEventListener('click', function () {
-      fetch('assets/generator/blaulicht.jpg').then(function (r) { return r.blob(); }).then(function (b) {
-        fotoLaden(new File([b], 'Blaulicht-Foto', { type: 'image/jpeg' }));
-      }).catch(function () { $('sAblageTitel').textContent = 'Blaulicht-Foto ließ sich nicht laden.'; });
-    });
+    // Fest hinterlegte Fotos für Polizei und Feuerwehr mit einem Tipp übernehmen
+    function festesFoto(pfad, name) {
+      fetch(pfad).then(function (r) { return r.blob(); }).then(function (b) {
+        fotoLaden(new File([b], name, { type: 'image/jpeg' }), true);
+      }).catch(function () { $('sAblageTitel').textContent = name + ' ließ sich nicht laden.'; });
+    }
+    $('sBlaulicht').addEventListener('click', function () { festesFoto('assets/generator/blaulicht.jpg', 'Polizei-Foto'); });
+    $('sFeuerwehr').addEventListener('click', function () { festesFoto('assets/img/feuerwehr.jpg', 'Feuerwehr-Foto'); });
 
     /* ---------- Letzte Überschriften (Nachrichten + Blaulicht) vorschlagen ---------- */
     function tag(d) { return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }); }
@@ -180,7 +182,7 @@
     Promise.all([BSN.listPublished(), BSN.listBlaulicht()]).then(function (r) {
       var gruppen = [
         ['Nachrichten', r[0].slice(0, 5).map(function (a) { return { titel: a.title, rubrik: a.category || '', datum: a.published_at, link: basis + 'artikel.html?s=' + encodeURIComponent(a.slug) }; })],
-        ['Blaulicht', r[1].filter(function (m) { return !m.hidden; }).slice(0, 5).map(function (m) { return { titel: m.title, rubrik: 'Blaulicht', datum: m.published_at, link: basis + 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: true }; })]
+        ['Blaulicht', r[1].filter(function (m) { return !m.hidden; }).slice(0, 5).map(function (m) { return { titel: m.title, rubrik: 'Blaulicht', datum: m.published_at, link: basis + 'blaulicht.html?m=' + encodeURIComponent(m.source_id), blaulicht: /^fw-/.test(m.source_id || '') ? 'sFeuerwehr' : 'sBlaulicht' }; })]
       ];
       var box = $('sZuletzt'), alle = [];
       box.innerHTML = gruppen.map(function (g, gi) {
@@ -196,7 +198,8 @@
           $('s_zusatz').value = S.zusatz = x.rubrik;
           if ($('sArtikel')) $('sArtikel').value = x.link;
           box.querySelectorAll('[data-zuletzt]').forEach(function (k) { k.setAttribute('aria-pressed', k === b ? 'true' : 'false'); });
-          if (x.blaulicht && !foto) $('sBlaulicht').click();
+          // Feuerwehr-Meldung → Feuerwehr-Foto, Polizei-Meldung → Polizei-Foto; ein eigenes Foto bleibt stehen
+          if (x.blaulicht && (!foto || fotoFest)) $(x.blaulicht).click();
           spaeter();
         });
       });
