@@ -49,6 +49,7 @@
         document.title = 'Meldung nicht gefunden — Bad Salzuflen News';
         box.innerHTML = '<h1>Meldung nicht gefunden</h1><p>Vielleicht ist sie nicht mehr verfügbar. <a href="blaulicht.html">Zu allen Blaulicht-Meldungen</a></p>'; return;
       }
+      BSN.addBlaulichtView(m.id);
       if (built) return;
       document.title = m.title + ' — Blaulicht — Bad Salzuflen News';
       var q = quelle(m);

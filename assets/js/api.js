@@ -128,6 +128,7 @@
       });
     };
     BSN.addView = function (id) { var v = read(KV, []); v.push({ article_id: id, created_at: new Date().toISOString() }); try { write(KV, v); } catch (e) {} return Promise.resolve(); };
+    BSN.addBlaulichtView = function (id) { var v = read(KV, []); v.push({ article_id: null, blaulicht_id: id, created_at: new Date().toISOString() }); try { write(KV, v); } catch (e) {} return Promise.resolve(); };
     BSN.getViews = function () { return Promise.resolve(read(KV, [])); };
 
 
@@ -301,6 +302,10 @@
   };
   BSN.addView = function (id) {
     return client().then(function (c) { return c.from('views').insert({ article_id: id }); }).catch(function () {});
+  };
+  /* Aufruf einer Blaulicht-Meldung – zählt bei „Aufrufe insgesamt“ mit */
+  BSN.addBlaulichtView = function (id) {
+    return client().then(function (c) { return c.from('views').insert({ blaulicht_id: id }); }).catch(function () {});
   };
   /* Supabase liefert pro Abfrage höchstens 1000 Zeilen – deshalb seitenweise holen. */
   BSN.getViews = function () {
