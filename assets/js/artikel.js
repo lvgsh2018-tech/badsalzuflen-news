@@ -17,12 +17,13 @@
     box.innerHTML = '<h1>Diesen Beitrag gibt es nicht</h1><p>Vielleicht wurde er entfernt oder der Link ist unvollständig.</p><a class="btn btn-primary" href="index.html">Zu allen Nachrichten</a>';
   }
   function html(a) {
+    var body = R.sanitize(a.body), oben = R.streckeOben(body, a.image_credit);
     return (a.anzeige ? '<p class="ad-kennung"><span class="ad-label">Anzeige</span> Dieser Beitrag ist eine bezahlte Anzeige.</p>' : '') +
       '<span class="tag tag-dark">' + R.esc(a.category) + '</span><h1>' + R.esc(a.title) + '</h1>' +
       '<p class="article-meta">' + (a.published_at ? R.date(a.published_at) + ' · ' : '') + R.readMinutes(a.body) + ' Min. Lesezeit</p>' +
-      (a.image_url ? '<figure><img src="' + R.esc(a.image_url) + '" alt="">' + (a.image_credit ? '<figcaption>' + R.esc(a.image_credit) + '</figcaption>' : '') + '</figure>' : '') +
+      (oben ? oben.fig : a.image_url ? '<figure><img src="' + R.esc(a.image_url) + '" alt="">' + (a.image_credit ? '<figcaption>' + R.esc(a.image_credit) + '</figcaption>' : '') + '</figure>' : '') +
       (a.teaser ? '<p class="article-lede">' + R.esc(a.teaser) + '</p>' : '') +
-      '<div class="article-body">' + R.sanitize(a.body) + '</div>';
+      '<div class="article-body">' + (oben ? oben.body : body) + '</div>';
   }
   if (!slug) { missing(); return; }
   if (built) R.strecken(box);

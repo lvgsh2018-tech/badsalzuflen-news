@@ -148,6 +148,20 @@ def sanitize(body, base):
     return ''.join(out(k) for k in t.root[2])
 
 
+# Hat ein Beitrag eine Bildstrecke (Bildblock mit mehreren Bildern), steht die erste oben anstelle des Titelbilds.
+# Gleiche Regel wie R.streckeOben in assets/js/render.js.
+def strecke_oben(clean, credit):
+    for m in re.finditer(r'<figure>(.*?)</figure>', clean, re.S):
+        inner = m.group(1)
+        if inner.count('<img') < 2:
+            continue
+        if '<figcaption>' not in inner and credit:
+            inner += '<figcaption>%s</figcaption>' % esc(re.sub(r'^Foto:', 'Fotos:', credit))
+        inner = inner.replace(' loading="lazy"', '', 1)
+        return clean[:m.start()] + clean[m.end():], '<figure>%s</figure>' % inner
+    return clean, None
+
+
 def plain(body):
     return ' '.join(html.unescape(re.sub(r'<[^>]+>', ' ', body or '')).split())
 
@@ -198,17 +212,18 @@ def article_page(tpl, a, base):
         '<meta property="article:published_time" content="%s">' % when(a['published_at']).isoformat(),
         '<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False).replace('</', '<\\/'),
     ])
+    text, oben = strecke_oben(sanitize(a.get('body'), base), a.get('image_credit'))
     body = (
         ('<p class="ad-kennung"><span class="ad-label">Anzeige</span> Dieser Beitrag ist eine bezahlte Anzeige.</p>'
          if a.get('anzeige') else '') +
         '<span class="tag tag-dark">%s</span><h1>%s</h1>' % (esc(a.get('category')), esc(title)) +
         '<p class="article-meta">%s · %d Min. Lesezeit</p>' % (date_de(a['published_at']), read_minutes(a.get('body'))) +
-        ('<figure><img src="%s" alt="">%s</figure>' % (
+        (oben or ('<figure><img src="%s" alt="">%s</figure>' % (
             esc(a['image_url']),
             '<figcaption>%s</figcaption>' % esc(a['image_credit']) if a.get('image_credit') else '')
-         if a.get('image_url') else '') +
+         if a.get('image_url') else '')) +
         ('<p class="article-lede">%s</p>' % esc(a['teaser']) if a.get('teaser') else '') +
-        '<div class="article-body">%s</div>' % sanitize(a.get('body'), base)
+        '<div class="article-body">%s</div>' % text
     )
     page = swap(tpl, '<meta charset="UTF-8">', '<meta charset="UTF-8">\n<base href="/">')
     page = swap(page, '<title>Beitrag — Bad Salzuflen News</title>', head)

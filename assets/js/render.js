@@ -123,7 +123,7 @@
      Ohne dieses Skript stehen die Bilder einfach untereinander. */
   var PFEIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
   R.strecken = function (root) {
-    (root || document).querySelectorAll('.article-body figure').forEach(function (fig) {
+    (root || document).querySelectorAll('.article figure').forEach(function (fig) {
       var imgs = Array.prototype.slice.call(fig.querySelectorAll(':scope > img'));
       if (imgs.length < 2 || fig.classList.contains('strecke')) return;
       var n = imgs.length, bahn = document.createElement('div'), bild = document.createElement('div');
@@ -166,6 +166,22 @@
         if (e.key === 'ArrowLeft') { e.preventDefault(); gehe(Math.max(0, stelle() - 1)); }
       });
     });
+  };
+  /* Hat ein Beitrag eine Bildstrecke, steht die erste oben anstelle des Titelbilds (Lennart, 2026-11-08).
+     Das Titelbild bleibt für Kacheln, Instagram und Link-Vorschauen. Fehlt der Strecke eine Unterschrift,
+     bekommt sie den Bildnachweis des Titelbilds („Foto:“ wird zu „Fotos:“). Gleiche Regel in werkzeug/seiten_bauen.py. */
+  R.streckeOben = function (cleanBody, credit) {
+    var doc = new DOMParser().parseFromString('<body>' + (cleanBody || '') + '</body>', 'text/html');
+    var fig = Array.prototype.find.call(doc.body.querySelectorAll('figure'), function (f) { return f.querySelectorAll('img').length > 1; });
+    if (!fig) return null;
+    fig.remove();
+    var cap = fig.querySelector('figcaption');
+    if (!(cap && cap.textContent.trim()) && credit) {
+      if (!cap) { cap = doc.createElement('figcaption'); fig.appendChild(cap); }
+      cap.textContent = String(credit).replace(/^Foto:/, 'Fotos:');
+    }
+    var first = fig.querySelector('img'); first.removeAttribute('loading');
+    return { fig: fig.outerHTML, body: doc.body.innerHTML };
   };
   window.BSNR = R;
 })();
