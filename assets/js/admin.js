@@ -208,8 +208,10 @@
         '<button type="button" data-block="blockquote" aria-label="Zitat" title="Zitat">„ “</button><span class="sep"></span>' +
         '<button type="button" data-link aria-label="Link einfügen" title="Link einfügen">Link</button>' +
         '<button type="button" data-cmd="unlink" aria-label="Link entfernen" title="Link entfernen">Link weg</button><span class="sep"></span>' +
-        '<button type="button" data-img aria-label="Bilder in den Text einfügen" title="Bilder in den Text einfügen (mehrere möglich)">+ Bilder</button></div>' +
+        '<button type="button" data-img aria-label="Bilder in den Text einfügen" title="Bilder in den Text einfügen (mehrere möglich)">+ Bilder</button>' +
+        '<button type="button" data-strecke aria-label="Bildstrecke zum Wischen einfügen" title="Mehrere Bilder als Bildstrecke, durch die man wischen kann">+ Bildstrecke</button></div>' +
         '<input type="file" id="fBodyImgs" accept="image/*" multiple class="sr-only" tabindex="-1" aria-hidden="true">' +
+        '<input type="file" id="fBodyStrecke" accept="image/*" multiple class="sr-only" tabindex="-1" aria-hidden="true">' +
         '<div class="body-edit" id="fBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Beitragstext" data-placeholder="Schreib hier deinen Beitrag …">' + R.sanitize(a.body) + '</div>' +
         '</div><aside class="editor-side">' +
         '<div class="panel"><div id="cover"></div>' +
@@ -239,6 +241,7 @@
       view.querySelector('.toolbar').addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
         if (b.hasAttribute('data-img')) { document.getElementById('fBodyImgs').click(); return; }
+        if (b.hasAttribute('data-strecke')) { document.getElementById('fBodyStrecke').click(); return; }
         body.focus();
         if (b.dataset.cmd) document.execCommand(b.dataset.cmd);
         else if (b.dataset.block) document.execCommand('formatBlock', false, b.dataset.block);
@@ -268,9 +271,10 @@
       document.addEventListener('selectionchange', function () { if (body.isConnected && document.activeElement === body) saveSpot(); });
       function captions() { body.querySelectorAll('figure').forEach(function (f) { if (!f.querySelector('figcaption')) f.appendChild(document.createElement('figcaption')); }); }
       captions();
-      function insertFigure(url) {
-        var fig = document.createElement('figure'), img = document.createElement('img');
-        img.src = url; img.alt = ''; fig.appendChild(img); fig.appendChild(document.createElement('figcaption'));
+      function insertFigure(urls) {
+        var fig = document.createElement('figure');
+        [].concat(urls).forEach(function (url) { var img = document.createElement('img'); img.src = url; img.alt = ''; fig.appendChild(img); });
+        fig.appendChild(document.createElement('figcaption'));
         // Absatz finden, in dem der Cursor steht – das Bild kommt dahinter; weitere Bilder jeweils hinter das vorige.
         var at = spot && spot.nodeType ? spot : spot ? spot.startContainer : null;
         while (at && at.parentNode !== body) at = at.parentNode;
@@ -289,10 +293,29 @@
           toast(n === 1 ? 'Bild ist im Text.' : n + ' Bilder sind im Text.');
         }).catch(function (x) { toast((n ? n + ' Bilder sind drin, dann ging es nicht weiter: ' : '') + x.message, true); });
       });
+      /* Bildstrecke: alle gewählten Bilder in einen Block – auf der Seite wischt man dann durch. */
+      document.getElementById('fBodyStrecke').addEventListener('change', function (e) {
+        var files = Array.prototype.slice.call(e.target.files); e.target.value = '';
+        if (!files.length) return;
+        if (files.length < 2) { toast('Für eine Bildstrecke bitte mindestens zwei Bilder auf einmal wählen.', true); return; }
+        var urls = [];
+        toast(files.length + ' Bilder werden verarbeitet …');
+        files.reduce(function (p, f) {
+          return p.then(function () { return BSN.uploadImage(f).then(function (url) { urls.push(url); }); });
+        }, Promise.resolve()).then(function () {
+          insertFigure(urls); dirty = true; toast('Bildstrecke mit ' + urls.length + ' Bildern ist im Text.');
+        }).catch(function (x) {
+          if (urls.length) { insertFigure(urls); dirty = true; }
+          toast((urls.length ? urls.length + ' Bilder sind drin, dann ging es nicht weiter: ' : '') + x.message, true);
+        });
+      });
       body.addEventListener('click', function (e) {
         var img = e.target.closest('figure img'); if (!img) return;
         ask({ title: 'Bild aus dem Text entfernen?', yes: 'Entfernen', danger: true }).then(function (ok) {
-          if (ok) { img.closest('figure').remove(); dirty = true; }
+          if (!ok) return;
+          var fig = img.closest('figure'); img.remove();
+          if (!fig.querySelector('img')) fig.remove();
+          dirty = true;
         });
       });
 

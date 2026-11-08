@@ -118,6 +118,55 @@
     d.textContent = 'Demo-Modus · Beispielinhalte, nur in deinem Browser';
     document.body.appendChild(d);
   };
+  /* Bildstrecke: ein Bildblock mit mehreren Bildern wird zum Wischen (wie bei Instagram).
+     Gewischt wird mit dem echten Scrollen des Browsers – Schwung und Einrasten fühlen sich dadurch natürlich an.
+     Ohne dieses Skript stehen die Bilder einfach untereinander. */
+  var PFEIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+  R.strecken = function (root) {
+    (root || document).querySelectorAll('.article-body figure').forEach(function (fig) {
+      var imgs = Array.prototype.slice.call(fig.querySelectorAll(':scope > img'));
+      if (imgs.length < 2 || fig.classList.contains('strecke')) return;
+      var n = imgs.length, bahn = document.createElement('div'), bild = document.createElement('div');
+      fig.classList.add('strecke');
+      bild.className = 'strecke-bild';
+      bahn.className = 'strecke-bahn'; bahn.tabIndex = 0;
+      bahn.setAttribute('role', 'group'); bahn.setAttribute('aria-roledescription', 'Bildstrecke'); bahn.setAttribute('aria-label', 'Bildstrecke mit ' + n + ' Bildern, zum Weiterblättern wischen');
+      imgs.forEach(function (img, i) { img.alt = 'Bild ' + (i + 1) + ' von ' + n; img.draggable = false; bahn.appendChild(img); });
+      bild.appendChild(bahn);
+      bild.insertAdjacentHTML('beforeend',
+        '<span class="strecke-zahl" aria-hidden="true">1 / ' + n + '</span>' +
+        '<button type="button" class="strecke-pfeil strecke-zurueck" aria-label="Vorheriges Bild" hidden>' + PFEIL + '</button>' +
+        '<button type="button" class="strecke-pfeil strecke-weiter" aria-label="Nächstes Bild">' + PFEIL + '</button>');
+      var punkte = document.createElement('div');
+      punkte.className = 'strecke-punkte'; punkte.setAttribute('aria-hidden', 'true');
+      punkte.innerHTML = imgs.map(function (_, i) { return '<i' + (i ? '' : ' class="an"') + '></i>'; }).join('');
+      fig.insertBefore(bild, fig.firstChild);
+      bild.after(punkte);
+      /* Höhe nach dem ersten Bild (zwischen hochkant 4:5 und quer 3:2), damit nichts springt */
+      function mass() {
+        var f = imgs[0]; if (!f.naturalWidth) return;
+        bahn.style.aspectRatio = Math.min(3 / 2, Math.max(4 / 5, f.naturalWidth / f.naturalHeight));
+      }
+      if (imgs[0].complete) mass(); else imgs[0].addEventListener('load', mass, { once: true });
+      var zahl = bild.querySelector('.strecke-zahl'), zur = bild.querySelector('.strecke-zurueck'), wei = bild.querySelector('.strecke-weiter');
+      var jetzt = 0, ruhig = window.matchMedia('(prefers-reduced-motion: reduce)');
+      function stelle() { return Math.round(bahn.scrollLeft / (bahn.clientWidth || 1)); }
+      function zeigen() {
+        var i = Math.max(0, Math.min(n - 1, stelle())); if (i === jetzt) return; jetzt = i;
+        zahl.textContent = (i + 1) + ' / ' + n;
+        punkte.querySelectorAll('i').forEach(function (p, k) { p.classList.toggle('an', k === i); });
+        zur.hidden = i === 0; wei.hidden = i === n - 1;
+      }
+      function gehe(i) { bahn.scrollTo({ left: i * bahn.clientWidth, behavior: ruhig.matches ? 'auto' : 'smooth' }); }
+      bahn.addEventListener('scroll', zeigen, { passive: true });
+      zur.addEventListener('click', function () { gehe(Math.max(0, stelle() - 1)); });
+      wei.addEventListener('click', function () { gehe(Math.min(n - 1, stelle() + 1)); });
+      bahn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); gehe(Math.min(n - 1, stelle() + 1)); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); gehe(Math.max(0, stelle() - 1)); }
+      });
+    });
+  };
   window.BSNR = R;
 })();
 

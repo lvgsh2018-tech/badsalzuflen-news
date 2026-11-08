@@ -25,6 +25,7 @@
       '<div class="article-body">' + R.sanitize(a.body) + '</div>';
   }
   if (!slug) { missing(); return; }
+  if (built) R.strecken(box);
   BSN.getUser().catch(function () { return null; }).then(function (u) {
     return BSN.getArticle(slug, { preview: !!u });
   }).then(function (a) {
@@ -35,6 +36,7 @@
     if (draft) robots.content = 'noindex';
     /* Die feste Seite nur neu zeichnen, wenn der Beitrag seit dem Bau geändert wurde */
     if (!built || draft || box.getAttribute('data-stand') !== a.updated_at) box.innerHTML = html(a);
+    R.strecken(box);
     if (draft) return;
     box.insertAdjacentHTML('beforeend', R.shareHTML(a));
     /* Hinweis auf das Werbepartnerprogramm direkt über „Beitrag teilen“ */

@@ -237,6 +237,11 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .body-edit figure img { display: block; width: 100%; height: auto; border-radius: 12px; cursor: pointer; }
 .body-edit figcaption { min-height: 1.6em; margin-top: 6px; font-size: 0.85rem; color: var(--color-text-soft); outline: none; }
 .body-edit figcaption:empty::before { content: "Bildunterschrift (kann leer bleiben)"; opacity: 0.6; }
+/* Bildstrecke im Editor: Bilder nebeneinander als Reihe, Antippen entfernt ein einzelnes */
+.body-edit figure:has(img + img) { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; padding: 10px; border: 1px dashed var(--color-text-soft); border-radius: 14px; }
+.body-edit figure:has(img + img)::before { content: "Bildstrecke: auf der Seite wischt man durch diese Bilder"; grid-column: 1 / -1; font-size: 0.8rem; color: var(--color-text-soft); }
+.body-edit figure:has(img + img) img { aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.body-edit figure:has(img + img) figcaption { grid-column: 1 / -1; }
 
 /* Planung (Contentplanung aus MeinOrbit) */
 /* Zehn Kanalfarben, je eine kräftige Schrift-/Linienfarbe und ein weicher Grund.
