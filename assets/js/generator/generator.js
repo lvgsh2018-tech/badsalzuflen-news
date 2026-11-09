@@ -270,8 +270,87 @@
     };
   }
 
+  /* Bildstrecken im Artikeltext finden: jeder Bildblock mit mindestens zwei Bildern */
+  function streckenAus(body) {
+    var d = new DOMParser().parseFromString('<div>' + (body || '') + '</div>', 'text/html');
+    return Array.prototype.map.call(d.querySelectorAll('figure'), function (fig) {
+      return Array.prototype.map.call(fig.querySelectorAll('img'), function (i) { return i.getAttribute('src'); }).filter(Boolean);
+    }).filter(function (l) { return l.length > 1; });
+  }
+  function streckenHtml(strecken, nachweis) {
+    if (!strecken.length) return '';
+    return '<section class="panel strecke-paket"><h2>Bildstrecke für Instagram</h2>' +
+      '<p class="gen-hilfe">Jedes Bild im Beitragsformat 4:5 mit dem Logo oben links – so passen alle zusammen in ein Karussell. Antippen lädt ein einzelnes Bild.</p>' +
+      '<label class="field"><span>Bildnachweis auf den Bildern (leer lassen für keinen)</span><input id="pSNachweis" value="' + esc(nachweis) + '"></label>' +
+      strecken.map(function (liste, s) {
+        return (strecken.length > 1 ? '<h3>Bildstrecke ' + (s + 1) + '</h3>' : '') +
+          (liste.length > 20 ? '<p class="gen-hilfe">Instagram nimmt höchstens 20 Bilder pro Beitrag – hier sind es ' + liste.length + '.</p>' : '') +
+          '<div class="strecke-raster">' + liste.map(function (_, i) {
+            return '<button type="button" class="strecke-kachel" data-sk="' + s + '-' + i + '" aria-label="Bild ' + (i + 1) + ' von ' + liste.length + ' herunterladen" disabled><span class="strecke-nr">' + (i + 1) + '</span></button>';
+          }).join('') + '</div>' +
+          '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" data-salle="' + s + '" disabled>Alle ' + liste.length + ' Bilder herunterladen</button>' +
+          '<button class="btn btn-secondary btn-sm" type="button" data-steilen="' + s + '" hidden disabled>Teilen / in Fotos sichern</button></div>';
+      }).join('') +
+      '<p class="gen-status" id="pSStatus" aria-live="polite">Bilder werden gezeichnet …</p></section>';
+  }
+  function streckenStarten(view, toast, strecken, titel) {
+    if (!strecken.length) return;
+    var fotos = [], fertig = [], daten = null, uhr;
+    function zeichnen() {
+      var nachweis = $('pSNachweis').value, stueck = wortFuerDatei(titel);
+      return Promise.all(strecken.map(function (liste, s) {
+        return Promise.all(liste.map(function (_, i) {
+          var c = Z.streckenBild(fotos[s][i], { nachweis: nachweis }, daten);
+          var k = view.querySelector('[data-sk="' + s + '-' + i + '"]');
+          k.querySelectorAll('canvas').forEach(function (x) { x.remove(); });
+          k.insertBefore(c, k.firstChild);
+          return alsBlob(c, 'jpg').then(function (b) {
+            fertig[s] = fertig[s] || [];
+            fertig[s][i] = { blob: b, name: dateiname('bildstrecke', stueck + (strecken.length > 1 ? '-' + (s + 1) : '') + '_' + String(i + 1).padStart(2, '0'), 'jpg') };
+          });
+        }));
+      }));
+    }
+    function bereit(an) {
+      view.querySelectorAll('[data-sk], [data-salle], [data-steilen]').forEach(function (k) { k.disabled = !an; });
+      view.querySelectorAll('[data-steilen]').forEach(function (k) { k.hidden = !kannTeilen(); });
+    }
+    Promise.all([Z.laden(), Promise.all(strecken.map(function (liste) {
+      return Promise.all(liste.map(function (url) { return bildVon(url).catch(function () { return null; }); }));
+    }))]).then(function (r) {
+      daten = r[0]; fotos = r[1];
+      var fehlt = [].concat.apply([], fotos).filter(function (f) { return !f; }).length;
+      return zeichnen().then(function () {
+        bereit(true);
+        $('pSStatus').textContent = fehlt ? fehlt + (fehlt === 1 ? ' Bild ließ' : ' Bilder ließen') + ' sich nicht laden und ' + (fehlt === 1 ? 'ist' : 'sind') + ' leer.' : '';
+      });
+    }).catch(function (x) { $('pSStatus').textContent = 'Das hat nicht geklappt: ' + x.message; });
+
+    $('pSNachweis').addEventListener('input', function () {
+      if (!daten) return;
+      clearTimeout(uhr); bereit(false);
+      uhr = setTimeout(function () { zeichnen().then(function () { bereit(true); }); }, 250);
+    });
+    view.querySelectorAll('[data-sk]').forEach(function (k) {
+      k.addEventListener('click', function () { var p = k.dataset.sk.split('-'), x = fertig[p[0]][p[1]]; herunterladen(x.blob, x.name); });
+    });
+    // Mehrere Dateien kurz nacheinander – Browser fragen beim ersten Mal evtl., ob mehrere Downloads erlaubt sind.
+    view.querySelectorAll('[data-salle]').forEach(function (k) {
+      k.addEventListener('click', function () {
+        var liste = fertig[k.dataset.salle];
+        liste.forEach(function (x, i) { setTimeout(function () { herunterladen(x.blob, x.name); }, i * 350); });
+        toast(liste.length + ' Bilder werden heruntergeladen.');
+      });
+    });
+    view.querySelectorAll('[data-steilen]').forEach(function (k) {
+      k.addEventListener('click', function () {
+        teilen(fertig[k.dataset.steilen].map(function (x) { return new File([x.blob], x.name, { type: 'image/jpeg' }); })).catch(function (x) { toast(x.message, true); });
+      });
+    });
+  }
+
   function paket(view, toast, a) {
-    var U = ausArtikel(a), fertig = {};
+    var U = ausArtikel(a), fertig = {}, strecken = streckenAus(a.body);
     view.innerHTML = '<div class="gen-kopf"><h1>Story und Beitrag</h1></div>' +
       '<p class="gen-hilfe">Zum Artikel „' + esc(U.titel) + '“ — gleiches Foto, gleiche Überschrift. ' + (U.bild ? '' : 'Der Artikel hat kein Titelbild, deshalb ist der Hintergrund leer. ') +
       (a.status === 'published' ? '' : 'Der Artikel ist noch ein Entwurf – der Link funktioniert erst nach dem Veröffentlichen. ') +
@@ -282,6 +361,7 @@
           '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" data-laden="' + f[0] + '" disabled>' + f[1] + ' herunterladen</button>' +
           '<a class="btn-ghost" href="#generator/' + f[0] + '" data-anpassen="' + f[0] + '">Anpassen</a></div></section>';
       }).join('') + '</div>' +
+      streckenHtml(strecken, U.nachweis) +
       '<section class="panel paket-ende"><label class="field" style="margin-top:0"><span>Artikel-Adresse (für den Link-Sticker)</span><input type="url" id="pLink" readonly value="' + esc(U.link) + '"></label>' +
       '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="pKopieren">Link kopieren</button>' +
       '<button class="btn btn-secondary btn-sm" type="button" id="pBeide" disabled>Beide herunterladen</button>' +
@@ -289,6 +369,7 @@
       '<a class="btn-ghost" href="#beitraege">Zur Beitragsliste</a></div>' +
       '<p class="gen-status" id="pStatus" aria-live="polite">Bilder werden gezeichnet …</p></section>';
 
+    streckenStarten(view, toast, strecken, U.titel);
     Promise.all([Z.laden(), bildVon(U.bild).catch(function (x) { toast(x.message, true); return null; })]).then(function (r) {
       var daten = r[0], foto = r[1];
       return Promise.all(['story', 'beitrag'].map(function (format) {

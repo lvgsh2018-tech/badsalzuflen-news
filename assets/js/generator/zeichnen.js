@@ -432,8 +432,43 @@
     return { canvas: c, feld: [feld[0] / B * 100, feld[1] / H * 100, (feld[2] - feld[0]) / B * 100, (feld[3] - feld[1]) / H * 100] };
   }
 
+  /* ============================================ Bildstrecke fürs Karussell */
+  /* Ein Bild der Bildstrecke im Beitragsformat 1080 × 1350 (4:5): Foto füllend
+     zugeschnitten, oben schmaler Verlauf mit dem weißen Logo wie beim Beitrag,
+     Bildnachweis oben rechts. Ohne Überschrift – das Karussell erzählt mit Fotos. */
+  function streckenBild(foto, einst, daten) {
+    var e = Object.assign({ nachweis: '', foto_x: 50, foto_y: 50 }, einst || {});
+    var f = FORMATE.beitrag, B = f.groesse[0], H = f.groesse[1];
+    var c = leinwand(B, H), ctx = c.getContext('2d');
+    ctx.fillStyle = NAVY_DUNKEL; ctx.fillRect(0, 0, B, H);
+    if (foto) {
+      var fw = foto.naturalWidth || foto.width, fh = foto.naturalHeight || foto.height, m = Math.max(B / fw, H / fh);
+      var nb = Math.max(B, Math.round(fw * m)), nh = Math.max(H, Math.round(fh * m));
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(foto, -Math.round((nb - B) * e.foto_x / 100), -Math.round((nh - H) * e.foto_y / 100), nb, nh);
+    }
+    var go = ctx.createLinearGradient(0, 0, 0, H * 0.22);
+    go.addColorStop(0, 'rgba(' + SCHATTEN + ',0.5)'); go.addColorStop(1, 'rgba(' + SCHATTEN + ',0)');
+    ctx.fillStyle = go; ctx.fillRect(0, 0, B, H * 0.22);
+    if (daten.logoWeiss) {
+      var lb = f.logo[2], lhh = Math.round(daten.logoWeiss.naturalHeight * lb / daten.logoWeiss.naturalWidth);
+      ctx.drawImage(daten.logoWeiss, f.logo[0], f.logo[1], lb, lhh);
+    }
+    var nachweis = String(e.nachweis || '').trim();
+    if (nachweis) {
+      if (nachweis.charAt(0) !== '©' && !/^symbolbild/i.test(nachweis)) nachweis = '© ' + nachweis;
+      var nS = schrift(SANS, 500, 22);
+      ctx.font = nS.css; ctx.textAlign = 'right';
+      ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 6;
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.fillText(nachweis, B - f.logo[0], f.nachweis + nS.oben);
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.textAlign = 'left';
+    }
+    return c;
+  }
+
   window.BSNZeichnen = {
-    laden: laden, montagsupdate: montagsupdate, story: story,
+    laden: laden, montagsupdate: montagsupdate, story: story, streckenBild: streckenBild,
     STANDARD: STANDARD, STORY_STANDARD: STORY_STANDARD, BEITRAG_STANDARD: BEITRAG_STANDARD
   };
 })();
