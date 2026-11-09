@@ -280,14 +280,20 @@
   function streckenHtml(strecken, nachweis) {
     if (!strecken.length) return '';
     return '<section class="panel strecke-paket"><h2>Bildstrecke für Instagram</h2>' +
-      '<p class="gen-hilfe">Jedes Bild im Beitragsformat 4:5 mit dem Logo oben links – so passen alle zusammen in ein Karussell. Antippen lädt ein einzelnes Bild.</p>' +
+      '<p class="gen-hilfe">Jedes Bild im Beitragsformat 4:5 mit dem Logo oben links – so passen alle zusammen in ein Karussell. Tipp ein Bild an, um den Ausschnitt zu verschieben.</p>' +
       '<label class="field"><span>Bildnachweis auf den Bildern (leer lassen für keinen)</span><input id="pSNachweis" value="' + esc(nachweis) + '"></label>' +
       strecken.map(function (liste, s) {
         return (strecken.length > 1 ? '<h3>Bildstrecke ' + (s + 1) + '</h3>' : '') +
           (liste.length > 20 ? '<p class="gen-hilfe">Instagram nimmt höchstens 20 Bilder pro Beitrag – hier sind es ' + liste.length + '.</p>' : '') +
           '<div class="strecke-raster">' + liste.map(function (_, i) {
-            return '<button type="button" class="strecke-kachel" data-sk="' + s + '-' + i + '" aria-label="Bild ' + (i + 1) + ' von ' + liste.length + ' herunterladen" disabled><span class="strecke-nr">' + (i + 1) + '</span></button>';
+            return '<button type="button" class="strecke-kachel" data-sk="' + s + '-' + i + '" aria-pressed="false" aria-label="Bild ' + (i + 1) + ' von ' + liste.length + ': Ausschnitt anpassen" disabled><span class="strecke-nr">' + (i + 1) + '</span></button>';
           }).join('') + '</div>' +
+          '<div class="strecke-wahl" data-swahl="' + s + '" hidden>' +
+          '<div class="strecke-gross" role="slider" tabindex="0" aria-label="Ausschnitt, ziehen oder mit den Pfeiltasten verschieben" aria-valuetext="Mitte"></div>' +
+          '<div class="strecke-wahl-text"><h4 data-swtitel></h4><p class="gen-hilfe" data-swhilfe></p>' +
+          '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" data-swladen>Dieses Bild herunterladen</button>' +
+          '<button class="btn btn-secondary btn-sm" type="button" data-swmitte>Mitte nehmen</button>' +
+          '<button class="btn-ghost" type="button" data-swzu>Fertig</button></div></div></div>' +
           '<div class="side-row"><button class="btn btn-primary btn-sm" type="button" data-salle="' + s + '" disabled>Alle ' + liste.length + ' Bilder herunterladen</button>' +
           '<button class="btn btn-secondary btn-sm" type="button" data-steilen="' + s + '" hidden disabled>Teilen / in Fotos sichern</button></div>';
       }).join('') +
@@ -295,21 +301,27 @@
   }
   function streckenStarten(view, toast, strecken, titel) {
     if (!strecken.length) return;
-    var fotos = [], fertig = [], daten = null, uhr;
+    var fotos = [], fertig = [], lage = [], daten = null, uhr, B = 1080, H = 1350;
+    var stueck = wortFuerDatei(titel);
+    strecken.forEach(function (liste, s) { fertig[s] = []; lage[s] = liste.map(function () { return { x: 50, y: 50 }; }); });
+    function einst(s, i) { return { nachweis: $('pSNachweis').value, foto_x: lage[s][i].x, foto_y: lage[s][i].y }; }
+    // Wie viel vom Foto über das 4:5-Format hinausragt – nur in diese Richtung lässt sich verschieben.
+    function ueber(foto) {
+      if (!foto) return { x: 0, y: 0 };
+      var fw = foto.naturalWidth || foto.width, fh = foto.naturalHeight || foto.height, m = Math.max(B / fw, H / fh);
+      return { x: Math.max(0, fw * m - B), y: Math.max(0, fh * m - H) };
+    }
+    function einBild(s, i) {
+      var c = Z.streckenBild(fotos[s][i], einst(s, i), daten);
+      var k = view.querySelector('[data-sk="' + s + '-' + i + '"]');
+      k.querySelectorAll('canvas').forEach(function (x) { x.remove(); });
+      k.insertBefore(c, k.firstChild);
+      return alsBlob(c, 'jpg').then(function (b) {
+        fertig[s][i] = { blob: b, name: dateiname('bildstrecke', stueck + (strecken.length > 1 ? '-' + (s + 1) : '') + '_' + String(i + 1).padStart(2, '0'), 'jpg') };
+      });
+    }
     function zeichnen() {
-      var nachweis = $('pSNachweis').value, stueck = wortFuerDatei(titel);
-      return Promise.all(strecken.map(function (liste, s) {
-        return Promise.all(liste.map(function (_, i) {
-          var c = Z.streckenBild(fotos[s][i], { nachweis: nachweis }, daten);
-          var k = view.querySelector('[data-sk="' + s + '-' + i + '"]');
-          k.querySelectorAll('canvas').forEach(function (x) { x.remove(); });
-          k.insertBefore(c, k.firstChild);
-          return alsBlob(c, 'jpg').then(function (b) {
-            fertig[s] = fertig[s] || [];
-            fertig[s][i] = { blob: b, name: dateiname('bildstrecke', stueck + (strecken.length > 1 ? '-' + (s + 1) : '') + '_' + String(i + 1).padStart(2, '0'), 'jpg') };
-          });
-        }));
-      }));
+      return Promise.all(strecken.map(function (liste, s) { return Promise.all(liste.map(function (_, i) { return einBild(s, i); })); }));
     }
     function bereit(an) {
       view.querySelectorAll('[data-sk], [data-salle], [data-steilen]').forEach(function (k) { k.disabled = !an; });
@@ -329,21 +341,99 @@
     $('pSNachweis').addEventListener('input', function () {
       if (!daten) return;
       clearTimeout(uhr); bereit(false);
-      uhr = setTimeout(function () { zeichnen().then(function () { bereit(true); }); }, 250);
+      uhr = setTimeout(function () { zeichnen().then(function () { bereit(true); offen && gross(); }); }, 250);
     });
+
+    /* Ausschnitt wählen: Bild antippen → große Vorschau, darin ziehen oder Pfeiltasten */
+    var offen = null; // [s, i]
+    function wahl(s) { return view.querySelector('[data-swahl="' + s + '"]'); }
+    function gross() {
+      var s = offen[0], i = offen[1], w = wahl(s), feld = w.querySelector('.strecke-gross');
+      var c = Z.streckenBild(fotos[s][i], einst(s, i), daten);
+      feld.replaceChildren(c);
+      var u = ueber(fotos[s][i]), l = lage[s][i];
+      feld.setAttribute('aria-valuetext', u.x ? 'waagerecht ' + Math.round(l.x) + ' Prozent' : u.y ? 'senkrecht ' + Math.round(l.y) + ' Prozent' : 'Bild passt genau');
+    }
+    function oeffnen(s, i) {
+      if (offen) schliessen(true);
+      offen = [s, i];
+      var w = wahl(s), u = ueber(fotos[s][i]);
+      w.hidden = false;
+      w.querySelector('[data-swtitel]').textContent = 'Bild ' + (i + 1) + ' von ' + strecken[s].length;
+      w.querySelector('[data-swhilfe]').textContent = !fotos[s][i] ? 'Dieses Bild ließ sich nicht laden.' :
+        u.x ? 'Zieh das Bild nach links oder rechts, bis der wichtige Teil zu sehen ist.' :
+        u.y ? 'Zieh das Bild nach oben oder unten, bis der wichtige Teil zu sehen ist.' : 'Dieses Bild passt genau ins Format, hier gibt es nichts zu verschieben.';
+      view.querySelectorAll('[data-sk]').forEach(function (k) { k.setAttribute('aria-pressed', k.dataset.sk === s + '-' + i ? 'true' : 'false'); });
+      gross();
+      w.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+    }
+    function schliessen(still) {
+      if (!offen) return;
+      var s = offen[0], i = offen[1];
+      wahl(s).hidden = true; offen = null;
+      var k = view.querySelector('[data-sk="' + s + '-' + i + '"]');
+      k.setAttribute('aria-pressed', 'false');
+      if (!still) k.focus();
+    }
+    function schieben(dx, dy) {
+      var s = offen[0], i = offen[1], u = ueber(fotos[s][i]), l = lage[s][i];
+      if (u.x) l.x = Math.max(0, Math.min(100, l.x + dx / u.x * 100));
+      if (u.y) l.y = Math.max(0, Math.min(100, l.y + dy / u.y * 100));
+      gross();
+    }
+    function uebernehmen() { if (offen) einBild(offen[0], offen[1]); }
     view.querySelectorAll('[data-sk]').forEach(function (k) {
-      k.addEventListener('click', function () { var p = k.dataset.sk.split('-'), x = fertig[p[0]][p[1]]; herunterladen(x.blob, x.name); });
+      k.addEventListener('click', function () {
+        var p = k.dataset.sk.split('-').map(Number);
+        if (offen && offen[0] === p[0] && offen[1] === p[1]) schliessen(true); else oeffnen(p[0], p[1]);
+      });
     });
+    view.querySelectorAll('[data-swahl]').forEach(function (w) {
+      var feld = w.querySelector('.strecke-gross'), start = null;
+      feld.addEventListener('pointerdown', function (e) {
+        if (!offen) return; e.preventDefault();
+        feld.setPointerCapture(e.pointerId); feld.classList.add('zieht');
+        start = { x: e.clientX, y: e.clientY };
+      });
+      feld.addEventListener('pointermove', function (e) {
+        if (!start) return;
+        // Bild folgt dem Finger: nach rechts ziehen zeigt mehr vom linken Rand.
+        var faktor = B / (feld.clientWidth || 1);
+        schieben(-(e.clientX - start.x) * faktor, -(e.clientY - start.y) * faktor);
+        start = { x: e.clientX, y: e.clientY };
+      });
+      function los() { if (!start) return; start = null; feld.classList.remove('zieht'); uebernehmen(); }
+      feld.addEventListener('pointerup', los); feld.addEventListener('pointercancel', los);
+      feld.addEventListener('keydown', function (e) {
+        var k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        if (e.key === 'Escape') { e.preventDefault(); schliessen(); return; }
+        if (!k || !offen) return; e.preventDefault();
+        var n = e.shiftKey ? 120 : 30; schieben(-k[0] * n, -k[1] * n); uebernehmen();
+      });
+      w.querySelector('[data-swmitte]').addEventListener('click', function () {
+        lage[offen[0]][offen[1]] = { x: 50, y: 50 }; gross(); uebernehmen();
+      });
+      w.querySelector('[data-swladen]').addEventListener('click', function () {
+        var s = offen[0], i = offen[1];
+        einBild(s, i).then(function () { var x = fertig[s][i]; herunterladen(x.blob, x.name); });
+      });
+      w.querySelector('[data-swzu]').addEventListener('click', function () { schliessen(); });
+    });
+
     // Mehrere Dateien kurz nacheinander – Browser fragen beim ersten Mal evtl., ob mehrere Downloads erlaubt sind.
+    function wennFertig() { return offen ? einBild(offen[0], offen[1]) : Promise.resolve(); }
     view.querySelectorAll('[data-salle]').forEach(function (k) {
       k.addEventListener('click', function () {
-        var liste = fertig[k.dataset.salle];
-        liste.forEach(function (x, i) { setTimeout(function () { herunterladen(x.blob, x.name); }, i * 350); });
-        toast(liste.length + ' Bilder werden heruntergeladen.');
+        wennFertig().then(function () {
+          var liste = fertig[k.dataset.salle];
+          liste.forEach(function (x, i) { setTimeout(function () { herunterladen(x.blob, x.name); }, i * 350); });
+          toast(liste.length + ' Bilder werden heruntergeladen.');
+        });
       });
     });
     view.querySelectorAll('[data-steilen]').forEach(function (k) {
       k.addEventListener('click', function () {
+        // Teilen muss direkt auf den Tipp folgen (iPhone), deshalb die schon fertigen Dateien nehmen.
         teilen(fertig[k.dataset.steilen].map(function (x) { return new File([x.blob], x.name, { type: 'image/jpeg' }); })).catch(function (x) { toast(x.message, true); });
       });
     });
