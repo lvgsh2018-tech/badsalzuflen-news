@@ -475,3 +475,12 @@ table.posts td.t a { color: var(--color-text); text-decoration: none; }
 .strecke-gross:focus-visible { outline: 3px solid #1E3A66; outline-offset: 3px; }
 .strecke-gross canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
 .strecke-wahl-text h4 { margin: 0 0 6px; font-size: 1rem; }
+
+/* Eingeschränkter Zugang: Reiter ohne Rechte sind sichtbar, aber gedämpft */
+.admin-tabs a.gesperrt { opacity: 0.5; }
+.admin-tabs a.gesperrt::after { content: ""; width: 11px; height: 11px; margin-left: 6px; background: currentColor; -webkit-mask: var(--schloss) center / contain no-repeat; mask: var(--schloss) center / contain no-repeat; }
+.admin-tabs { --schloss: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E"); }
+.kein-zugriff { max-width: 560px; }
+.kein-zugriff h1 { margin-bottom: 12px; }
+.kein-zugriff p { color: var(--color-text-soft); margin: 0 0 12px; }
+.kein-zugriff .side-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }

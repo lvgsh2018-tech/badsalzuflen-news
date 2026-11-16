@@ -2,6 +2,9 @@
 (function () {
   var R = window.BSNR, esc = R.esc, view = document.getElementById('view');
   var articles = [], views = [], pushN = null, dirty = false;
+  /* Rolle: 'chef' darf alles, 'redaktion' alles außer Werbung (siehe supabase/rollen.sql). */
+  var rolle = 'chef', NUR_CHEF = ['werbung', 'anzeige'];
+  function darf(bereich) { return rolle === 'chef' || (rolle === 'redaktion' && NUR_CHEF.indexOf(bereich) < 0); }
   var CREDITS = ['Foto: Stadt Bad Salzuflen', 'Foto: Lennart Schleef', 'Symbolbild', 'Symbolbild (KI-generiert)'];
 
   /* ---------- Hilfen ---------- */
@@ -101,7 +104,7 @@
             '<td>' + R.date(a.published_at || a.created_at) + '</td><td>' + viewsOf(a.id) + '</td>' +
             '<td><div class="row-actions"><a class="btn-ghost" href="#editor/' + esc(a.id) + '">Bearbeiten</a>' +
             '<a class="btn-ghost" href="' + R.url(a) + '" target="_blank" rel="noopener">Ansehen</a>' +
-            '<button class="btn-ghost del" type="button" data-del="' + esc(a.id) + '">Löschen</button></div></td></tr>';
+            (darf('beitraege') ? '<button class="btn-ghost del" type="button" data-del="' + esc(a.id) + '">Löschen</button>' : '') + '</div></td></tr>';
         }).join('') + '</tbody></table>' : '<p class="empty">Hier ist noch nichts. <a href="#editor/neu">Schreib den ersten Beitrag.</a></p>') +
       '</div></div>';
   }
@@ -118,7 +121,7 @@
       return;
     }
     var d = e.target.closest('[data-del]');
-    if (d) {
+    if (d && darf('beitraege')) {
       var a = articles.filter(function (x) { return x.id === d.dataset.del; })[0];
       ask({ title: 'Beitrag löschen?', text: '„' + title(a) + '“ wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.', yes: 'Endgültig löschen', danger: true }).then(function (ok) {
         if (!ok) return;
@@ -225,7 +228,7 @@
         '<div class="thema-neu" id="catNeuBox" hidden><label class="field"><span>Name des neuen Themas</span><input id="fCatNeu" maxlength="40" placeholder="z. B. Sport"></label>' +
         '<div class="side-row"><button class="btn btn-secondary btn-sm" type="button" id="catNeuOk">Hinzufügen</button><button class="btn-ghost" type="button" id="catNeuNein">Abbrechen</button></div></div>' +
         '<label class="check"><input type="checkbox" id="fFeat"' + (a.featured ? ' checked' : '') + '><span>Als große Kachel oben auf der Startseite zeigen</span></label>' +
-        '<label class="check"><input type="checkbox" id="fAnz"' + (a.anzeige ? ' checked' : '') + '><span>Bezahlte Anzeige (der Beitrag wird überall als „Anzeige“ gekennzeichnet)</span></label></div>' +
+        '<label class="check"' + (rolle === 'chef' ? '' : ' hidden') + '><input type="checkbox" id="fAnz"' + (a.anzeige ? ' checked' : '') + '><span>Bezahlte Anzeige (der Beitrag wird überall als „Anzeige“ gekennzeichnet)</span></label></div>' +
         '<div class="panel stack"><div class="save-state" id="state">' + (live ? 'Veröffentlicht am ' + R.date(a.published_at) : 'Entwurf — noch nicht sichtbar') + '</div>' +
         (live
           ? '<button class="btn btn-primary" id="bSave" type="button">Änderungen speichern</button><button class="btn btn-secondary" id="bDraft" type="button">Zurück zum Entwurf</button>'
@@ -556,6 +559,16 @@
     });
   }
 
+  /* ---------- Kein Zugriff ---------- */
+  var NAMEN = { termine: 'Termine', termin: 'Termine', blaulicht: 'Blaulicht', planung: 'Planung', werbung: 'Werbung', anzeige: 'Werbung', generator: 'Generator' };
+  function pageKeinZugriff(bereich) {
+    view.innerHTML = '<section class="panel kein-zugriff"><h1>Keine Berechtigung</h1>' +
+      '<p>Für den Bereich „' + esc(NAMEN[bereich] || bereich) + '“ hast du keine Rechte. Alle anderen Bereiche kannst du ganz normal nutzen.</p>' +
+      '<p>Wenn du hier etwas brauchst, sag Lennart Bescheid.</p>' +
+      (darf('beitraege') ? '<p class="side-row"><a class="btn btn-primary btn-sm" href="#beitraege">Zu den Beiträgen</a><a class="btn btn-secondary btn-sm" href="#editor/neu">Neuen Beitrag schreiben</a></p>' : '') +
+      '</section>';
+  }
+
   /* ---------- Weiche ---------- */
   function route() {
     var h = location.hash.replace('#', '') || 'uebersicht', p = h.split('/');
@@ -564,6 +577,7 @@
     });
     window.scrollTo(0, 0);
     view.onclick = view.ondragstart = view.ondragover = view.ondragend = view.ondrop = null; // Reste der Planung
+    if (!darf(p[0])) return pageKeinZugriff(p[0]);
     if (p[0] === 'planung') return window.BSNPlanung.zeigen(view, toast, ask);
     if (p[0] === 'werbung' || p[0] === 'anzeige') return window.BSNWerbung.zeigen(view, p, toast, ask, function (d) { dirty = d; });
     if (p[0] === 'editor') return pageEditor(p[1] || 'neu');
@@ -590,8 +604,14 @@
   /* Zutritt nur mit Anmeldung */
   BSN.getUser().then(function (u) {
     if (!u) { location.replace('login.html'); return; }
-    document.body.hidden = false; R.demoBadge(); route();
-    // Absender-Schlüssel für Mitteilungen einmalig anlegen lassen (falls der Versand eingerichtet ist).
-    if (BSN.live) BSN.pushPublicKey().then(function (k) { if (!k) return BSN.pushInit(); }).catch(function () {});
+    return BSN.rolle(u).then(function (r) {
+      rolle = r;
+      document.querySelectorAll('[data-tab]').forEach(function (a) { if (!darf(a.dataset.tab)) a.classList.add('gesperrt'); });
+      if (!darf('editor')) document.querySelectorAll('.admin-actions a[href="#editor/neu"]').forEach(function (a) { a.hidden = true; });
+      document.body.hidden = false; R.demoBadge(); route();
+      if (rolle !== 'chef') return;
+      // Absender-Schlüssel für Mitteilungen einmalig anlegen lassen (falls der Versand eingerichtet ist).
+      if (BSN.live) BSN.pushPublicKey().then(function (k) { if (!k) return BSN.pushInit(); }).catch(function () {});
+    });
   }).catch(function () { location.replace('login.html'); });
 })();

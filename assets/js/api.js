@@ -234,6 +234,8 @@
     };
     BSN.signOut = function () { sessionStorage.removeItem(KS); return Promise.resolve(); };
     BSN.getUser = function () { var e = sessionStorage.getItem(KS); return Promise.resolve(e ? { email: e } : null); };
+    /* Demo: Adresse mit „autor“ darin zeigt die eingeschränkte Ansicht, sonst alles. */
+    BSN.rolle = function (user) { return Promise.resolve(/autor/i.test(user && user.email || '') ? 'redaktion' : 'chef'); };
     BSN.resetDemo = function () { localStorage.removeItem(KA); localStorage.removeItem(KV); localStorage.removeItem(KE); localStorage.removeItem(KB); localStorage.removeItem(KK); localStorage.removeItem(KP); localStorage.removeItem(KW); localStorage.removeItem(KZ); seed(); };
     /* Mitteilungen (Demo: nichts wird gespeichert oder verschickt) */
     BSN.pushPublicKey = function () { return Promise.resolve(null); };
@@ -350,6 +352,15 @@
     });
   };
   BSN.signOut = function () { return client().then(function (c) { return c.auth.signOut(); }); };
+  /* Rolle der angemeldeten Person: 'chef' (alles), 'redaktion' (alles außer Werbung) oder 'keine'.
+     Die echte Sperre sitzt im Speicher (supabase/rollen.sql) – das hier steuert nur die Anzeige.
+     Fehlt die Abfrage noch im Speicher, gelten nur die bisherigen zwei Adressen als 'chef'. */
+  BSN.rolle = function (user) {
+    return client().then(function (c) { return c.rpc('meine_rolle'); }).then(ok).catch(function () {
+      var e = String(user && user.email || '').toLowerCase();
+      return ['schleef.lennart@gmail.com', 'l.schleef@badsalzuflennews.de'].indexOf(e) >= 0 ? 'chef' : 'redaktion';
+    });
+  };
   BSN.getUser = function () {
     return client().then(function (c) { return c.auth.getSession(); }).then(function (r) {
       return r.data && r.data.session ? r.data.session.user : null;
