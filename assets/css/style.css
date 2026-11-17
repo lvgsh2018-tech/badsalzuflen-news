@@ -223,11 +223,11 @@ a { color: var(--color-navy); }
 }
 .main-nav a { white-space: nowrap; }
 /* Sieben Reiter: auf mittleren Breiten etwas enger, damit nichts umbricht. */
-@media (min-width: 761px) and (max-width: 1080px) {
+@media (min-width: 841px) and (max-width: 1080px) {
   .nav-glass a { padding: 8px 10px; }
   .nav-cta { padding: 12px 14px; }
 }
-@media (min-width: 761px) and (max-width: 900px) {
+@media (min-width: 841px) and (max-width: 900px) {
   .nav-glass a { padding: 8px 7px; }
   .main-nav a { font-size: 0.8rem; }
   .main-nav { gap: 8px; }
@@ -254,7 +254,7 @@ a { color: var(--color-navy); }
 :root[data-theme="dark"] .nav-cta { color: var(--color-navy) !important; background: var(--color-gold); }
 :root[data-theme="dark"] .nav-cta:hover { background: var(--color-gold); opacity: 0.9; }
 
-@media (max-width: 760px) {
+@media (max-width: 840px) {
   /* Im Handy-Menü eigener Innenabstand, sonst greift die Menüzeilen-Regel (ohne Seitenabstand, volle Breite) und die Schrift klebt am Rand. */
   .main-nav .nav-cta { align-self: flex-start; width: auto; margin-top: 10px; padding: 12px 20px; }
 }
@@ -272,7 +272,7 @@ a { color: var(--color-navy); }
 .nav-toggle svg { width: 26px; height: 26px; }
 :root[data-theme="dark"] .nav-toggle { color: #FFFFFF; }
 
-@media (max-width: 760px) {
+@media (max-width: 840px) {
   .main-nav {
     position: absolute;
     top: 100%;
@@ -646,6 +646,16 @@ body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .ansicht-titel { display: none; }
+/* Am Rechner nur ein runder Knopf: zeigt die jeweils andere Ansicht (Mond im Hellen, Sonne im Dunkeln).
+   Die Kopfleiste hat kaum Luft, das Logo darf dafür nie schrumpfen. */
+@media (min-width: 841px) {
+  .ansicht { padding: 0; }
+  .ansicht button[aria-pressed="true"] { display: none; }
+  .ansicht button { width: 44px; height: 44px; }
+  .ansicht button:hover { background: rgba(255, 255, 255, 0.7); }
+}
+@media (min-width: 1081px) { .nav-glass a { padding: 8px 13px; } }
+.logo-link, .logo-link img { flex-shrink: 0; }
 .ansicht button {
   display: inline-flex;
   align-items: center;
@@ -669,11 +679,11 @@ body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(
 :root[data-theme="dark"] .ansicht button:hover { color: var(--color-gold); background: rgba(255, 255, 255, 0.08); }
 :root[data-theme="dark"] .ansicht button[aria-pressed="true"] { color: var(--color-gold); background: rgba(255, 255, 255, 0.14); box-shadow: none; }
 .ansicht button:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
-@media (min-width: 761px) and (max-width: 900px) {
-  .ansicht button { width: 32px; height: 32px; }
+@media (min-width: 841px) and (max-width: 900px) {
+  .ansicht button { width: 36px; height: 36px; }
 }
 /* Handy-Menü: eigene Zeile mit Beschriftung, große Tippflächen */
-@media (max-width: 760px) {
+@media (max-width: 840px) {
   .main-nav .ansicht {
     display: flex;
     width: 100%;

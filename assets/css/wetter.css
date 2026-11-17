@@ -26,8 +26,8 @@
   :root:not([data-theme="light"]) .wetter-kopf { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); color: #F1EEF9; }
 }
 /* Auf mittleren Breiten braucht die Navigation den Platz */
-@media (min-width: 761px) and (max-width: 1180px) { .wetter-kopf { display: none; } }
-@media (max-width: 760px) {
+@media (min-width: 841px) and (max-width: 1180px) { .wetter-kopf { display: none; } }
+@media (max-width: 840px) {
   .wetter-kopf { margin-right: -6px; }
 }
 @media (max-width: 380px) { .wetter-kopf-ort { display: none; } }
