@@ -626,3 +626,72 @@ body.verlauf { background: linear-gradient(180deg, #DCCBF3 0%, #E9DEF8 45%, var(
 body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(220, 203, 243, 0.85) 0%, rgba(220, 203, 243, 0.7) 55%, rgba(220, 203, 243, 0) 100%); }
 :root[data-theme="dark"] body.verlauf .site-header::before { background: linear-gradient(to bottom, rgba(58, 45, 87, 0.85) 0%, rgba(58, 45, 87, 0.7) 55%, rgba(58, 45, 87, 0) 100%); }
 
+
+/* ---------- Schalter Hell/Dunkel im Menü ---------- */
+.ansicht {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 1px 2px rgba(30, 58, 102, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+:root[data-theme="dark"] .ansicht {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.ansicht-titel { display: none; }
+.ansicht button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--color-text-soft);
+  font: 500 0.85rem/1 var(--font-body);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.ansicht button svg { width: 18px; height: 18px; flex: none; }
+.ansicht button span { display: none; }
+.ansicht button:hover { color: var(--color-navy); background: rgba(255, 255, 255, 0.7); }
+.ansicht button[aria-pressed="true"] { color: var(--color-navy); background: rgba(255, 255, 255, 0.95); box-shadow: 0 1px 2px rgba(30, 58, 102, 0.12); }
+:root[data-theme="dark"] .ansicht button:hover { color: var(--color-gold); background: rgba(255, 255, 255, 0.08); }
+:root[data-theme="dark"] .ansicht button[aria-pressed="true"] { color: var(--color-gold); background: rgba(255, 255, 255, 0.14); box-shadow: none; }
+.ansicht button:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
+@media (min-width: 761px) and (max-width: 900px) {
+  .ansicht button { width: 32px; height: 32px; }
+}
+/* Handy-Menü: eigene Zeile mit Beschriftung, große Tippflächen */
+@media (max-width: 760px) {
+  .main-nav .ansicht {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    gap: 8px;
+  }
+  :root[data-theme="dark"] .main-nav .ansicht { background: none; border: 0; box-shadow: none; }
+  .ansicht-titel { display: block; flex: 1; padding: 12px 4px; font-weight: 500; font-size: 0.85rem; color: var(--color-text-soft); }
+  .ansicht button { width: auto; height: 44px; padding: 0 16px; border: 1px solid rgba(30, 58, 102, 0.14); }
+  .ansicht button span { display: inline; }
+  .ansicht button[aria-pressed="true"] { border-color: transparent; background: var(--color-navy); color: #FFFFFF; box-shadow: none; }
+  :root[data-theme="dark"] .ansicht button { border-color: rgba(255, 255, 255, 0.18); }
+  :root[data-theme="dark"] .ansicht button[aria-pressed="true"] { border-color: transparent; background: var(--color-gold); color: #142845; }
+}
+@media (prefers-reduced-motion: reduce) { .ansicht button { transition: none; } }
