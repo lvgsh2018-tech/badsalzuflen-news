@@ -121,9 +121,9 @@
     <div class="container">
       <a class="adv-kachel" href="advent.html">
         <div class="adv-kachel-text">
-          <span class="wb-pill"><span class="wb-dot" aria-hidden="true"></span><span id="advKachelPill">Adventsgewinnspiel · ab 29. November</span></span>
+          <span class="wb-pill"><span class="wb-dot" aria-hidden="true"></span><span id="advKachelPill">Adventsgewinnspiel · ab 23. November</span></span>
           <h2 id="advKachelTitel">Vier Sonntage, vier Preise <span class="wb-gold">aus Bad&nbsp;Salzuflen</span></h2>
-          <p>An jedem Adventssonntag verlosen wir einen Preis von einem Geschäft aus unserer Stadt. Welches Geschäft dabei ist, verraten wir am jeweiligen Sonntag.</p>
+          <p>Zum Start verlosen wir zur Eröffnung des Weihnachtstraums einen Lichterbogen. Danach gibt es an jedem Adventssonntag einen Preis von einem Geschäft aus unserer Stadt. Welches Geschäft dabei ist, verraten wir am jeweiligen Sonntag.</p>
           <span class="wb-btn wb-btn-gold">Zu den vier Sonntagen →</span>
         </div>
         <div class="adv-kachel-bild" aria-hidden="true">
@@ -144,6 +144,7 @@
       if (heute === '2026-12-27') document.getElementById('advKachelPill').textContent = 'Adventsgewinnspiel · heute letzte Auslosung';
       else if (nr) document.getElementById('advKachelPill').textContent = `Adventsgewinnspiel · ${nr}. Advent läuft`;
       else if (heute >= '2026-11-23' && heute <= '2026-11-26') document.getElementById('advKachelPill').textContent = 'Jetzt Lichterbogen gewinnen';
+      else if (heute >= '2026-11-27') document.getElementById('advKachelPill').textContent = 'Adventsgewinnspiel · weiter am 29. November';
     })();
   </script>
 
