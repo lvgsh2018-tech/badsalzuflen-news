@@ -180,8 +180,8 @@
         <h2>So machst du mit</h2>
         <ol>
           <li>Folge <a href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">@badsalzuflennews.de</a> auf Instagram.</li>
-          <li>Like den jeweiligen Gewinnspiel-Beitrag.</li>
-          <li>Kommentiere den Beitrag mit einem Weihnachtsemoji.</li>
+          <li>Like den jeweiligen Gewinnspiel-Beitrag. Beim Lichterbogen ist das ein Reel.</li>
+          <li>Kommentiere dort mit einem Weihnachtsemoji.</li>
         </ol>
         <p>Bis wann du mitmachen kannst, steht bei jedem Gewinnspiel auf dieser Seite. Die Auslosung zeigen wir am Tag nach dem Teilnahmeschluss in unserer Story, wer gewinnt, bekommt von uns eine Nachricht auf Instagram.</p>
         <p><a href="#teilnahmebedingungen">Zu den Teilnahmebedingungen</a></p>
@@ -197,7 +197,7 @@
         <p>Mitmachen darf jede Person mit einem eigenen Instagram-Konto, eine Altersgrenze gibt es nicht. Minderjährige brauchen das Einverständnis ihrer Eltern oder anderer Sorgeberechtigter. Wir dürfen uns dieses Einverständnis vor der Übergabe des Preises zeigen lassen. Nicht mitmachen dürfen die Mitglieder unserer Redaktion und die Beschäftigten des Unternehmens, das den Preis des jeweiligen Gewinnspiels stellt.</p>
 
         <h3>3. So nimmst du teil</h3>
-        <p>Diese Bedingungen gelten für die vier Gewinnspiele an den Adventssonntagen und für das Gewinnspiel zur Eröffnung des Bad Salzufler Weihnachtstraums. Für jedes Gewinnspiel gibt es einen eigenen Beitrag auf <a href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">@badsalzuflennews.de</a>. Du nimmst teil, wenn du dem Konto folgst, den Beitrag likest und ihn mit einem Weihnachtsemoji kommentierst. Die Teilnahme ist kostenlos und hängt nicht von einem Kauf ab. Pro Person zählt je Gewinnspiel eine Teilnahme, weitere Kommentare oder Zweitkonten erhöhen die Chance nicht. Wer mit falschen Konten oder technischen Hilfsmitteln teilnimmt, wird ausgeschlossen.</p>
+        <p>Diese Bedingungen gelten für die vier Gewinnspiele an den Adventssonntagen und für das Gewinnspiel zur Eröffnung des Bad Salzufler Weihnachtstraums. Für jedes Gewinnspiel gibt es einen eigenen Beitrag auf <a href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">@badsalzuflennews.de</a>, beim Gewinnspiel zur Eröffnung des Weihnachtstraums ist das ein Reel. Du nimmst teil, wenn du dem Konto folgst, diesen Beitrag likest und ihn mit einem Weihnachtsemoji kommentierst. Die Teilnahme ist kostenlos und hängt nicht von einem Kauf ab. Pro Person zählt je Gewinnspiel eine Teilnahme, weitere Kommentare oder Zweitkonten erhöhen die Chance nicht. Wer mit falschen Konten oder technischen Hilfsmitteln teilnimmt, wird ausgeschlossen.</p>
 
         <h3>4. Zeitraum und Auslosung</h3>
         <table class="adv-zeiten">
@@ -278,10 +278,10 @@
   const BOGEN = { start: '2026-11-23', schluss: '2026-11-26', auslosung: '2026-11-27', beitrag: '' };
 
   function bogenKarte(heute) {
-    if (heute < BOGEN.start) return '';
-    const laeuft = heute <= BOGEN.schluss;
-    const status = laeuft ? 'Läuft gerade' : heute === BOGEN.auslosung ? 'Heute Auslosung' : 'Ausgelost';
-    return `<li class="adv-karte" data-zustand="${laeuft ? 'laeuft' : 'vorbei'}">
+    const vorher = heute < BOGEN.start;
+    const laeuft = !vorher && heute <= BOGEN.schluss;
+    const status = vorher ? 'Ab 23. November' : laeuft ? 'Läuft gerade' : heute === BOGEN.auslosung ? 'Heute Auslosung' : 'Ausgelost';
+    return `<li class="adv-karte" data-zustand="${vorher ? 'bald' : laeuft ? 'laeuft' : 'vorbei'}">
       <div class="adv-wann-bogen">
         <h2 class="adv-sonntag">Weihnachtstraum</h2><span class="adv-datum">Eröffnung, ${tagFmt(BOGEN.start)}</span>
         <img class="adv-foto" src="assets/img/advent-lichterbogen.webp" width="800" height="607" alt="Beleuchteter Lichterbogen aus Holz mit Pyramide, Buden und Tannen, auf dem Sockel steht Bad Salzufler Weihnachtstraum">
@@ -290,8 +290,8 @@
         <p class="adv-preis">Beleuchteter Lichterbogen mit dem Schriftzug „Bad Salzufler Weihnachtstraum“</p>
         <p class="adv-laden">Lasergarage Marcel Bittner</p>
         <p class="adv-text">Von Marcel Bittner aus Bad Salzuflen selbst gestaltet, gelasert und graviert.</p>
-        ${laeuft ? `<p class="adv-frist">Mitmachen bis Donnerstag, ${tagFmt(BOGEN.schluss)}, 23:59 Uhr. Die Auslosung zeigen wir am Freitag, ${tagFmt(BOGEN.auslosung)}, in unserer Story.</p>
-        <div class="adv-links"><a class="haupt" href="${BOGEN.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a></div>` : ''}
+        ${vorher || laeuft ? `<p class="adv-frist">${vorher ? `Los geht es am ${tagFmt(BOGEN.start)}. ` : ''}Mitmachen bis Donnerstag, ${tagFmt(BOGEN.schluss)}, 23:59 Uhr. Die Auslosung zeigen wir am Freitag, ${tagFmt(BOGEN.auslosung)}, in unserer Story.</p>` : ''}
+        ${laeuft ? `<div class="adv-links"><a class="haupt" href="${BOGEN.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a></div>` : ''}
         <p class="adv-anzeige">Anzeige: Der Preis wird von der Lasergarage Marcel Bittner gestellt.</p>
       </div>
     </li>`;

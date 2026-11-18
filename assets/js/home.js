@@ -24,6 +24,8 @@
   /* Wetter-Kachel: steht unten rechts in den vier kleinen Kacheln, Inhalt kommt aus wetter.js */
   var WETTER = { wetter: true };
   function T(x, cls) {
+    /* In der Gewinnspielzeit steht an dieser Stelle die Gewinnspiel-Vorschau (advent-vorschau.js) */
+    if (x === WETTER && window.BSNAdvent) return BSNAdvent.html(cls);
     return x === WETTER ? '<section class="tile wetter-kachel ' + cls + '" id="wetter" aria-label="Wetter in Bad Salzuflen"><div class="tile-body"></div></section>' : R.tile(x, cls);
   }
 
@@ -78,7 +80,7 @@
     var featured = top;
     var rest = articles.concat(bls).filter(function (a) { return a !== top; })
       .sort(function (a, b) { return time(b) - time(a); }).slice(0, BOARD - 1);
-    if (window.BSNWetter && rest.length >= 4) { rest = rest.slice(0, BOARD - 2); rest.splice(3, 0, WETTER); }
+    if ((window.BSNWetter || window.BSNAdvent) && rest.length >= 4) { rest = rest.slice(0, BOARD - 2); rest.splice(3, 0, WETTER); }
     var tileAds = (ads || []).filter(function (a) { return /^kachel/.test(a.platz); });
     if (tileAds.length && window.BSNAnzeigen && rest.length >= 4) {
       grid.innerHTML = boardMitAnzeigen(featured, rest, articles, tileAds);
