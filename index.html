@@ -28,6 +28,49 @@
 <link rel="stylesheet" href="assets/css/news.css?v=10">
 <link rel="stylesheet" href="assets/css/anzeigen.css?v=3">
 <script src="assets/js/theme.js?v=2"></script>
+<style>
+  /* Advents-Kachel im Look der Story (2026) */
+  .adv-kachel-wrap { margin-top: calc(20px - clamp(40px, 6vw, 72px)); margin-bottom: 20px; }
+  @media (max-width: 600px) { .adv-kachel-wrap { margin-top: calc(12px - clamp(40px, 6vw, 72px)); margin-bottom: 12px; } }
+  .adv-kachel {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: center;
+    min-height: 300px; padding: clamp(32px, 4.5vw, 52px);
+    border-radius: var(--radius-l); color: #fff; text-decoration: none;
+    background: linear-gradient(180deg, #183A2C, #0B231A);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .adv-kachel::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; opacity: .55;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,.9) 1.2px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,255,255,.6) 2px, transparent 2.6px),
+      radial-gradient(circle, rgba(255,255,255,.35) 3px, transparent 4px);
+    background-size: 90px 110px, 170px 150px, 260px 230px;
+    background-position: 10px 20px, 60px 80px, 130px 40px;
+  }
+  .adv-kachel::after {
+    content: ""; position: absolute; z-index: -1; right: 8%; top: 20%; width: 45%; height: 70%;
+    background: radial-gradient(closest-side, rgba(224,165,74,.28), transparent); filter: blur(20px);
+  }
+  @media (hover: hover) {
+    .adv-kachel:hover { transform: translateY(-3px); box-shadow: 0 24px 50px rgba(11, 35, 26, 0.35); }
+    .adv-kachel:hover .wb-btn-gold { background: var(--wb-gold-hell); }
+  }
+  .adv-kachel:focus-visible { outline: 3px solid var(--wb-gold); outline-offset: 4px; }
+  .adv-kachel h2 {
+    color: #fff !important; font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+    line-height: 1.08; letter-spacing: -0.02em; margin: 16px 0 12px; text-wrap: balance;
+  }
+  .adv-kachel p { color: rgba(255,255,255,.85); margin-bottom: 22px; max-width: 30em; }
+  .adv-kachel-bild img { width: 100%; height: auto; max-width: 520px; margin-left: auto; }
+  @media (max-width: 760px) {
+    .adv-kachel { grid-template-columns: 1fr; padding-bottom: 8px; }
+    .adv-kachel-bild img { max-width: 380px; margin: -8px auto 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .adv-kachel { transition: none; } .adv-kachel:hover { transform: none; } }
+  .adv-kachel-wrap ~ .wb-teaser-wrap { margin-top: 0; }
+</style>
 </head>
 <body>
 
@@ -63,6 +106,35 @@
       <div class="board-grid" id="boardGrid" aria-live="polite"></div>
     </div>
   </section>
+
+  <section class="adv-kachel-wrap" id="advKachel" aria-labelledby="advKachelTitel">
+    <div class="container">
+      <a class="adv-kachel" href="advent.html">
+        <div class="adv-kachel-text">
+          <span class="wb-pill"><span class="wb-dot" aria-hidden="true"></span><span id="advKachelPill">Adventsgewinnspiel · ab 29. November</span></span>
+          <h2 id="advKachelTitel">Vier Sonntage, vier Preise <span class="wb-gold">aus Bad&nbsp;Salzuflen</span></h2>
+          <p>An jedem Adventssonntag verlosen wir einen Preis von einem Geschäft aus unserer Stadt. Welches Geschäft dabei ist, verraten wir am jeweiligen Sonntag.</p>
+          <span class="wb-btn wb-btn-gold">Zu den vier Sonntagen →</span>
+        </div>
+        <div class="adv-kachel-bild" aria-hidden="true">
+          <img src="assets/img/advent-kranz.png" alt="" width="900" height="648" loading="lazy">
+        </div>
+      </a>
+    </div>
+  </section>
+  <script>
+    // Kachel zeigt den laufenden Sonntag und verschwindet nach der letzten Auslosung (27.12.2026).
+    (function () {
+      const d = new Date();
+      const lokal = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).get('tag');
+      const heute = lokal || `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (heute > '2026-12-27') { document.getElementById('advKachel').remove(); return; }
+      const nr = ['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'].filter(t => t <= heute).length;
+      if (heute === '2026-12-27') document.getElementById('advKachelPill').textContent = 'Adventsgewinnspiel · heute letzte Auslosung';
+      else if (nr) document.getElementById('advKachelPill').textContent = `Adventsgewinnspiel · ${nr}. Advent läuft`;
+      else if (heute >= '2026-11-23' && heute <= '2026-11-26') document.getElementById('advKachelPill').textContent = 'Jetzt Lichterbogen gewinnen';
+    })();
+  </script>
 
   <section class="wb-teaser-wrap" aria-labelledby="wbTeaserTitel">
     <div class="container">

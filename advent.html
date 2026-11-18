@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adventsgewinnspiel — Bad Salzuflen News</title>
+<meta name="description" content="An jedem Adventssonntag verlosen wir einen Preis von einem Geschäft aus Bad Salzuflen.">
+<meta property="og:title" content="Vier Sonntage, vier Preise aus Bad Salzuflen">
+<meta property="og:description" content="Das Adventsgewinnspiel von Bad Salzuflen News: an jedem Adventssonntag ein Preis von einem Geschäft aus unserer Stadt.">
+<meta property="og:image" content="https://badsalzuflennews.de/assets/img/og-bild.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://badsalzuflennews.de/advent.html">
+<link rel="canonical" href="https://badsalzuflennews.de/advent.html">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/img/favicon-48.png">
+<meta name="theme-color" content="#183A2C">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css?v=9">
+<link rel="stylesheet" href="assets/css/werbung.css?v=14">
+<script src="assets/js/theme.js?v=2"></script>
+<style>
+  /* Adventsgewinnspiel 2026: ganze Seite im Look der Story */
+  :root {
+    --tanne: #183A2C; --tanne-dunkel: #0B231A;
+    --gold: #E0A54A; --gold-hell: #F2C66B;
+    --weiss-weich: rgba(255, 255, 255, .82);
+    --linie: rgba(224, 165, 74, .28);
+  }
+  body.adv-seite {
+    background: linear-gradient(180deg, var(--tanne) 0, var(--tanne-dunkel) 100vh) fixed var(--tanne-dunkel);
+    color: #fff; min-height: 100vh; position: relative; isolation: isolate;
+  }
+  /* Schnee wie in der Story */
+  body.adv-seite::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,.9) 1.2px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,255,255,.55) 2px, transparent 2.6px),
+      radial-gradient(circle, rgba(255,255,255,.3) 3px, transparent 4px);
+    background-size: 90px 110px, 170px 150px, 260px 230px;
+    background-position: 10px 20px, 60px 80px, 130px 40px;
+  }
+  .adv-seite h1, .adv-seite h2, .adv-seite h3 { color: #fff !important; }
+  .adv-seite p { color: var(--weiss-weich); }
+  .adv-seite a { color: var(--gold-hell); }
+  .adv-seite :focus-visible { outline: 3px solid var(--gold-hell); outline-offset: 3px; }
+
+  /* Kopfzeile: Logo hell, nur Zurueck-Link */
+  .adv-kopfzeile { padding: 22px 0; }
+  .adv-kopfzeile .container { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .adv-kopfzeile img { height: 52px; width: auto; filter: brightness(0) invert(1); }
+  .adv-zurueck {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,.35); color: #fff !important; text-decoration: none; font-weight: 600; font-size: .95rem;
+  }
+  .adv-zurueck:hover { background: rgba(255,255,255,.08); }
+
+  /* Kopf */
+  .adv-held { padding: clamp(24px, 5vw, 56px) 0 clamp(16px, 3vw, 32px); }
+  .adv-held .container { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: center; }
+  .adv-held h1 { font-size: clamp(2.3rem, 5.5vw, 4rem); line-height: 1.04; letter-spacing: -0.02em; margin: 18px 0 16px; text-wrap: balance; }
+  .adv-held h1 em { color: var(--gold-hell); }
+  .adv-held p { font-size: 1.12rem; max-width: 32em; }
+  .adv-held-bild { position: relative; }
+  .adv-held-bild::before {
+    content: ""; position: absolute; inset: 0 10% 15%; z-index: -1;
+    background: radial-gradient(closest-side, rgba(224,165,74,.3), transparent); filter: blur(24px);
+  }
+  .adv-held-bild img { width: 100%; max-width: 540px; height: auto; margin-left: auto; }
+  @media (max-width: 760px) {
+    .adv-held .container { grid-template-columns: 1fr; gap: 8px; }
+    .adv-held-bild img { max-width: 400px; margin: 0 auto; }
+  }
+
+  /* Die vier Sonntage: eine Spalte, jede Karte so hoch wie ihr Inhalt */
+  .adv-sonntage { padding: clamp(16px, 3vw, 32px) 0 clamp(48px, 7vw, 88px); }
+  .adv-liste { display: flex; flex-direction: column; gap: 16px; max-width: 860px; margin: 0 auto; list-style: none; padding: 0; }
+  .adv-karte {
+    display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: start;
+    padding: 26px 28px; border-radius: var(--radius-m);
+    background: rgba(255, 255, 255, .055); border: 1px solid var(--linie);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .adv-karte[data-zustand="laeuft"] { background: rgba(224, 165, 74, .12); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 20px 50px rgba(0,0,0,.25); }
+  .adv-karte[data-zustand="vorbei"] { opacity: .72; }
+
+  .adv-wann { display: flex; gap: 16px; align-items: flex-end; }
+  .adv-kerze { width: 18px; height: 54px; border-radius: 4px; background: #F3EEE2; position: relative; flex: none; margin-top: 22px; opacity: .4; }
+  .adv-karte:not([data-zustand="bald"]) .adv-kerze { opacity: 1; }
+  .adv-karte:not([data-zustand="bald"]) .adv-kerze::before {
+    content: ""; position: absolute; left: 3px; top: -22px; width: 12px; height: 18px;
+    background: radial-gradient(circle at 50% 70%, #FFF1C4 0 30%, #F5B446 60%);
+    border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+    box-shadow: 0 0 18px 6px rgba(245, 180, 70, .45);
+  }
+  .adv-wann-bogen { display: block; min-width: 0; }
+  .adv-wann-bogen .adv-sonntag { font-size: 1.3rem; }
+  .adv-foto { display: block; width: 100%; height: auto; margin-top: 14px; border-radius: 10px; border: 1px solid var(--linie); }
+  .adv-sonntag { font-family: var(--font-head); font-size: 1.55rem; line-height: 1.1; margin: 0; color: var(--gold-hell); }
+  .adv-datum { display: block; font-weight: 600; color: #fff; margin-top: 4px; font-size: .98rem; white-space: nowrap; }
+
+  .adv-inhalt { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .adv-status {
+    align-self: flex-start; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35); color: #fff;
+  }
+  .adv-karte[data-zustand="laeuft"] .adv-status { background: var(--gold); border-color: var(--gold); color: #1F1605; }
+  .adv-preis { font-family: var(--font-head); font-size: 1.45rem; line-height: 1.2; color: #fff; margin: 4px 0 0; }
+  .adv-laden { font-weight: 700; color: var(--gold-hell) !important; margin: 0; }
+  .adv-text, .adv-ort, .adv-geheim { margin: 0; }
+  .adv-ort { font-size: .95rem; }
+  .adv-frist { margin: 6px 0 0; color: #fff !important; font-weight: 600; }
+  .adv-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .adv-links a {
+    display: inline-flex; align-items: center; justify-content: center; text-align: center; line-height: 1.25;
+    min-height: 44px; padding: 8px 20px; border-radius: 999px;
+    font-weight: 600; text-decoration: none; color: #fff !important; border: 1.5px solid rgba(255,255,255,.4);
+  }
+  .adv-links a:hover { background: rgba(255,255,255,.08); }
+  .adv-links a.haupt { background: var(--gold); border-color: var(--gold); color: #1F1605 !important; }
+  .adv-links a.haupt:hover { background: var(--gold-hell); }
+  .adv-anzeige { font-size: .8rem; margin: 4px 0 0; color: rgba(255,255,255,.6) !important; }
+
+  @media (max-width: 600px) {
+    .adv-karte { grid-template-columns: 1fr; gap: 14px; padding: 22px 20px; }
+    .adv-wann { gap: 12px; }
+  }
+
+  /* Spielregeln */
+  .adv-regeln { max-width: 860px; margin: 40px auto 0; padding-top: 28px; border-top: 1px solid var(--linie); }
+  .adv-regeln h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+  .adv-regeln ul, .adv-regeln ol { padding-left: 1.2em; color: var(--weiss-weich); margin: 0 0 16px; }
+  .adv-regeln li { margin-bottom: 6px; }
+
+  /* Teilnahmebedingungen */
+  .adv-bedingungen { max-width: 860px; margin: 48px auto 0; padding-top: 28px; border-top: 1px solid var(--linie); scroll-margin-top: 24px; }
+  .adv-bedingungen h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 8px; }
+  .adv-bedingungen h3 { font-family: inherit; font-size: 1.05rem; font-weight: 700; margin: 26px 0 6px; }
+  .adv-bedingungen p, .adv-bedingungen li { font-size: .98rem; line-height: 1.6; }
+  .adv-bedingungen p { margin: 0 0 10px; max-width: 68ch; }
+  .adv-bedingungen ul { padding-left: 1.2em; color: var(--weiss-weich); margin: 0 0 10px; max-width: 68ch; }
+  .adv-bedingungen li { margin-bottom: 4px; }
+  .adv-zeiten { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: .95rem; color: var(--weiss-weich); }
+  .adv-zeiten th, .adv-zeiten td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid rgba(255,255,255,.14); vertical-align: top; }
+  .adv-zeiten th { color: #fff; font-weight: 700; }
+  @media (max-width: 600px) { .adv-zeiten { font-size: .86rem; } .adv-zeiten th, .adv-zeiten td { padding-right: 8px; } }
+
+  .adv-fuss { padding: 28px 0 40px; border-top: 1px solid rgba(255,255,255,.1); font-size: .9rem; }
+  .adv-fuss .container { display: flex; flex-wrap: wrap; gap: 8px 20px; color: rgba(255,255,255,.6); }
+  .adv-fuss a { color: rgba(255,255,255,.75); text-decoration: none; }
+</style>
+</head>
+<body class="adv-seite">
+
+<header class="adv-kopfzeile">
+  <div class="container">
+    <a href="index.html" aria-label="Bad Salzuflen News — Start"><img src="assets/img/logo.webp" alt="Bad Salzuflen News"></a>
+    <a class="adv-zurueck" href="index.html">← Zur Startseite</a>
+  </div>
+</header>
+
+<main>
+  <section class="adv-held">
+    <div class="container">
+      <div>
+        <span class="wb-pill"><span class="wb-dot" aria-hidden="true"></span>Adventsgewinnspiel</span>
+        <h1>Vier Sonntage, vier Preise <em>aus Bad&nbsp;Salzuflen</em></h1>
+        <p>An jedem Adventssonntag verlosen wir einen Preis von einem Geschäft aus unserer Stadt. Welches Geschäft dabei ist, verraten wir am jeweiligen Sonntag.</p>
+      </div>
+      <div class="adv-held-bild" aria-hidden="true">
+        <img src="assets/img/advent-kranz.png" alt="" width="900" height="648">
+      </div>
+    </div>
+  </section>
+
+  <section class="adv-sonntage" aria-label="Die vier Adventssonntage">
+    <div class="container">
+      <ol class="adv-liste" id="advListe"></ol>
+
+      <div class="adv-regeln">
+        <h2>So machst du mit</h2>
+        <ol>
+          <li>Folge <a href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">@badsalzuflennews.de</a> auf Instagram.</li>
+          <li>Like den jeweiligen Gewinnspiel-Beitrag.</li>
+          <li>Kommentiere den Beitrag mit einem Weihnachtsemoji.</li>
+        </ol>
+        <p>Bis wann du mitmachen kannst, steht bei jedem Gewinnspiel auf dieser Seite. Die Auslosung zeigen wir am Tag nach dem Teilnahmeschluss in unserer Story, wer gewinnt, bekommt von uns eine Nachricht auf Instagram.</p>
+        <p><a href="#teilnahmebedingungen">Zu den Teilnahmebedingungen</a></p>
+      </div>
+
+      <div class="adv-bedingungen" id="teilnahmebedingungen">
+        <h2>Teilnahmebedingungen</h2>
+
+        <h3>1. Veranstalter</h3>
+        <p>Veranstalter ist Bad Salzuflen News, ein Angebot von ARTLENN MEDIA, Inhaber Lennart Schleef, Wiensieker Weg 15, 32108 Bad Salzuflen. Fragen beantworten wir unter <a href="mailto:redaktion@badsalzuflennews.de">redaktion@badsalzuflennews.de</a>.</p>
+
+        <h3>2. Wer mitmachen darf</h3>
+        <p>Mitmachen darf jede Person mit einem eigenen Instagram-Konto, eine Altersgrenze gibt es nicht. Minderjährige brauchen das Einverständnis ihrer Eltern oder anderer Sorgeberechtigter. Wir dürfen uns dieses Einverständnis vor der Übergabe des Preises zeigen lassen. Nicht mitmachen dürfen die Mitglieder unserer Redaktion und die Beschäftigten des Unternehmens, das den Preis des jeweiligen Gewinnspiels stellt.</p>
+
+        <h3>3. So nimmst du teil</h3>
+        <p>Diese Bedingungen gelten für die vier Gewinnspiele an den Adventssonntagen und für das Gewinnspiel zur Eröffnung des Bad Salzufler Weihnachtstraums. Für jedes Gewinnspiel gibt es einen eigenen Beitrag auf <a href="https://www.instagram.com/badsalzuflennews.de/" target="_blank" rel="noopener">@badsalzuflennews.de</a>. Du nimmst teil, wenn du dem Konto folgst, den Beitrag likest und ihn mit einem Weihnachtsemoji kommentierst. Die Teilnahme ist kostenlos und hängt nicht von einem Kauf ab. Pro Person zählt je Gewinnspiel eine Teilnahme, weitere Kommentare oder Zweitkonten erhöhen die Chance nicht. Wer mit falschen Konten oder technischen Hilfsmitteln teilnimmt, wird ausgeschlossen.</p>
+
+        <h3>4. Zeitraum und Auslosung</h3>
+        <table class="adv-zeiten">
+          <thead><tr><th scope="col">Gewinnspiel</th><th scope="col">Mitmachen bis</th><th scope="col">Auslosung</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Weihnachtstraum, 23.11.2026</th><td>Do, 26.11.2026, 23:59 Uhr</td><td>Fr, 27.11.2026</td></tr>
+            <tr><th scope="row">1. Advent, 29.11.2026</th><td>Sa, 05.12.2026, 23:59 Uhr</td><td>So, 06.12.2026</td></tr>
+            <tr><th scope="row">2. Advent, 06.12.2026</th><td>Sa, 12.12.2026, 23:59 Uhr</td><td>So, 13.12.2026</td></tr>
+            <tr><th scope="row">3. Advent, 13.12.2026</th><td>Sa, 19.12.2026, 23:59 Uhr</td><td>So, 20.12.2026</td></tr>
+            <tr><th scope="row">4. Advent, 20.12.2026</th><td>Sa, 26.12.2026, 23:59 Uhr</td><td>So, 27.12.2026</td></tr>
+          </tbody>
+        </table>
+        <p>Die Gewinnerinnen und Gewinner werden unter allen gültigen Teilnahmen zufällig ausgelost. Das Ergebnis zeigen wir in unserer Instagram-Story.</p>
+
+        <h3>5. Benachrichtigung</h3>
+        <p>Wer gewinnt, bekommt eine Nachricht von unserem Konto @badsalzuflennews.de. Meldest du dich nicht innerhalb von 7 Tagen zurück, losen wir den Preis neu aus. Wir fragen nie nach Passwörtern oder Bankdaten und schicken keine Links, über die du deinen Gewinn freischalten musst. Solche Nachrichten kommen nicht von uns.</p>
+
+        <h3>6. Die Preise</h3>
+        <p>Welcher Preis verlost wird, steht im jeweiligen Beitrag. Die Preise werden von den beteiligten Unternehmen gestellt. Wie du deinen Preis bekommst, sprechen wir nach der Auslosung mit dir ab. Eine Auszahlung in Geld ist nicht möglich.</p>
+
+        <h3>7. Deine Daten</h3>
+        <p>Für das Gewinnspiel verarbeiten wir deinen Instagram-Namen, deinen Kommentar und, wenn du gewinnst, die Angaben, die du uns für die Übergabe des Preises schickst. Rechtsgrundlage ist die Durchführung des Gewinnspiels (Art. 6 Abs. 1 lit. b DSGVO). Deinen Instagram-Namen zeigen wir bei der Auslosung in unserer Story. An das Unternehmen, das den Preis stellt, geben wir nur weiter, was für die Übergabe nötig ist. Nach der Übergabe löschen wir diese Angaben, soweit wir sie nicht aufbewahren müssen. Deine Rechte findest du in unserer <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+
+        <h3>8. Instagram</h3>
+        <p>Dieses Gewinnspiel steht in keiner Verbindung zu Instagram und wird von Instagram weder gesponsert noch unterstützt oder organisiert.</p>
+
+        <h3>9. Änderungen und vorzeitiges Ende</h3>
+        <p>Wir dürfen das Gewinnspiel aus wichtigem Grund ändern oder vorzeitig beenden, etwa wenn ein Preis ausfällt oder die Durchführung technisch nicht mehr möglich ist. Es gilt deutsches Recht.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="adv-fuss">
+  <div class="container">
+    <span>© 2026 Bad Salzuflen News</span>
+    <a href="impressum.html">Impressum</a>
+    <a href="datenschutz.html">Datenschutz</a>
+  </div>
+</footer>
+
+<script>
+  // Pro Sonntag gepflegt. "beitrag" = Link zum Instagram-Beitrag, sobald er online ist;
+  // solange er leer ist, fuehrt der Knopf zum Instagram-Konto.
+  const KONTO = 'https://www.instagram.com/badsalzuflennews.de/';
+  const SONNTAGE = [
+    { nr: 1, datum: '2026-11-29',
+      laden: 'Bio am Markt',
+      preis: 'Ein Korb mit ausgewählten Produkten aus dem Sortiment',
+      text: 'Bioladen mitten in der Fußgängerzone, mit großer Käsetheke, Feinkost und regionalen Produkten.',
+      ort: 'Am Markt 16', webseite: '', beitrag: '',
+      anzeige: 'Anzeige: Der Preis wird von Bio am Markt gestellt.' },
+    { nr: 2, datum: '2026-12-06',
+      laden: 'Biokiste Weissenbach',
+      preis: 'Zwei Biokisten voller Genuss aus der Region',
+      text: 'Gemüsebau in der vierten Generation, Hofladen und Biokiste bis vor die Haustür. Es gibt zwei Gewinnerinnen oder Gewinner.',
+      ort: 'Fritz-Niewald-Weg 1', webseite: 'https://hofladen-weissenbach.de', beitrag: '',
+      anzeige: 'Anzeige: Die Preise werden von der Biokiste Weissenbach gestellt.' },
+    { nr: 3, datum: '2026-12-13',
+      laden: 'Esquina Café & Bar',
+      preis: 'Gutschein für zwei Personen für Kaffee und einen Snack',
+      text: 'Café und Bar in der Fußgängerzone, jeden Tag geöffnet, auch sonntags.',
+      ort: 'Lange Straße 53', webseite: 'https://esquina-cafebar.eatbu.com', beitrag: '',
+      anzeige: 'Anzeige: Der Preis wird vom Esquina Café & Bar gestellt.' },
+    { nr: 4, datum: '2026-12-20',
+      laden: 'Komplizen Café',
+      preis: 'Gutschein für zwei Personen zum Keramikmalen, mit Kaffee und Kuchen',
+      text: 'Frühstück, selbstgebackene Torten und Keramik zum Selbstbemalen im Fachwerkhaus in der Altstadt.',
+      ort: 'Salzsiederstraße 2', webseite: 'https://komplizen-salzuflen.de', beitrag: '',
+      anzeige: 'Anzeige: Der Preis wird vom Komplizen Café gestellt.' },
+  ];
+
+  const tagFmt = d => new Date(d + 'T12:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+  const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+  const plus = (d, n) => { const x = new Date(d + 'T12:00'); x.setDate(x.getDate() + n); return iso(x); };
+
+  // Zusatz-Gewinnspiel zur Eroeffnung des Weihnachtstraums. "beitrag" wie bei den Sonntagen.
+  const BOGEN = { start: '2026-11-23', schluss: '2026-11-26', auslosung: '2026-11-27', beitrag: '' };
+
+  function bogenKarte(heute) {
+    if (heute < BOGEN.start) return '';
+    const laeuft = heute <= BOGEN.schluss;
+    const status = laeuft ? 'Läuft gerade' : heute === BOGEN.auslosung ? 'Heute Auslosung' : 'Ausgelost';
+    return `<li class="adv-karte" data-zustand="${laeuft ? 'laeuft' : 'vorbei'}">
+      <div class="adv-wann-bogen">
+        <h2 class="adv-sonntag">Weihnachtstraum</h2><span class="adv-datum">Eröffnung, ${tagFmt(BOGEN.start)}</span>
+        <img class="adv-foto" src="assets/img/advent-lichterbogen.webp" width="800" height="607" alt="Beleuchteter Lichterbogen aus Holz mit Pyramide, Buden und Tannen, auf dem Sockel steht Bad Salzufler Weihnachtstraum">
+      </div>
+      <div class="adv-inhalt"><span class="adv-status">${status}</span>
+        <p class="adv-preis">Beleuchteter Lichterbogen mit dem Schriftzug „Bad Salzufler Weihnachtstraum“</p>
+        <p class="adv-laden">Lasergarage Marcel Bittner</p>
+        <p class="adv-text">Von Marcel Bittner aus Bad Salzuflen selbst gestaltet, gelasert und graviert.</p>
+        ${laeuft ? `<p class="adv-frist">Mitmachen bis Donnerstag, ${tagFmt(BOGEN.schluss)}, 23:59 Uhr. Die Auslosung zeigen wir am Freitag, ${tagFmt(BOGEN.auslosung)}, in unserer Story.</p>
+        <div class="adv-links"><a class="haupt" href="${BOGEN.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a></div>` : ''}
+        <p class="adv-anzeige">Anzeige: Der Preis wird von der Lasergarage Marcel Bittner gestellt.</p>
+      </div>
+    </li>`;
+  }
+
+  function zeigen(heute) {
+    const sonntage = SONNTAGE.map(s => {
+      const schluss = plus(s.datum, 6), auslosung = plus(s.datum, 7);
+      const zustand = heute < s.datum ? 'bald' : heute <= schluss ? 'laeuft' : 'vorbei';
+      const status = zustand === 'bald' ? 'Kommt bald' : zustand === 'laeuft' ? 'Läuft gerade'
+        : heute === auslosung ? 'Heute Auslosung' : 'Ausgelost';
+      const wannAuslosung = s.nr < 4 ? `am ${s.nr + 1}. Advent` : `am Sonntag, ${tagFmt(auslosung)},`;
+      let inhalt;
+      if (zustand === 'bald') {
+        inhalt = `<p class="adv-geheim">Preis und Geschäft verraten wir am ${tagFmt(s.datum)}.</p>`;
+      } else {
+        inhalt = `
+          <p class="adv-preis">${s.preis}</p>
+          <p class="adv-laden">${s.laden}</p>
+          <p class="adv-text">${s.text}</p>
+          <p class="adv-ort">${s.ort}, Bad Salzuflen</p>
+          ${zustand === 'laeuft' ? `<p class="adv-frist">Mitmachen bis Samstag, ${tagFmt(schluss)}, 23:59 Uhr. Die Auslosung zeigen wir ${wannAuslosung} in unserer Story.</p>` : ''}
+          <div class="adv-links">
+            ${zustand === 'laeuft' ? `<a class="haupt" href="${s.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a>` : ''}
+            ${s.webseite ? `<a href="${s.webseite}" target="_blank" rel="noopener">Webseite von ${s.laden}</a>` : ''}
+          </div>
+          <p class="adv-anzeige">${s.anzeige}</p>`;
+      }
+      return `<li class="adv-karte" data-zustand="${zustand}">
+        <div class="adv-wann">
+          <span class="adv-kerze" aria-hidden="true"></span>
+          <div><h2 class="adv-sonntag">${s.nr}. Advent</h2><span class="adv-datum">Sonntag, ${tagFmt(s.datum)}</span></div>
+        </div>
+        <div class="adv-inhalt"><span class="adv-status">${status}</span>${inhalt}</div>
+      </li>`;
+    }).join('');
+    // Bis zur Auslosung steht der Lichterbogen oben, danach rutscht er ans Ende.
+    const bogen = bogenKarte(heute);
+    document.getElementById('advListe').innerHTML = heute <= BOGEN.auslosung ? bogen + sonntage : sonntage + bogen;
+  }
+
+  // Vorschau anderer Tage nur auf dem eigenen Rechner: advent.html?tag=2026-12-08
+  const probe = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).get('tag');
+  zeigen(probe || iso(new Date()));
+</script>
+</body>
+</html>
