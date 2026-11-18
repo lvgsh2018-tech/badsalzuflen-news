@@ -81,7 +81,7 @@
     -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
   }
   .adv-karte[data-zustand="laeuft"] { background: rgba(224, 165, 74, .12); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 20px 50px rgba(0,0,0,.25); }
-  .adv-karte[data-zustand="vorbei"] { opacity: .72; }
+  .adv-karte[data-zustand="vorbei"] { opacity: .88; }
 
   .adv-wann { display: flex; gap: 16px; align-items: flex-end; }
   .adv-kerze { width: 18px; height: 54px; border-radius: 4px; background: #F3EEE2; position: relative; flex: none; margin-top: 22px; opacity: .4; }
@@ -109,6 +109,14 @@
   .adv-text, .adv-ort, .adv-geheim { margin: 0; }
   .adv-ort { font-size: .95rem; }
   .adv-frist { margin: 6px 0 0; color: #fff !important; font-weight: 600; }
+  /* Infos zum Geschaeft */
+  .adv-ueber { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--linie); }
+  .adv-seite .adv-ueber h3 { font-family: inherit; font-size: 1rem; font-weight: 700; line-height: 1.3; margin: 0; color: var(--gold-hell) !important; }
+  .adv-fakten { display: grid; gap: 7px; margin: 6px 0 0; font-size: .95rem; line-height: 1.45; }
+  .adv-fakten div { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 12px; }
+  .adv-fakten dt { font-weight: 700; color: #fff; }
+  .adv-fakten dd { margin: 0; color: var(--weiss-weich); overflow-wrap: anywhere; }
+  @media (max-width: 600px) { .adv-fakten { gap: 10px; } .adv-fakten div { grid-template-columns: minmax(0, 1fr); gap: 1px; } }
   .adv-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
   .adv-links a {
     display: inline-flex; align-items: center; justify-content: center; text-align: center; line-height: 1.25;
@@ -243,32 +251,50 @@
   // Pro Sonntag gepflegt. "beitrag" = Link zum Instagram-Beitrag, sobald er online ist;
   // solange er leer ist, fuehrt der Knopf zum Instagram-Konto.
   const KONTO = 'https://www.instagram.com/badsalzuflennews.de/';
+  const tel = (anzeige, nummer) => `<a href="tel:${nummer}">${anzeige}</a>`;
+  const mail = a => `<a href="mailto:${a}">${a}</a>`;
+  // Oeffnungszeiten und Kontakt: Stand 2026-11-18, Quellen im Wiki (themen/adventsaktion-2026.md)
   const SONNTAGE = [
     { nr: 1, datum: '2026-11-29',
       laden: 'Bio am Markt',
       preis: 'Ein Korb mit ausgewählten Produkten aus dem Sortiment',
-      text: 'Bioladen mitten in der Fußgängerzone, mit großer Käsetheke, Feinkost und regionalen Produkten.',
-      ort: 'Am Markt 16', webseite: '', beitrag: '',
+      ueber: ['Seit Ende 2025 gibt es mit Bio am Markt wieder ein Lebensmittelgeschäft in der Fußgängerzone. Geführt wird der Laden von Katharina Laitsch und Anja Olden, beide aus Bad Salzuflen.',
+        'Im Sortiment sind eine große Käsetheke, Feinkost und regionale Produkte. Dazu gibt es ein Mittagsgericht und Waren für Menschen mit Unverträglichkeiten.'],
+      fakten: [['Adresse', 'Am Markt 16, 32105 Bad Salzuflen'], ['Geöffnet', 'Mo bis Fr 9 bis 18 Uhr, Sa 9 bis 14 Uhr'], ['E-Mail', mail('info@bio-am-markt-bs.de')]],
+      webseite: '', beitrag: '',
       anzeige: 'Anzeige: Der Preis wird von Bio am Markt gestellt.' },
     { nr: 2, datum: '2026-12-06',
       laden: 'Biokiste Weissenbach',
       preis: 'Zwei Biokisten voller Genuss aus der Region',
-      text: 'Gemüsebau in der vierten Generation, Hofladen und Biokiste bis vor die Haustür. Es gibt zwei Gewinnerinnen oder Gewinner.',
-      ort: 'Fritz-Niewald-Weg 1', webseite: 'https://hofladen-weissenbach.de', beitrag: '',
+      text: 'Es gibt zwei Gewinnerinnen oder Gewinner.',
+      ueber: ['Die Familie Weißenbach baut ihr Gemüse in der vierten Generation an und gehört zu den Pionieren des Ökolandbaus. 2008 haben Jens und Sven Weißenbach den Hof von ihren Eltern übernommen.',
+        'Die Biokiste stellst du online selbst zusammen, ohne Abo und ohne Vertrag. Geliefert wird nach Hause oder ins Büro. Im Hofladen gibt es außerdem Backwaren, Käse und Bio-Weine.'],
+      fakten: [['Adresse', 'Fritz-Niewald-Weg 1, 32107 Bad Salzuflen'], ['Hofladen', 'Di 9 bis 12:30 und 15 bis 18 Uhr, Do 9 bis 12:30 Uhr, Fr 9 bis 13 und 15 bis 18 Uhr, Sa 9 bis 13 Uhr'],
+        ['Telefon Hofladen', tel('05222 963720', '+495222963720')], ['Telefon Biokiste', tel('05222 795834', '+495222795834')], ['E-Mail', mail('kontakt@biokiste-weissenbach.de')]],
+      webseite: 'https://hofladen-weissenbach.de', beitrag: '',
       anzeige: 'Anzeige: Die Preise werden von der Biokiste Weissenbach gestellt.' },
     { nr: 3, datum: '2026-12-13',
       laden: 'Esquina Café & Bar',
       preis: 'Gutschein für zwei Personen für Kaffee und einen Snack',
-      text: 'Café und Bar in der Fußgängerzone, jeden Tag geöffnet, auch sonntags.',
-      ort: 'Lange Straße 53', webseite: 'https://esquina-cafebar.eatbu.com', beitrag: '',
+      ueber: ['Das Esquina von Artur Minasjan ist Café und Bar mitten in der Fußgängerzone. Es gibt Kaffee, Frappés und Snacks, auch zum Mitnehmen, dazu einen Außenbereich.',
+        'Du kannst dort auch deine eigene Feier ausrichten oder Catering bestellen. Der Zugang ist barrierefrei, Haustiere sind willkommen.'],
+      fakten: [['Adresse', 'Lange Straße 53, 32105 Bad Salzuflen'], ['Geöffnet', 'jeden Tag 10 bis 19 Uhr'], ['Telefon', tel('0160 6737694', '+491606737694')]],
+      webseite: 'https://esquina-cafebar.eatbu.com', beitrag: '',
       anzeige: 'Anzeige: Der Preis wird vom Esquina Café & Bar gestellt.' },
     { nr: 4, datum: '2026-12-20',
       laden: 'Komplizen Café',
       preis: 'Gutschein für zwei Personen zum Keramikmalen, mit Kaffee und Kuchen',
-      text: 'Frühstück, selbstgebackene Torten und Keramik zum Selbstbemalen im Fachwerkhaus in der Altstadt.',
-      ort: 'Salzsiederstraße 2', webseite: 'https://komplizen-salzuflen.de', beitrag: '',
+      ueber: ['Im Fachwerkhaus in der Altstadt gibt es Frühstück, Mittagstisch und selbstgebackene Torten. Dazu suchst du dir einen Rohling aus und bemalst Tasse, Teller oder Schale selbst. Das Team glasiert und brennt die Stücke, nach etwa drei Wochen holst du sie ab.',
+        'Außerdem verkaufen hier zurzeit 30 Anbieter aus der Region ihre Produkte, von Schmuck über Kerzen und Seifen bis zu Honig. Wer selbst etwas herstellt, kann eine eigene Fläche mieten.'],
+      fakten: [['Adresse', 'Salzsiederstraße 2, 32105 Bad Salzuflen'], ['Geöffnet', 'täglich 9:30 bis 17 Uhr'], ['Frühstück', 'bis 14 Uhr'], ['Mittagstisch', '11 bis 14 Uhr'],
+        ['Telefon', tel('05222 3690339', '+4952223690339')], ['E-Mail', mail('post@komplizen-salzuflen.de')]],
+      webseite: 'https://komplizen-salzuflen.de', beitrag: '',
       anzeige: 'Anzeige: Der Preis wird vom Komplizen Café gestellt.' },
   ];
+
+  const ueberHtml = (name, absaetze, fakten) => `<div class="adv-ueber"><h3>Über ${name}</h3>
+    ${absaetze.map(t => `<p class="adv-text">${t}</p>`).join('')}
+    <dl class="adv-fakten">${fakten.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
 
   const tagFmt = d => new Date(d + 'T12:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
   const iso = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
@@ -291,7 +317,13 @@
         <p class="adv-laden">Lasergarage Marcel Bittner</p>
         <p class="adv-text">Von Marcel Bittner aus Bad Salzuflen selbst gestaltet, gelasert und graviert.</p>
         ${vorher || laeuft ? `<p class="adv-frist">${vorher ? `Los geht es am ${tagFmt(BOGEN.start)}. ` : ''}Mitmachen bis Donnerstag, ${tagFmt(BOGEN.schluss)}, 23:59 Uhr. Die Auslosung zeigen wir am Freitag, ${tagFmt(BOGEN.auslosung)}, in unserer Story.</p>` : ''}
-        ${laeuft ? `<div class="adv-links"><a class="haupt" href="${BOGEN.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a></div>` : ''}
+        <div class="adv-links">
+          ${laeuft ? `<a class="haupt" href="${BOGEN.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a>` : ''}
+          <a href="https://www.instagram.com/lasergaragemarcelbittner/" target="_blank" rel="noopener">Lasergarage auf Instagram</a>
+        </div>
+        ${ueberHtml('die Lasergarage', ['Als kleines Unternehmen aus Bad Salzuflen fertigt Marcel Bittner individuelle Produkte und Geschenkideen nach Kundenwunsch, etwa zu Geburtstagen, Hochzeiten oder Weihnachten. Viele Stücke entstehen in Handarbeit.'],
+          [['Lasergravuren', 'auf Holz, Schiefer, Leder, Glas und Acryl'], ['Laserschneiden', 'Dekorationen, Schriftzüge, Aufsteller und Geschenkverpackungen'], ['Druck', 'Tassen, Puzzles und andere Geschenkartikel mit Fotos, Motiven oder Schriftzügen'],
+           ['Textilien', 'individuell gestaltete T-Shirts'], ['Plotterarbeiten', 'Aufkleber, Beschriftungen und Autoaufkleber']])}
         <p class="adv-anzeige">Anzeige: Der Preis wird von der Lasergarage Marcel Bittner gestellt.</p>
       </div>
     </li>`;
@@ -311,13 +343,13 @@
         inhalt = `
           <p class="adv-preis">${s.preis}</p>
           <p class="adv-laden">${s.laden}</p>
-          <p class="adv-text">${s.text}</p>
-          <p class="adv-ort">${s.ort}, Bad Salzuflen</p>
+          ${s.text ? `<p class="adv-text">${s.text}</p>` : ''}
           ${zustand === 'laeuft' ? `<p class="adv-frist">Mitmachen bis Samstag, ${tagFmt(schluss)}, 23:59 Uhr. Die Auslosung zeigen wir ${wannAuslosung} in unserer Story.</p>` : ''}
           <div class="adv-links">
             ${zustand === 'laeuft' ? `<a class="haupt" href="${s.beitrag || KONTO}" target="_blank" rel="noopener">Zum Gewinnspiel auf Instagram</a>` : ''}
             ${s.webseite ? `<a href="${s.webseite}" target="_blank" rel="noopener">Webseite von ${s.laden}</a>` : ''}
           </div>
+          ${ueberHtml(s.laden, s.ueber, s.fakten)}
           <p class="adv-anzeige">${s.anzeige}</p>`;
       }
       return `<li class="adv-karte" data-zustand="${zustand}">
